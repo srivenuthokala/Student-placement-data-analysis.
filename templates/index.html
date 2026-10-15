@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduPlace | Student Placement Data Analysis System</title>
+    <meta name="description" content="Intermediate-level Student Placement Analytics System visualizing placement rates, department comparisons, salary distributions, and skill demand.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- Custom Vanilla CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app-layout" id="appLayout">
+        <!-- Top Navigation Bar -->
+        <header class="top-nav" id="topNav">
+            <div class="nav-brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div class="brand-details">
+                    <h1>EduPlace Analytics</h1>
+                    <span class="brand-tagline">Student Placement Data Analysis System</span>
+                </div>
+            </div>
+
+            <div class="nav-actions">
+                <div class="cohort-badge" id="cohortBadge">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <span>Cohort: <strong>2025</strong></span>
+                </div>
+                <button type="button" class="btn btn-secondary" id="btnSeedData" title="Reset & populate fictional dataset">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    <span>Re-Seed Data</span>
+                </button>
+                <a href="/reports/download" class="btn btn-primary" id="btnDownloadReport" download>
+                    <i class="fa-solid fa-file-arrow-down"></i>
+                    <span>Download Report</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- Secondary Navigation / Tabs -->
+        <nav class="navigation-bar" id="navigationBar" aria-label="Main Navigation">
+            <ul class="nav-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button type="button" class="tab-link active" id="tab-overview" data-target="view-overview" role="tab" aria-selected="true">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <span>Overview</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button type="button" class="tab-link" id="tab-departments" data-target="view-departments" role="tab" aria-selected="false">
+                        <i class="fa-solid fa-building-columns"></i>
+                        <span>Department Analysis</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button type="button" class="tab-link" id="tab-packages" data-target="view-packages" role="tab" aria-selected="false">
+                        <i class="fa-solid fa-money-bill-trend-up"></i>
+                        <span>Package & Salary</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button type="button" class="tab-link" id="tab-skills" data-target="view-skills" role="tab" aria-selected="false">
+                        <i class="fa-solid fa-code"></i>
+                        <span>Skill Demand</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button type="button" class="tab-link" id="tab-students" data-target="view-students" role="tab" aria-selected="false">
+                        <i class="fa-solid fa-user-graduate"></i>
+                        <span>Students & Placements</span>
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button type="button" class="tab-link" id="tab-charts" data-target="view-charts" role="tab" aria-selected="false">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span>Matplotlib Visuals</span>
+                    </button>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main Content Views Container -->
+        <main class="main-content" id="mainContent">
+
+            <!-- ================= VIEW 1: OVERVIEW DASHBOARD ================= -->
+            <section class="tab-view active" id="view-overview" role="tabpanel" aria-labelledby="tab-overview">
+                <!-- KPI Cards Row -->
+                <div class="kpi-grid">
+                    <!-- Placement Rate Card -->
+                    <div class="kpi-card highlight-card">
+                        <div class="kpi-header">
+                            <span class="kpi-title">Official Placement Rate</span>
+                            <div class="kpi-icon-pill green-pill">
+                                <i class="fa-solid fa-percent"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-value-row">
+                            <span class="kpi-number" id="kpiPlacementRate">--%</span>
+                            <span class="kpi-badge badge-success">Target: &gt;75%</span>
+                        </div>
+                        <p class="kpi-caption" id="kpiPlacementFormula">
+                            <i class="fa-solid fa-circle-info"></i> Denominator: Eligible Cohort (<span id="kpiEligibleDenominator">--</span> students)
+                        </p>
+                    </div>
+
+                    <!-- Unique Placed & Duplicate Handling Card -->
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-title">Placed Candidates & Offers</span>
+                            <div class="kpi-icon-pill blue-pill">
+                                <i class="fa-solid fa-user-check"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-value-row">
+                            <span class="kpi-number" id="kpiUniquePlaced">--</span>
+                            <span class="kpi-subtext">/ <span id="kpiTotalOffers">--</span> Offers</span>
+                        </div>
+                        <p class="kpi-caption" id="kpiDuplicatesInfo">
+                            <i class="fa-solid fa-copy"></i> <span id="kpiDuplicateOffers">--</span> duplicate offers handled cleanly
+                        </p>
+                    </div>
+
+                    <!-- Average & Median Package Card -->
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-title">Average Package (LPA)</span>
+                            <div class="kpi-icon-pill purple-pill">
+                                <i class="fa-solid fa-indian-rupee-sign"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-value-row">
+                            <span class="kpi-number" id="kpiAvgPackage">-- LPA</span>
+                            <span class="kpi-subtext">Median: <strong id="kpiMedianPackage">-- LPA</strong></span>
+                        </div>
+                        <p class="kpi-caption">
+                            <i class="fa-solid fa-arrow-up-right-dots"></i> Top Offer: <strong id="kpiMaxPackage">-- LPA</strong>
+                        </p>
+                    </div>
+
+                    <!-- Eligibility & Denominator Card -->
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-title">Cohort Eligibility</span>
+                            <div class="kpi-icon-pill amber-pill">
+                                <i class="fa-solid fa-filter-circle-dollar"></i>
+                            </div>
+                        </div>
+                        <div class="kpi-value-row">
+                            <span class="kpi-number" id="kpiEligibleCount">--</span>
+                            <span class="kpi-subtext">Eligible / <span id="kpiTotalEnrolled">--</span> Enrolled</span>
+                        </div>
+                        <p class="kpi-caption">
+                            <i class="fa-solid fa-triangle-exclamation"></i> <span id="kpiIneligibleCount">--</span> Ineligible (CGPA &lt; 6.0 / backlogs)
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Interactive Charts Row -->
+                <div class="charts-grid-2col">
+                    <div class="glass-card chart-container">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-chart-column"></i> Department Placement Rates (%)</h3>
+                            <span class="card-subtitle">Eligible Student Outcomes by Department</span>
+                        </div>
+                        <div class="canvas-wrap">
+                            <canvas id="chartDeptRate"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="glass-card chart-container">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-chart-pie"></i> Placement Cohort Breakdown</h3>
+                            <span class="card-subtitle">Placed vs Unplaced Eligible vs Ineligible</span>
+                        </div>
+                        <div class="canvas-wrap">
+                            <canvas id="chartCohortStatus"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Second Charts Row: Salary Tiers & Top Skills -->
+                <div class="charts-grid-2col">
+                    <div class="glass-card chart-container">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-layer-group"></i> Placement Salary Tiers</h3>
+                            <span class="card-subtitle">Super Dream (&gt;15 LPA) to Entry Tiers</span>
+                        </div>
+                        <div class="canvas-wrap">
+                            <canvas id="chartSalaryTiers"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="glass-card chart-container">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-bolt"></i> Top Skills in Demand</h3>
+                            <span class="card-subtitle">Count of Placed Students by Key Skill</span>
+                        </div>
+                        <div class="canvas-wrap">
+                            <canvas id="chartTopSkills"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= VIEW 2: DEPARTMENT COMPARISON ================= -->
+            <section class="tab-view" id="view-departments" role="tabpanel" aria-labelledby="tab-departments">
+                <div class="view-header">
+                    <div>
+                        <h2>Department-Wise Placement Analytics</h2>
+                        <p class="view-description">
+                            Comparative evaluation of placement outcomes across academic branches. Denominators strictly consider eligible candidates only.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Department Cards Grid -->
+                <div class="department-cards-grid" id="deptCardsGrid">
+                    <!-- Populated dynamically via JS -->
+                </div>
+
+                <!-- Comprehensive Department Comparison Table -->
+                <div class="glass-card table-container">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-table-list"></i> Department Summary Table</h3>
+                        <span class="unit-tag">Units: Package in LPA (INR)</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table" id="departmentTable">
+                            <thead>
+                                <tr>
+                                    <th>Department</th>
+                                    <th>Enrolled</th>
+                                    <th>Eligible (Denominator)</th>
+                                    <th>Placed Students</th>
+                                    <th>Placement Rate</th>
+                                    <th>Total Offers</th>
+                                    <th>Avg Package</th>
+                                    <th>Max Package</th>
+                                    <th>Min Package</th>
+                                </tr>
+                            </thead>
+                            <tbody id="departmentTableBody">
+                                <tr><td colspan="9" class="text-center">Loading department data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= VIEW 3: PACKAGE & SALARY METRICS ================= -->
+            <section class="tab-view" id="view-packages" role="tabpanel" aria-labelledby="tab-packages">
+                <div class="view-header">
+                    <div>
+                        <h2>Compensation & Package Distribution</h2>
+                        <p class="view-description">
+                            Statistical metrics computed via NumPy (Mean, Median, Standard Deviation, Percentiles, and Interquartile Range).
+                        </p>
+                    </div>
+                    <div class="unit-badge">
+                        <i class="fa-solid fa-circle-check"></i> Standard Unit: <strong>LPA (Lakhs Per Annum)</strong>
+                    </div>
+                </div>
+
+                <!-- Statistical Metric Cards -->
+                <div class="stat-boxes-grid" id="salaryStatBoxes">
+                    <!-- Dynamic Stat Boxes -->
+                </div>
+
+                <div class="charts-grid-2col">
+                    <div class="glass-card chart-container">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-chart-area"></i> Package Distribution Curve (LPA)</h3>
+                            <span class="card-subtitle">Frequency density across salary bands</span>
+                        </div>
+                        <div class="canvas-wrap">
+                            <canvas id="chartPackageDistCurve"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="glass-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-building"></i> Top Recruiting Companies</h3>
+                            <span class="card-subtitle">Average compensation & offer counts</span>
+                        </div>
+                        <div class="table-responsive" style="max-height: 380px;">
+                            <table class="data-table" id="companiesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Company</th>
+                                        <th>Offers</th>
+                                        <th>Avg Package (LPA)</th>
+                                        <th>Max Package (LPA)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="companiesTableBody">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= VIEW 4: SKILL DEMAND ================= -->
+            <section class="tab-view" id="view-skills" role="tabpanel" aria-labelledby="tab-skills">
+                <div class="view-header">
+                    <div>
+                        <h2>Skill Demand & Market Value Analysis</h2>
+                        <p class="view-description">
+                            Examines which technical competencies correlate with higher placement rates and top compensation packages.
+                        </p>
+                    </div>
+                    <div class="search-box">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="skillSearchInput" placeholder="Filter skills (e.g., Python, AWS)..." aria-label="Filter skills">
+                    </div>
+                </div>
+
+                <!-- Skill Cards Cloud -->
+                <div class="skill-tags-cloud" id="skillTagsCloud">
+                    <!-- Dynamic skill tags -->
+                </div>
+
+                <!-- Skill Demand Table -->
+                <div class="glass-card table-container">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-list-check"></i> Skill Performance Matrix</h3>
+                        <span class="card-subtitle">Ranked by placement frequency</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table" id="skillsTable">
+                            <thead>
+                                <tr>
+                                    <th>Skill Name</th>
+                                    <th>Students Possessing Skill</th>
+                                    <th>Placed Students</th>
+                                    <th>Success Rate (%)</th>
+                                    <th>Average Package (LPA)</th>
+                                    <th>Market Demand Tier</th>
+                                </tr>
+                            </thead>
+                            <tbody id="skillsTableBody">
+                                <tr><td colspan="6" class="text-center">Loading skills matrix...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= VIEW 5: STUDENTS & PLACEMENTS DIRECTORY ================= -->
+            <section class="tab-view" id="view-students" role="tabpanel" aria-labelledby="tab-students">
+                <div class="view-header">
+                    <div>
+                        <h2>Students & Offers Directory</h2>
+                        <p class="view-description">
+                            Manage student profiles, verify eligibility status, and inspect individual offer records.
+                        </p>
+                    </div>
+                    <div class="header-action-group">
+                        <button type="button" class="btn btn-secondary" id="btnOpenStudentModal">
+                            <i class="fa-solid fa-user-plus"></i>
+                            <span>Add New Student</span>
+                        </button>
+                        <button type="button" class="btn btn-primary" id="btnOpenPlacementModal">
+                            <i class="fa-solid fa-file-signature"></i>
+                            <span>Record Placement Offer</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filter & Search Toolbar -->
+                <div class="toolbar-card">
+                    <div class="filter-group">
+                        <label for="filterDepartment">Department:</label>
+                        <select id="filterDepartment" class="form-select">
+                            <option value="ALL">All Departments</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Information Technology">Information Technology</option>
+                            <option value="Electronics & Comm">Electronics & Comm</option>
+                            <option value="Mechanical Engg">Mechanical Engg</option>
+                            <option value="Civil Engg">Civil Engg</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="filterStatus">Status:</label>
+                        <select id="filterStatus" class="form-select">
+                            <option value="ALL">All Statuses</option>
+                            <option value="Placed">Placed</option>
+                            <option value="Unplaced">Unplaced</option>
+                            <option value="Eligible">Eligible Only</option>
+                            <option value="Ineligible">Ineligible Only</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group search-flex">
+                        <label for="studentSearchInput">Search Student:</label>
+                        <div class="search-box">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="studentSearchInput" placeholder="Search by name, roll no, or company..." aria-label="Search student">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Students Table -->
+                <div class="glass-card table-container">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-users"></i> Student Records (<span id="filteredStudentCount">0</span> found)</h3>
+                        <span class="card-subtitle">Showing active cohort</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table" id="studentsTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Roll No</th>
+                                    <th>Student Name</th>
+                                    <th>Department</th>
+                                    <th>CGPA</th>
+                                    <th>Eligibility</th>
+                                    <th>Status</th>
+                                    <th>Offers</th>
+                                    <th>Highest Pkg (LPA)</th>
+                                    <th>Companies</th>
+                                    <th>Key Skills</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentsTableBody">
+                                <tr><td colspan="11" class="text-center">Loading student records...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================= VIEW 6: MATPLOTLIB VISUALS GALLERY ================= -->
+            <section class="tab-view" id="view-charts" role="tabpanel" aria-labelledby="tab-charts">
+                <div class="view-header">
+                    <div>
+                        <h2>Matplotlib Static Visualizations Gallery</h2>
+                        <p class="view-description">
+                            High-resolution Python Matplotlib charts generated directly from the analysis pipeline and saved on disk.
+                        </p>
+                    </div>
+                    <button type="button" class="btn btn-secondary" id="btnRefreshMatplotlibCharts">
+                        <i class="fa-solid fa-rotate"></i>
+                        <span>Regenerate Figures</span>
+                    </button>
+                </div>
+
+                <div class="gallery-grid">
+                    <div class="gallery-card">
+                        <div class="gallery-card-header">
+                            <h4>Department-Wise Placement Rate</h4>
+                            <span class="badge">Bar Chart</span>
+                        </div>
+                        <div class="gallery-img-wrap" onclick="openImageModal('/charts/department_placement_rate.png', 'Department-Wise Placement Rate')">
+                            <img src="/charts/department_placement_rate.png" alt="Department-Wise Placement Rate Chart" id="imgDeptChart">
+                            <div class="img-overlay"><i class="fa-solid fa-magnifying-glass-plus"></i> View Full Image</div>
+                        </div>
+                    </div>
+
+                    <div class="gallery-card">
+                        <div class="gallery-card-header">
+                            <h4>Package Distribution & NumPy Metrics</h4>
+                            <span class="badge">Boxplot & Histogram</span>
+                        </div>
+                        <div class="gallery-img-wrap" onclick="openImageModal('/charts/package_distribution.png', 'Package Distribution & Metrics')">
+                            <img src="/charts/package_distribution.png" alt="Package Distribution Chart" id="imgPkgChart">
+                            <div class="img-overlay"><i class="fa-solid fa-magnifying-glass-plus"></i> View Full Image</div>
+                        </div>
+                    </div>
+
+                    <div class="gallery-card">
+                        <div class="gallery-card-header">
+                            <h4>Top Skills in Demand</h4>
+                            <span class="badge">Horizontal Bar</span>
+                        </div>
+                        <div class="gallery-img-wrap" onclick="openImageModal('/charts/top_skills_demand.png', 'Top Skills in Demand')">
+                            <img src="/charts/top_skills_demand.png" alt="Top Skills in Demand Chart" id="imgSkillChart">
+                            <div class="img-overlay"><i class="fa-solid fa-magnifying-glass-plus"></i> View Full Image</div>
+                        </div>
+                    </div>
+
+                    <div class="gallery-card">
+                        <div class="gallery-card-header">
+                            <h4>Cohort Placement Status</h4>
+                            <span class="badge">Donut Chart</span>
+                        </div>
+                        <div class="gallery-img-wrap" onclick="openImageModal('/charts/placement_status_overview.png', 'Cohort Placement Status Overview')">
+                            <img src="/charts/placement_status_overview.png" alt="Placement Status Donut Chart" id="imgStatusChart">
+                            <div class="img-overlay"><i class="fa-solid fa-magnifying-glass-plus"></i> View Full Image</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p><strong>Student Placement Data Analysis System</strong> &bull; Intermediate Data Engineering & Analytics Project &bull; Built with Python, Pandas, NumPy, MySQL/SQLite & Vanilla CSS</p>
+        </footer>
+    </div>
+
+    <!-- ================= MODAL: ADD STUDENT ================= -->
+    <div class="modal-backdrop" id="studentModal" aria-hidden="true">
+        <div class="modal-card modal-medium" role="dialog" aria-labelledby="studentModalTitle">
+            <div class="modal-header">
+                <h3 id="studentModalTitle"><i class="fa-solid fa-user-plus"></i> Add New Student to Cohort</h3>
+                <button type="button" class="btn-close" id="btnCloseStudentModal" aria-label="Close modal">&times;</button>
+            </div>
+            <form id="addStudentForm">
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="inputStudentName">Full Name <span class="required">*</span></label>
+                        <input type="text" id="inputStudentName" class="form-control" placeholder="e.g. Aditi Sharma" required>
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="inputStudentRollNo">Roll Number <span class="required">*</span></label>
+                        <input type="text" id="inputStudentRollNo" class="form-control" placeholder="e.g. CSE2025101" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="selectStudentDept">Department <span class="required">*</span></label>
+                        <select id="selectStudentDept" class="form-control" required>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Information Technology">Information Technology</option>
+                            <option value="Electronics & Comm">Electronics & Comm</option>
+                            <option value="Mechanical Engg">Mechanical Engg</option>
+                            <option value="Civil Engg">Civil Engg</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="inputGradYear">Graduation Year <span class="required">*</span></label>
+                        <input type="number" id="inputGradYear" class="form-control" value="2025" min="2020" max="2035" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="inputStudentCGPA">CGPA (0.0 - 10.0) <span class="required">*</span></label>
+                        <input type="number" id="inputStudentCGPA" class="form-control" step="0.01" min="0.0" max="10.0" placeholder="e.g. 8.45" required>
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="selectStudentEligibility">Eligibility Status <span class="required">*</span></label>
+                        <select id="selectStudentEligibility" class="form-control" required>
+                            <option value="1" selected>Eligible for Placements (CGPA &ge; 6.0, No backlogs)</option>
+                            <option value="0">Ineligible (Active backlogs / Disciplinary criteria)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Assign Student Skills</label>
+                    <div class="skills-select-grid" id="modalSkillsCheckboxGrid">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                    <div class="custom-skill-input-row">
+                        <input type="text" id="inputCustomSkill" class="form-control" placeholder="Type new skill and click Add...">
+                        <button type="button" class="btn btn-secondary" id="btnAddCustomSkill">
+                            <i class="fa-solid fa-plus"></i> Add Skill
+                        </button>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btnCancelStudentModal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btnSubmitStudent">
+                        <i class="fa-solid fa-check"></i> Register Student
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: RECORD PLACEMENT ================= -->
+    <div class="modal-backdrop" id="placementModal" aria-hidden="true">
+        <div class="modal-card" role="dialog" aria-labelledby="modalTitle">
+            <div class="modal-header">
+                <h3 id="modalTitle"><i class="fa-solid fa-file-signature"></i> Record Placement Offer</h3>
+                <button type="button" class="btn-close" id="btnClosePlacementModal" aria-label="Close modal">&times;</button>
+            </div>
+            <form id="recordPlacementForm">
+                <div class="form-group">
+                    <label for="selectStudent">Select Student <span class="required">*</span></label>
+                    <select id="selectStudent" class="form-control" required>
+                        <option value="">-- Choose Eligible Student --</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="inputCompany">Company Name <span class="required">*</span></label>
+                        <input type="text" id="inputCompany" class="form-control" placeholder="e.g. Google, Microsoft" required>
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="inputRole">Job Role <span class="required">*</span></label>
+                        <input type="text" id="inputRole" class="form-control" placeholder="e.g. Software Engineer" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="inputPackage">Package (in LPA) <span class="required">*</span></label>
+                        <input type="number" id="inputPackage" class="form-control" step="0.1" min="1.0" max="150.0" placeholder="e.g. 14.5" required>
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="inputPlacementDate">Placement Date</label>
+                        <input type="date" id="inputPlacementDate" class="form-control">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="selectOfferStatus">Offer Status</label>
+                    <select id="selectOfferStatus" class="form-control">
+                        <option value="Placed" selected>Placed (Offer Accepted)</option>
+                        <option value="Offered">Offered (Dual/Multiple Offer)</option>
+                        <option value="Accepted">Accepted</option>
+                    </select>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btnCancelPlacementModal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btnSubmitPlacement">
+                        <i class="fa-solid fa-check"></i> Save Placement Record
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: FULL-RES IMAGE VIEWER ================= -->
+    <div class="modal-backdrop" id="imageModal" aria-hidden="true">
+        <div class="modal-card modal-large">
+            <div class="modal-header">
+                <h3 id="imageModalTitle">Visualization Preview</h3>
+                <button type="button" class="btn-close" id="btnCloseImageModal" aria-label="Close image modal">&times;</button>
+            </div>
+            <div class="image-preview-body">
+                <img src="" alt="Full view preview" id="fullPreviewImage">
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+    <!-- Custom Frontend Logic -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

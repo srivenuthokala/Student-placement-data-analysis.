@@ -1,0 +1,92 @@
+================================================================================
+            STUDENT PLACEMENT DATA ANALYSIS SYSTEM - SUMMARY REPORT             
+================================================================================
+
+=================================================================
+           PLACEMENT-RATE REPORT (COHORT: 2025)
+=================================================================
+Total Enrolled Students       : 100
+Eligible Students (Denominator): 75 (Criteria: CGPA >= 6.0, no backlogs)
+Ineligible Students           : 25
+-----------------------------------------------------------------
+Unique Placed Students (Num)  : 61
+Unplaced Eligible Students    : 14
+Total Placement Offers Made   : 87
+Duplicate Offers Handled      : 26 extra offers
+Avg Offers per Placed Student : 1.43
+=================================================================
+--> OFFICIAL PLACEMENT RATE   : 81.33%
+    [Formula: (Unique Placed / Eligible Students) * 100]
+=================================================================
+
+
+================================================================================
+                  DEPARTMENT-WISE COMPARISON REPORT
+================================================================================
+Department             | Enrolled | Eligible (Denominator) | Placed Students | Placement Rate (%) | Total Offers | Avg Package (LPA (Lakhs Per Annum - INR)) | Max Package (LPA (Lakhs Per Annum - INR)) | Min Package (LPA (Lakhs Per Annum - INR))
+-----------------------+----------+------------------------+-----------------+--------------------+--------------+-------------------------------------------+-------------------------------------------+------------------------------------------
+Information Technology | 24       | 18                     | 17              | 94.44              | 26           | 11.23                                     | 24.47                                     | 4.25                                     
+Civil Engg             | 21       | 16                     | 14              | 87.5               | 17           | 5.91                                      | 7.73                                      | 4.63                                     
+Computer Science       | 23       | 17                     | 14              | 82.35              | 19           | 12.1                                      | 28.86                                     | 4.54                                     
+Mechanical Engg        | 16       | 10                     | 7               | 70.0               | 9            | 5.49                                      | 7.38                                      | 4.19                                     
+Electronics & Comm     | 16       | 14                     | 9               | 64.29              | 16           | 11.05                                     | 26.11                                     | 4.61                                     
+* Note: Package figures are in LPA (Lakhs Per Annum - INR). Sensitive student details excluded.
+================================================================================
+
+
+=================================================================
+          PACKAGE DISTRIBUTION & SALARY METRICS
+=================================================================
+
+[A] All Offers Distribution (Unit: LPA (Lakhs Per Annum - INR)):
+  - Count                 : 87
+  - Mean                  : 9.76
+  - Median                : 6.38
+  - Std Dev               : 6.6
+  - Min                   : 4.19
+  - Max                   : 28.86
+  - 25th Percentile (Q1)  : 5.4
+  - 75th Percentile (Q3)  : 13.36
+  - IQR                   : 7.96
+  - Unit                  : LPA (Lakhs Per Annum - INR)
+
+[B] Unique Students' Highest Offer Distribution:
+  - Count                 : 61
+  - Mean                  : 11.17
+  - Median                : 6.75
+  - Std Dev               : 7.29
+  - Min                   : 4.25
+  - Max                   : 28.86
+  - 25th Percentile (Q1)  : 5.54
+  - 75th Percentile (Q3)  : 15.93
+  - IQR                   : 10.39
+  - Unit                  : LPA (Lakhs Per Annum - INR)
+
+[C] Salary Tier Breakdown (All Offers):
+  - Super Dream (> 15 LPA)    : 17 offers
+  - Dream (8 - 15 LPA)        : 13 offers
+  - Standard (4 - 8 LPA)      : 57 offers
+  - Entry (< 4 LPA)           : 0 offers
+=================================================================
+
+
+===========================================================================
+                     SKILL-DEMAND REPORT
+===========================================================================
+Skill            | Students with Skill | Placed Students | Placement Success Rate (%) | Avg Package (LPA (Lakhs Per Annum - INR))
+-----------------+---------------------+-----------------+----------------------------+------------------------------------------
+Python           | 51                  | 34              | 66.67                      | 10.24                                    
+SQL              | 43                  | 29              | 67.44                      | 11.85                                    
+Data Structures  | 35                  | 22              | 62.86                      | 13.84                                    
+Data Analytics   | 29                  | 16              | 55.17                      | 5.83                                     
+Docker           | 25                  | 16              | 64.0                       | 15.06                                    
+React            | 21                  | 14              | 66.67                      | 13.96                                    
+Java             | 20                  | 13              | 65.0                       | 16.44                                    
+AutoCAD          | 23                  | 13              | 56.52                      | 6.1                                      
+MATLAB           | 26                  | 13              | 50.0                       | 10.06                                    
+AWS              | 21                  | 11              | 52.38                      | 12.8                                     
+Machine Learning | 19                  | 9               | 47.37                      | 15.24                                    
+C++              | 9                   | 6               | 66.67                      | 11.76                                    
+Embedded Systems | 10                  | 5               | 50.0                       | 12.01                                    
+===========================================================================
+
