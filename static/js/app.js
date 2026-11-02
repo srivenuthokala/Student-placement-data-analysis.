@@ -65,7 +65,8 @@ async function loadAllDashboardData() {
             fetchDepartmentAnalytics(),
             fetchPackageAnalytics(),
             fetchSkillDemand(),
-            fetchStudentsDirectory()
+            fetchStudentsDirectory(),
+            fetchCompanyPartners()
         ]);
     } catch (err) {
         console.error("Error loading dashboard data:", err);
@@ -158,58 +159,66 @@ function renderCohortStatusChart(data) {
    2. Department Analytics Tab
    ========================================================================== */
 async function fetchDepartmentAnalytics() {
-    const res = await fetch("/api/departments");
-    const departments = await res.json();
+    try {
+        const res = await fetch("/api/departments");
+        const departments = await res.json();
 
-    // Render Overview Dept Rate Bar Chart
-    renderDepartmentRateChart(departments);
+        // Render Overview Dept Rate Bar Chart
+        renderDepartmentRateChart(departments);
 
-    // Populate Department Cards
-    const cardsGrid = document.getElementById("deptCardsGrid");
-    cardsGrid.innerHTML = departments.map(d => `
-        <div class="dept-card">
-            <div class="dept-card-header">
-                <span class="dept-card-title">${d.Department}</span>
-                <span class="dept-card-rate">${d["Placement Rate (%)"]}%</span>
-            </div>
-            <div class="dept-stat-row">
-                <span>Eligible Denominator:</span>
-                <strong>${d["Eligible (Denominator)"]} / ${d.Enrolled}</strong>
-            </div>
-            <div class="dept-stat-row">
-                <span>Unique Placed:</span>
-                <strong>${d["Placed Students"]}</strong>
-            </div>
-            <div class="dept-stat-row">
-                <span>Total Offers:</span>
-                <strong>${d["Total Offers"]}</strong>
-            </div>
-            <div class="dept-stat-row">
-                <span>Avg Package:</span>
-                <strong style="color: var(--accent-cyan)">${d["Avg Package (LPA (Lakhs Per Annum - INR))"]} LPA</strong>
-            </div>
-            <div class="dept-stat-row">
-                <span>Highest Offer:</span>
-                <strong style="color: var(--accent-emerald)">${d["Max Package (LPA (Lakhs Per Annum - INR))"]} LPA</strong>
-            </div>
-        </div>
-    `).join("");
+        // Populate Department Cards
+        const cardsGrid = document.getElementById("deptCardsGrid");
+        if (cardsGrid) {
+            cardsGrid.innerHTML = departments.map(d => `
+                <div class="dept-card">
+                    <div class="dept-card-header">
+                        <span class="dept-card-title">${d.Department}</span>
+                        <span class="dept-card-rate">${d["Placement Rate (%)"]}%</span>
+                    </div>
+                    <div class="dept-stat-row">
+                        <span>Eligible Denominator:</span>
+                        <strong>${d["Eligible (Denominator)"]} / ${d.Enrolled}</strong>
+                    </div>
+                    <div class="dept-stat-row">
+                        <span>Unique Placed:</span>
+                        <strong>${d["Placed Students"]}</strong>
+                    </div>
+                    <div class="dept-stat-row">
+                        <span>Total Offers:</span>
+                        <strong>${d["Total Offers"]}</strong>
+                    </div>
+                    <div class="dept-stat-row">
+                        <span>Avg Package:</span>
+                        <strong style="color: var(--royal-600)">${d["Avg Package (LPA (Lakhs Per Annum - INR))"]} LPA</strong>
+                    </div>
+                    <div class="dept-stat-row">
+                        <span>Highest Offer:</span>
+                        <strong style="color: var(--emerald-600)">${d["Max Package (LPA (Lakhs Per Annum - INR))"]} LPA</strong>
+                    </div>
+                </div>
+            `).join("");
+        }
 
-    // Populate Department Summary Table
-    const tbody = document.getElementById("departmentTableBody");
-    tbody.innerHTML = departments.map(d => `
-        <tr>
-            <td><strong>${d.Department}</strong></td>
-            <td>${d.Enrolled}</td>
-            <td><span class="status-pill status-eligible">${d["Eligible (Denominator)"]}</span></td>
-            <td><span class="status-pill status-placed">${d["Placed Students"]}</span></td>
-            <td><strong style="color: var(--accent-emerald)">${d["Placement Rate (%)"]}%</strong></td>
-            <td>${d["Total Offers"]}</td>
-            <td><strong>${d["Avg Package (LPA (Lakhs Per Annum - INR))"]} LPA</strong></td>
-            <td>${d["Max Package (LPA (Lakhs Per Annum - INR))"]} LPA</td>
-            <td>${d["Min Package (LPA (Lakhs Per Annum - INR))"]} LPA</td>
-        </tr>
-    `).join("");
+        // Populate Department Summary Table
+        const tbody = document.getElementById("departmentTableBody");
+        if (tbody) {
+            tbody.innerHTML = departments.map(d => `
+                <tr>
+                    <td><strong>${d.Department}</strong></td>
+                    <td>${d.Enrolled}</td>
+                    <td><span class="status-pill status-eligible">${d["Eligible (Denominator)"]}</span></td>
+                    <td><span class="status-pill status-placed">${d["Placed Students"]}</span></td>
+                    <td><strong style="color: var(--emerald-600)">${d["Placement Rate (%)"]}%</strong></td>
+                    <td>${d["Total Offers"]}</td>
+                    <td><strong>${d["Avg Package (LPA (Lakhs Per Annum - INR))"]} LPA</strong></td>
+                    <td>${d["Max Package (LPA (Lakhs Per Annum - INR))"]} LPA</td>
+                    <td>${d["Min Package (LPA (Lakhs Per Annum - INR))"]} LPA</td>
+                </tr>
+            `).join("");
+        }
+    } catch (e) {
+        console.error("Error in fetchDepartmentAnalytics:", e);
+    }
 }
 
 function renderDepartmentRateChart(departments) {
@@ -277,62 +286,199 @@ function renderDepartmentRateChart(departments) {
    3. Package & Salary Analytics Tab
    ========================================================================== */
 async function fetchPackageAnalytics() {
-    const res = await fetch("/api/packages");
-    const data = await res.json();
+    try {
+        const res = await fetch("/api/packages");
+        const data = await res.json();
 
-    const stats = data.all_offers_summary || {};
-    const tiers = data.salary_tiers || {};
+        const stats = data.all_offers_summary || {};
+        const tiers = data.salary_tiers || {};
 
-    // Render Stat Boxes
-    const statBoxes = document.getElementById("salaryStatBoxes");
-    statBoxes.innerHTML = `
-        <div class="stat-box">
-            <div class="stat-box-title">Mean Package</div>
-            <div class="stat-box-value" style="color: var(--accent-cyan);">${stats.Mean || "--"} <span style="font-size: 0.85rem;">LPA</span></div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-box-title">Median Package</div>
-            <div class="stat-box-value" style="color: var(--accent-emerald);">${stats.Median || "--"} <span style="font-size: 0.85rem;">LPA</span></div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-box-title">Std Deviation</div>
-            <div class="stat-box-value">${stats["Std Dev"] || "--"}</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-box-title">Interquartile Range (IQR)</div>
-            <div class="stat-box-value">${stats.IQR || "--"} <span style="font-size: 0.85rem;">LPA</span></div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-box-title">25th Percentile (Q1)</div>
-            <div class="stat-box-value">${stats["25th Percentile (Q1)"] || "--"} <span style="font-size: 0.85rem;">LPA</span></div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-box-title">75th Percentile (Q3)</div>
-            <div class="stat-box-value">${stats["75th Percentile (Q3)"] || "--"} <span style="font-size: 0.85rem;">LPA</span></div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-box-title">Min - Max Range</div>
-            <div class="stat-box-value">${stats.Min || "--"} - ${stats.Max || "--"} <span style="font-size: 0.85rem;">LPA</span></div>
-        </div>
-    `;
+        // Render Stat Boxes
+        const statBoxes = document.getElementById("salaryStatBoxes");
+        if (statBoxes) {
+            statBoxes.innerHTML = `
+                <div class="stat-box">
+                    <div class="stat-box-title">Mean Package</div>
+                    <div class="stat-box-value" style="color: var(--royal-600);">${stats.Mean || "--"} <span style="font-size: 0.8rem;">LPA</span></div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-title">Median Package</div>
+                    <div class="stat-box-value" style="color: var(--emerald-600);">${stats.Median || "--"} <span style="font-size: 0.8rem;">LPA</span></div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-title">Std Deviation</div>
+                    <div class="stat-box-value" style="color: var(--navy-900);">${stats["Std Dev"] || "--"}</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-title">Interquartile Range</div>
+                    <div class="stat-box-value" style="color: #7c3aed;">${stats.IQR || "--"} <span style="font-size: 0.8rem;">LPA</span></div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-title">25th Percentile (Q1)</div>
+                    <div class="stat-box-value">${stats["25th Percentile (Q1)"] || "--"} <span style="font-size: 0.8rem;">LPA</span></div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-title">75th Percentile (Q3)</div>
+                    <div class="stat-box-value">${stats["75th Percentile (Q3)"] || "--"} <span style="font-size: 0.8rem;">LPA</span></div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-box-title">Min - Max Range</div>
+                    <div class="stat-box-value" style="font-size: 1.15rem;">${stats.Min || "--"} - ${stats.Max || "--"} <span style="font-size: 0.8rem;">LPA</span></div>
+                </div>
+            `;
+        }
 
-    // Render Salary Tiers Chart on Overview Tab
-    renderSalaryTiersChart(tiers);
+        // Render Salary Tiers Chart on Overview Tab
+        renderSalaryTiersChart(tiers);
 
-    // Render Package Distribution Curve
-    renderPackageDistCurve(data.raw_packages || []);
+        // Render Salary Tiers Chart on Salary Tab
+        renderSalaryTiersPackageTab(tiers);
 
-    // Render Recruiting Companies Table
-    const compBody = document.getElementById("companiesTableBody");
-    const companies = data.companies || [];
-    compBody.innerHTML = companies.map(c => `
-        <tr>
-            <td><strong>${c.company}</strong></td>
-            <td><span class="status-pill status-eligible">${c.count}</span></td>
-            <td><strong>${Number(c.mean).toFixed(2)} LPA</strong></td>
-            <td><strong style="color: var(--accent-emerald)">${Number(c.max).toFixed(2)} LPA</strong></td>
-        </tr>
-    `).join("");
+        // Render Package Distribution Curve
+        renderPackageDistCurve(data.raw_packages || []);
+
+        // Render Recruiting Companies Table
+        const compBody = document.getElementById("companiesTableBody");
+        const companies = data.companies || [];
+        if (compBody) {
+            compBody.innerHTML = companies.map(c => `
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.65rem;">
+                            <div class="partner-icon-wrap" style="width: 32px; height: 32px; font-size: 1rem;">
+                                <i class="${c.icon || 'fa-solid fa-building'}"></i>
+                            </div>
+                            <div>
+                                <strong>${c.company}</strong>
+                                <span style="display: block; font-size: 0.72rem; color: var(--slate-500);">${c.category || 'Recruiter'}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="partner-tier-badge ${c.badge_class || 'badge-secondary'}">${c.tier || 'Partner'}</span></td>
+                    <td><strong style="color: var(--royal-600); font-size: 0.95rem;">${c.count} Offers</strong></td>
+                    <td><strong>${Number(c.mean).toFixed(2)} LPA</strong></td>
+                    <td><strong style="color: var(--emerald-600); font-size: 0.95rem;">${Number(c.max).toFixed(2)} LPA</strong></td>
+                    <td><span class="status-pill status-placed"><i class="fa-solid fa-circle-check"></i> Active</span></td>
+                </tr>
+            `).join("");
+        }
+    } catch (e) {
+        console.error("Error in fetchPackageAnalytics:", e);
+    }
+}
+
+/* ==========================================================================
+   Company Recruitment Partners Showcase
+   ========================================================================== */
+async function fetchCompanyPartners() {
+    try {
+        const res = await fetch("/api/company-partners");
+        const data = await res.json();
+
+        // 1. Company Partners Showcase Grid
+        const grid = document.getElementById("companyPartnersGrid");
+        if (grid && data.partners) {
+            grid.innerHTML = data.partners.map(p => `
+                <div class="partner-card">
+                    <div class="partner-card-header">
+                        <div class="partner-icon-wrap">
+                            <i class="${p.icon}"></i>
+                        </div>
+                        <div>
+                            <span class="partner-name">${p.company}</span>
+                            <span class="partner-category">${p.category}</span>
+                        </div>
+                        <span class="partner-tier-badge ${p.badge_class}">${p.tier}</span>
+                    </div>
+                    <div class="partner-stats-grid">
+                        <div class="p-stat">
+                            <span class="p-stat-label">Offers</span>
+                            <strong class="p-stat-val text-royal">${p.total_hires}</strong>
+                        </div>
+                        <div class="p-stat">
+                            <span class="p-stat-label">Highest</span>
+                            <strong class="p-stat-val text-emerald">${p.max_package} <span style="font-size: 0.65rem;">LPA</span></strong>
+                        </div>
+                        <div class="p-stat">
+                            <span class="p-stat-label">Average</span>
+                            <strong class="p-stat-val text-navy">${p.avg_package} <span style="font-size: 0.65rem;">LPA</span></strong>
+                        </div>
+                    </div>
+                    <div class="partner-roles-list">
+                        ${p.roles.slice(0, 2).map(r => `<span class="partner-role-tag">${r}</span>`).join("")}
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        // 2. Recent Placement Stream Table
+        const recentBody = document.getElementById("recentPlacementsTableBody");
+        if (recentBody && data.recent_placements) {
+            recentBody.innerHTML = data.recent_placements.map(item => `
+                <tr>
+                    <td><code>${item.roll_no}</code></td>
+                    <td><strong>${item.name}</strong></td>
+                    <td><span style="font-size: 0.82rem; color: var(--slate-600);">${item.department}</span></td>
+                    <td>
+                        <strong style="color: var(--navy-900);"><i class="fa-solid fa-briefcase" style="color: var(--royal-600); margin-right: 4px;"></i> ${item.company}</strong>
+                    </td>
+                    <td>${item.role}</td>
+                    <td><strong style="color: var(--emerald-600); font-size: 0.92rem;">${item.package} LPA</strong></td>
+                    <td>${item.placement_date || '--'}</td>
+                    <td><span class="status-pill status-placed">${item.status || 'Accepted'}</span></td>
+                </tr>
+            `).join("");
+        }
+    } catch (e) {
+        console.error("Error in fetchCompanyPartners:", e);
+    }
+}
+
+let chartSalaryTiersPackageTabInstance = null;
+function renderSalaryTiersPackageTab(tiers) {
+    const ctx = document.getElementById("chartSalaryTiersPackageTab");
+    if (!ctx) return;
+
+    if (chartSalaryTiersPackageTabInstance) chartSalaryTiersPackageTabInstance.destroy();
+
+    const labels = Object.keys(tiers);
+    const counts = Object.values(tiers);
+
+    chartSalaryTiersPackageTabInstance = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Number of Offers",
+                data: counts,
+                backgroundColor: [
+                    "rgba(168, 85, 247, 0.85)", // Super Dream
+                    "rgba(6, 182, 212, 0.85)",  // Dream
+                    "rgba(59, 130, 246, 0.85)", // Standard
+                    "rgba(148, 163, 184, 0.6)"  // Entry
+                ],
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: "rgba(15, 23, 42, 0.06)" },
+                    ticks: { color: "#64748b" }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { color: "#334155", font: { weight: "bold" } }
+                }
+            },
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
 }
 
 function renderSalaryTiersChart(tiers) {
@@ -446,22 +592,28 @@ function renderPackageDistCurve(packages) {
    4. Skill Demand Hub Tab
    ========================================================================== */
 async function fetchSkillDemand() {
-    const res = await fetch("/api/skills");
-    cachedSkills = await res.json();
+    try {
+        const res = await fetch("/api/skills");
+        cachedSkills = await res.json();
 
-    // Render Overview Top Skills Chart
-    renderTopSkillsChart(cachedSkills.slice(0, 8));
+        // Render Overview Top Skills Chart
+        renderTopSkillsChart(cachedSkills.slice(0, 8));
 
-    // Render Skill Tags Cloud
-    const tagsCloud = document.getElementById("skillTagsCloud");
-    tagsCloud.innerHTML = cachedSkills.map(s => `
-        <div class="skill-tag" onclick="filterSkillsByTag('${s.Skill}')">
-            <span>${s.Skill}</span>
-            <span class="skill-tag-count">${s["Placed Students"]} placed</span>
-        </div>
-    `).join("");
+        // Render Skill Tags Cloud
+        const tagsCloud = document.getElementById("skillTagsCloud");
+        if (tagsCloud) {
+            tagsCloud.innerHTML = cachedSkills.map(s => `
+                <div class="skill-tag" onclick="filterSkillsByTag('${s.Skill}')">
+                    <span>${s.Skill}</span>
+                    <span class="skill-tag-count">${s["Placed Students"]} placed</span>
+                </div>
+            `).join("");
+        }
 
-    renderSkillsTable(cachedSkills);
+        renderSkillsTable(cachedSkills);
+    } catch (e) {
+        console.error("Error in fetchSkillDemand:", e);
+    }
 }
 
 function renderTopSkillsChart(topSkills) {
@@ -509,6 +661,7 @@ function renderTopSkillsChart(topSkills) {
 
 function renderSkillsTable(skills) {
     const tbody = document.getElementById("skillsTableBody");
+    if (!tbody) return;
     tbody.innerHTML = skills.map(s => {
         let tierBadge = `<span class="status-pill status-eligible">High Demand</span>`;
         if (s["Placed Students"] >= 20) {
@@ -521,9 +674,9 @@ function renderSkillsTable(skills) {
             <tr>
                 <td><strong>${s.Skill}</strong></td>
                 <td>${s["Students with Skill"]}</td>
-                <td><strong style="color: var(--accent-cyan);">${s["Placed Students"]}</strong></td>
-                <td>${s["Placement Success Rate (%)"]}%</td>
-                <td><strong>${s["Avg Package (LPA (Lakhs Per Annum - INR))"]} LPA</strong></td>
+                <td><strong style="color: var(--royal-600); font-size: 0.95rem;">${s["Placed Students"]}</strong></td>
+                <td><strong>${s["Placement Success Rate (%)"]}%</strong></td>
+                <td><strong style="color: var(--emerald-600);">${s["Avg Package (LPA (Lakhs Per Annum - INR))"]} LPA</strong></td>
                 <td>${tierBadge}</td>
             </tr>
         `;
@@ -532,7 +685,7 @@ function renderSkillsTable(skills) {
 
 function filterSkillsByTag(skillName) {
     const searchInput = document.getElementById("skillSearchInput");
-    searchInput.value = skillName;
+    if (searchInput) searchInput.value = skillName;
     const filtered = cachedSkills.filter(s => s.Skill.toLowerCase().includes(skillName.toLowerCase()));
     renderSkillsTable(filtered);
 }
@@ -546,11 +699,13 @@ async function fetchStudentsDirectory() {
 
     // Populate student modal select dropdown
     const selectStudent = document.getElementById("selectStudent");
-    selectStudent.innerHTML = `<option value="">-- Choose Eligible Student --</option>` +
-        cachedStudents
-            .filter(s => s.is_eligible === 1)
-            .map(s => `<option value="${s.student_id}">${s.roll_no} - ${s.name} (${s.department}, CGPA: ${s.cgpa})</option>`)
-            .join("");
+    if (selectStudent) {
+        selectStudent.innerHTML = `<option value="">-- Choose Eligible Student --</option>` +
+            cachedStudents
+                .filter(s => s.is_eligible === 1)
+                .map(s => `<option value="${s.student_id}">${s.roll_no} - ${s.name} (${s.department}, CGPA: ${s.cgpa})</option>`)
+                .join("");
+    }
 
     renderStudentsTable(cachedStudents);
 }
@@ -558,40 +713,77 @@ async function fetchStudentsDirectory() {
 function renderStudentsTable(students) {
     const tbody = document.getElementById("studentsTableBody");
     const countSpan = document.getElementById("filteredStudentCount");
-    countSpan.textContent = students.length;
+    if (countSpan) countSpan.textContent = students.length;
+
+    if (!tbody) return;
 
     if (students.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="11" class="text-center" style="padding: 2rem; color: var(--text-muted);">No matching student records found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="12" class="text-center" style="padding: 2.5rem; color: var(--slate-500);"><i class="fa-solid fa-users-slash" style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem; opacity: 0.5;"></i>No matching student records found.</td></tr>`;
         return;
     }
 
     tbody.innerHTML = students.map(s => {
-        const eligPill = s.is_eligible === 1
-            ? `<span class="status-pill status-eligible">Eligible</span>`
-            : `<span class="status-pill status-ineligible">Ineligible</span>`;
+        const isLateral = (s.admission_type && s.admission_type.toLowerCase() === "lateral entry");
+        const typeBadge = isLateral
+            ? `<span class="badge-lateral" title="Direct 2nd Year Entry"><i class="fa-solid fa-user-graduate"></i> Lateral Entry</span>`
+            : `<span class="badge-regular" title="Regular 4-Year Admission"><i class="fa-solid fa-graduation-cap"></i> Regular</span>`;
 
-        const statusPill = s.placement_status === "Placed"
-            ? `<span class="status-pill status-placed">Placed</span>`
-            : `<span class="status-pill status-unplaced">Unplaced</span>`;
+        let eligBadge = `<span class="badge-pending">Pending</span>`;
+        if (s.placement_eligibility === "Eligible" || s.is_eligible === 1) {
+            eligBadge = `<span class="status-pill status-eligible">Eligible</span>`;
+        } else if (s.placement_eligibility === "Not Eligible" || s.is_eligible === 0) {
+            eligBadge = `<span class="status-pill status-ineligible">Ineligible</span>`;
+        }
+
+        let statusBadge = `<span class="status-pill status-unplaced">Unplaced</span>`;
+        if (s.placement_status === "Placed" || s.total_offers > 0) {
+            statusBadge = `<span class="status-pill status-placed">Placed</span>`;
+        } else if (s.placement_status === "Pending") {
+            statusBadge = `<span class="badge-pending">Pending</span>`;
+        }
 
         const highestPkg = s.highest_package > 0 ? `${s.highest_package} LPA` : "--";
         const offersCount = s.total_offers > 1
-            ? `<strong style="color: var(--accent-purple)">${s.total_offers} (Multi)</strong>`
-            : s.total_offers;
+            ? `<strong style="color: var(--royal-600);">${s.total_offers} (Multi)</strong>`
+            : (s.total_offers > 0 ? `<strong style="color: var(--emerald-600);">1 Offer</strong>` : "0");
+
+        const yearSec = `${s.year_of_study || '4th Year'} (${s.section || 'A'})`;
+        const backlogsBadge = s.backlogs > 0
+            ? `<strong style="color: var(--rose-600);">${s.backlogs}</strong>`
+            : `<span style="color: var(--emerald-600);">0</span>`;
 
         return `
             <tr>
-                <td>#${s.student_id}</td>
                 <td><code>${s.roll_no}</code></td>
-                <td><strong>${s.name}</strong></td>
+                <td>
+                    <div style="font-weight: 700; color: var(--navy-900);">${s.name}</div>
+                    <div style="font-size: 0.75rem; color: var(--slate-500); margin-top: 2px;">${s.email || ''}</div>
+                </td>
+                <td>${typeBadge}</td>
                 <td>${s.department}</td>
-                <td><strong>${s.cgpa}</strong></td>
-                <td>${eligPill}</td>
-                <td>${statusPill}</td>
+                <td><span style="font-size: 0.82rem; font-weight: 600;">${yearSec}</span></td>
+                <td><strong>${Number(s.cgpa).toFixed(2)}</strong></td>
+                <td>${backlogsBadge}</td>
+                <td>${eligBadge}</td>
+                <td>${statusBadge}</td>
                 <td>${offersCount}</td>
-                <td><strong style="color: var(--accent-emerald);">${highestPkg}</strong></td>
-                <td><span style="font-size: 0.8rem; color: var(--text-secondary);">${s.companies}</span></td>
-                <td><span style="font-size: 0.78rem; color: var(--text-muted);">${s.skills}</span></td>
+                <td><strong style="color: var(--emerald-600);">${highestPkg}</strong></td>
+                <td style="text-align: center;">
+                    <div class="table-actions-cell" style="justify-content: center;">
+                        <button type="button" class="btn-table-action btn-view" onclick="openViewProfileModal(${s.student_id})" title="View Full Profile Dossier">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                        <button type="button" class="btn-table-action btn-edit" onclick="openEditStudentModal(${s.student_id})" title="Edit Student Details">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button type="button" class="btn-table-action btn-offer" onclick="openQuickPlacementModal(${s.student_id})" title="Add Corporate Offer">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                        <button type="button" class="btn-table-action btn-delete" onclick="openDeleteStudentModal(${s.student_id})" title="Delete Student Record">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                </td>
             </tr>
         `;
     }).join("");
@@ -603,45 +795,61 @@ function renderStudentsTable(students) {
 function initEventListeners() {
     // Student Filters
     const deptSelect = document.getElementById("filterDepartment");
+    const typeSelect = document.getElementById("filterAdmissionType");
     const statusSelect = document.getElementById("filterStatus");
     const studentSearch = document.getElementById("studentSearchInput");
 
     function applyStudentFilters() {
-        const dept = deptSelect.value;
-        const status = statusSelect.value;
-        const query = studentSearch.value.trim().toLowerCase();
+        const dept = deptSelect ? deptSelect.value : "ALL";
+        const admType = typeSelect ? typeSelect.value : "ALL";
+        const status = statusSelect ? statusSelect.value : "ALL";
+        const query = studentSearch ? studentSearch.value.trim().toLowerCase() : "";
 
         const filtered = cachedStudents.filter(s => {
             const matchesDept = (dept === "ALL" || s.department === dept);
+
+            let matchesType = true;
+            if (admType !== "ALL") {
+                const sType = (s.admission_type || "Regular").toLowerCase();
+                matchesType = (sType === admType.toLowerCase());
+            }
+
             let matchesStatus = true;
-            if (status === "Placed") matchesStatus = (s.placement_status === "Placed");
-            else if (status === "Unplaced") matchesStatus = (s.placement_status === "Unplaced");
-            else if (status === "Eligible") matchesStatus = (s.is_eligible === 1);
-            else if (status === "Ineligible") matchesStatus = (s.is_eligible === 0);
+            if (status === "Placed") matchesStatus = (s.placement_status === "Placed" || s.total_offers > 0);
+            else if (status === "Unplaced") matchesStatus = (s.placement_status === "Unplaced" && s.total_offers === 0);
+            else if (status === "Eligible") matchesStatus = (s.placement_eligibility === "Eligible" || s.is_eligible === 1);
+            else if (status === "Ineligible") matchesStatus = (s.placement_eligibility === "Not Eligible" || s.is_eligible === 0);
+            else if (status === "Pending") matchesStatus = (s.placement_eligibility === "Pending" || s.placement_status === "Pending");
 
             const matchesQuery = !query ||
                 s.name.toLowerCase().includes(query) ||
                 s.roll_no.toLowerCase().includes(query) ||
+                (s.department && s.department.toLowerCase().includes(query)) ||
+                (s.diploma_college && s.diploma_college.toLowerCase().includes(query)) ||
+                (s.diploma_qualification && s.diploma_qualification.toLowerCase().includes(query)) ||
                 (s.companies && s.companies.toLowerCase().includes(query)) ||
                 (s.skills && s.skills.toLowerCase().includes(query));
 
-            return matchesDept && matchesStatus && matchesQuery;
+            return matchesDept && matchesType && matchesStatus && matchesQuery;
         });
 
         renderStudentsTable(filtered);
     }
 
-    deptSelect.addEventListener("change", applyStudentFilters);
-    statusSelect.addEventListener("change", applyStudentFilters);
-    studentSearch.addEventListener("input", applyStudentFilters);
+    if (deptSelect) deptSelect.addEventListener("change", applyStudentFilters);
+    if (typeSelect) typeSelect.addEventListener("change", applyStudentFilters);
+    if (statusSelect) statusSelect.addEventListener("change", applyStudentFilters);
+    if (studentSearch) studentSearch.addEventListener("input", applyStudentFilters);
 
     // Skill Filter
     const skillSearch = document.getElementById("skillSearchInput");
-    skillSearch.addEventListener("input", () => {
-        const query = skillSearch.value.trim().toLowerCase();
-        const filtered = cachedSkills.filter(s => s.Skill.toLowerCase().includes(query));
-        renderSkillsTable(filtered);
-    });
+    if (skillSearch) {
+        skillSearch.addEventListener("input", () => {
+            const query = skillSearch.value.trim().toLowerCase();
+            const filtered = cachedSkills.filter(s => s.Skill.toLowerCase().includes(query));
+            renderSkillsTable(filtered);
+        });
+    }
 
     // Re-Seed Data Button
     const btnSeed = document.getElementById("btnSeedData");
@@ -776,16 +984,66 @@ function initModals() {
     });
 
     /* ==========================================================================
-       Student Registration Modal Logic
+       Student Registration & Lateral Entry Modal Logic
        ========================================================================== */
     const studentModal = document.getElementById("studentModal");
     const btnOpenStudent = document.getElementById("btnOpenStudentModal");
+    const btnOpenLateral = document.getElementById("btnOpenLateralModal");
     const btnCloseStudent = document.getElementById("btnCloseStudentModal");
     const btnCancelStudent = document.getElementById("btnCancelStudentModal");
     const formAddStudent = document.getElementById("addStudentForm");
     const skillsGrid = document.getElementById("modalSkillsCheckboxGrid");
     const btnAddCustomSkill = document.getElementById("btnAddCustomSkill");
     const inputCustomSkill = document.getElementById("inputCustomSkill");
+
+    const radioRegular = document.getElementById("radioTypeRegular");
+    const radioLateral = document.getElementById("radioTypeLateral");
+    const tabLabelRegular = document.getElementById("tabLabelRegular");
+    const tabLabelLateral = document.getElementById("tabLabelLateral");
+    const lateralFieldsBox = document.getElementById("lateralEntryFieldsBox");
+    const inputAdmissionType = document.getElementById("inputAdmissionType");
+    const selectYearOfStudy = document.getElementById("selectYearOfStudy");
+
+    function setAdmissionTypeUI(type) {
+        if (!inputAdmissionType) return;
+        inputAdmissionType.value = type;
+        if (type === "Lateral Entry") {
+            if (radioLateral) radioLateral.checked = true;
+            if (tabLabelLateral) {
+                tabLabelLateral.style.background = "#7c3aed";
+                tabLabelLateral.style.color = "#fff";
+            }
+            if (tabLabelRegular) {
+                tabLabelRegular.style.background = "transparent";
+                tabLabelRegular.style.color = "var(--slate-700)";
+            }
+            if (lateralFieldsBox) lateralFieldsBox.style.display = "block";
+            if (selectYearOfStudy && selectYearOfStudy.value === "4th Year") {
+                selectYearOfStudy.value = "2nd Year";
+            }
+        } else {
+            if (radioRegular) radioRegular.checked = true;
+            if (tabLabelRegular) {
+                tabLabelRegular.style.background = "var(--royal-600)";
+                tabLabelRegular.style.color = "#fff";
+            }
+            if (tabLabelLateral) {
+                tabLabelLateral.style.background = "transparent";
+                tabLabelLateral.style.color = "var(--slate-700)";
+            }
+            if (lateralFieldsBox) lateralFieldsBox.style.display = "none";
+            if (selectYearOfStudy && selectYearOfStudy.value === "2nd Year") {
+                selectYearOfStudy.value = "4th Year";
+            }
+        }
+    }
+
+    if (radioRegular && tabLabelRegular) {
+        tabLabelRegular.addEventListener("click", () => setAdmissionTypeUI("Regular"));
+    }
+    if (radioLateral && tabLabelLateral) {
+        tabLabelLateral.addEventListener("click", () => setAdmissionTypeUI("Lateral Entry"));
+    }
 
     async function populateSkillsGrid() {
         if (!skillsGrid) return;
@@ -805,9 +1063,23 @@ function initModals() {
 
     if (btnOpenStudent) {
         btnOpenStudent.addEventListener("click", () => {
-            studentModal.classList.add("open");
-            studentModal.setAttribute("aria-hidden", "false");
-            populateSkillsGrid();
+            if (studentModal) {
+                studentModal.classList.add("open");
+                studentModal.setAttribute("aria-hidden", "false");
+                setAdmissionTypeUI("Regular");
+                populateSkillsGrid();
+            }
+        });
+    }
+
+    if (btnOpenLateral) {
+        btnOpenLateral.addEventListener("click", () => {
+            if (studentModal) {
+                studentModal.classList.add("open");
+                studentModal.setAttribute("aria-hidden", "false");
+                setAdmissionTypeUI("Lateral Entry");
+                populateSkillsGrid();
+            }
         });
     }
 
@@ -815,7 +1087,8 @@ function initModals() {
         if (studentModal) {
             studentModal.classList.remove("open");
             studentModal.setAttribute("aria-hidden", "true");
-            formAddStudent.reset();
+            if (formAddStudent) formAddStudent.reset();
+            setAdmissionTypeUI("Regular");
         }
     }
 
@@ -827,7 +1100,6 @@ function initModals() {
             const newSkill = inputCustomSkill.value.trim();
             if (!newSkill) return;
 
-            // Check if already in grid
             const existing = Array.from(skillsGrid.querySelectorAll("input")).map(cb => cb.value.toLowerCase());
             if (existing.includes(newSkill.toLowerCase())) {
                 showToast(`Skill '${newSkill}' is already in list.`, "error");
@@ -853,9 +1125,9 @@ function initModals() {
             const val = parseFloat(inputCGPA.value);
             if (!isNaN(val)) {
                 if (val < 6.0) {
-                    selectElig.value = "0"; // Ineligible
+                    selectElig.value = "Not Eligible";
                 } else {
-                    selectElig.value = "1"; // Eligible
+                    selectElig.value = "Eligible";
                 }
             }
         });
@@ -865,18 +1137,33 @@ function initModals() {
     if (formAddStudent) {
         formAddStudent.addEventListener("submit", async (e) => {
             e.preventDefault();
+            const rollNo = document.getElementById("inputStudentRollNo").value.trim().toUpperCase();
             const name = document.getElementById("inputStudentName").value.trim();
-            const rollNo = document.getElementById("inputStudentRollNo").value.trim();
+            const admissionType = inputAdmissionType ? inputAdmissionType.value : "Regular";
             const department = document.getElementById("selectStudentDept").value;
-            const gradYear = parseInt(document.getElementById("inputGradYear").value, 10);
+            const yearOfStudy = document.getElementById("selectYearOfStudy").value;
+            const section = document.getElementById("inputSection").value.trim() || "A";
+            const academicYear = document.getElementById("inputAcademicYear").value.trim() || "2024-2025";
+            const email = document.getElementById("inputStudentEmail").value.trim();
+            const mobile = document.getElementById("inputStudentMobile").value.trim();
+            const dob = document.getElementById("inputStudentDOB").value;
+            const gender = document.getElementById("selectStudentGender").value;
             const cgpa = parseFloat(document.getElementById("inputStudentCGPA").value);
-            const isEligible = parseInt(document.getElementById("selectStudentEligibility").value, 10);
+            const backlogs = parseInt(document.getElementById("inputBacklogs").value, 10) || 0;
+            const eligibility = document.getElementById("selectStudentEligibility").value;
+            const placementStatus = document.getElementById("selectInitialPlacementStatus").value;
 
-            // Collect checked skills
-            const checkedSkills = Array.from(skillsGrid.querySelectorAll("input[name='studentSkill']:checked"))
-                .map(cb => cb.value);
+            // Lateral Entry Details
+            const diplomaQual = document.getElementById("inputDiplomaQual") ? document.getElementById("inputDiplomaQual").value.trim() : "";
+            const diplomaPct = document.getElementById("inputDiplomaPct") ? document.getElementById("inputDiplomaPct").value.trim() : "";
+            const diplomaCollege = document.getElementById("inputDiplomaCollege") ? document.getElementById("inputDiplomaCollege").value.trim() : "";
+            const lateralAdmYear = document.getElementById("inputLateralAdmissionYear") ? document.getElementById("inputLateralAdmissionYear").value.trim() : "2022";
 
-            if (!name || !rollNo || !department || isNaN(cgpa)) {
+            const checkedSkills = skillsGrid
+                ? Array.from(skillsGrid.querySelectorAll("input[name='studentSkill']:checked")).map(cb => cb.value)
+                : [];
+
+            if (!rollNo || !name || !department || isNaN(cgpa)) {
                 showToast("Please fill all required student fields correctly.", "error");
                 return;
             }
@@ -890,12 +1177,25 @@ function initModals() {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        name: name,
                         roll_no: rollNo,
+                        name: name,
+                        admission_type: admissionType,
                         department: department,
-                        graduation_year: gradYear,
+                        year_of_study: yearOfStudy,
+                        section: section,
+                        academic_year: academicYear,
+                        email: email,
+                        mobile: mobile,
+                        dob: dob,
+                        gender: gender,
                         cgpa: cgpa,
-                        is_eligible: isEligible,
+                        backlogs: backlogs,
+                        placement_eligibility: eligibility,
+                        placement_status: placementStatus,
+                        diploma_qualification: diplomaQual,
+                        diploma_percentage: diplomaPct ? parseFloat(diplomaPct) : null,
+                        diploma_college: diplomaCollege,
+                        admission_year: parseInt(lateralAdmYear, 10) || 2022,
                         skills: checkedSkills
                     })
                 });
@@ -913,7 +1213,309 @@ function initModals() {
                 showToast("Network error registering student.", "error");
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = `<i class="fa-solid fa-check"></i> Register Student`;
+                submitBtn.innerHTML = `<i class="fa-solid fa-check"></i> Save Student Record`;
+            }
+        });
+    }
+
+    /* ==========================================================================
+       Edit Student Modal Logic
+       ========================================================================== */
+    const editModal = document.getElementById("editStudentModal");
+    const btnCloseEdit = document.getElementById("btnCloseEditStudentModal");
+    const btnCancelEdit = document.getElementById("btnCancelEditStudentModal");
+    const formEditStudent = document.getElementById("editStudentForm");
+
+    function closeEditModal() {
+        if (editModal) {
+            editModal.classList.remove("open");
+            editModal.setAttribute("aria-hidden", "true");
+            if (formEditStudent) formEditStudent.reset();
+        }
+    }
+
+    if (btnCloseEdit) btnCloseEdit.addEventListener("click", closeEditModal);
+    if (btnCancelEdit) btnCancelEdit.addEventListener("click", closeEditModal);
+
+    if (formEditStudent) {
+        formEditStudent.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const studentId = document.getElementById("editStudentId").value;
+            const rollNo = document.getElementById("editStudentRollNo").value.trim().toUpperCase();
+            const name = document.getElementById("editStudentName").value.trim();
+            const admissionType = document.getElementById("editAdmissionType").value;
+            const department = document.getElementById("editStudentDept").value;
+            const yearOfStudy = document.getElementById("editYearOfStudy").value;
+            const section = document.getElementById("editSection").value.trim() || "A";
+            const email = document.getElementById("editEmail").value.trim();
+            const mobile = document.getElementById("editMobile").value.trim();
+            const dob = document.getElementById("editDOB").value;
+            const gender = document.getElementById("editGender").value;
+            const cgpa = parseFloat(document.getElementById("editCGPA").value);
+            const backlogs = parseInt(document.getElementById("editBacklogs").value, 10) || 0;
+            const eligibility = document.getElementById("editPlacementEligibility").value;
+            const placementStatus = document.getElementById("editPlacementStatus").value;
+
+            const diplomaQual = document.getElementById("editDiplomaQual") ? document.getElementById("editDiplomaQual").value.trim() : "";
+            const diplomaPct = document.getElementById("editDiplomaPct") ? document.getElementById("editDiplomaPct").value.trim() : "";
+            const diplomaCollege = document.getElementById("editDiplomaCollege") ? document.getElementById("editDiplomaCollege").value.trim() : "";
+            const admYear = document.getElementById("editAdmissionYear") ? document.getElementById("editAdmissionYear").value.trim() : "";
+
+            const submitBtn = document.getElementById("btnSubmitEditStudent");
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Saving...`;
+
+            try {
+                const res = await fetch(`/api/student/${studentId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        roll_no: rollNo,
+                        name: name,
+                        admission_type: admissionType,
+                        department: department,
+                        year_of_study: yearOfStudy,
+                        section: section,
+                        email: email,
+                        mobile: mobile,
+                        dob: dob,
+                        gender: gender,
+                        cgpa: cgpa,
+                        backlogs: backlogs,
+                        placement_eligibility: eligibility,
+                        placement_status: placementStatus,
+                        diploma_qualification: diplomaQual,
+                        diploma_percentage: diplomaPct ? parseFloat(diplomaPct) : null,
+                        diploma_college: diplomaCollege,
+                        admission_year: admYear ? parseInt(admYear, 10) : 2021
+                    })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message, "success");
+                    closeEditModal();
+                    await loadAllDashboardData();
+                    refreshMatplotlibImages();
+                } else {
+                    showToast(data.error || "Failed to update student.", "error");
+                }
+            } catch (err) {
+                showToast("Network error updating student.", "error");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="fa-solid fa-check"></i> Save Changes`;
+            }
+        });
+    }
+
+    /* ==========================================================================
+       View Profile Dossier Modal Logic
+       ========================================================================== */
+    const viewProfileModal = document.getElementById("viewProfileModal");
+    const btnCloseViewProfile = document.getElementById("btnCloseViewProfileModal");
+    const btnDoneViewProfile = document.getElementById("btnDoneViewProfile");
+
+    function closeViewProfileModal() {
+        if (viewProfileModal) {
+            viewProfileModal.classList.remove("open");
+            viewProfileModal.setAttribute("aria-hidden", "true");
+        }
+    }
+
+    if (btnCloseViewProfile) btnCloseViewProfile.addEventListener("click", closeViewProfileModal);
+    if (btnDoneViewProfile) btnDoneViewProfile.addEventListener("click", closeViewProfileModal);
+
+    /* ==========================================================================
+       Delete Student Confirmation Modal Logic
+       ========================================================================== */
+    const deleteModal = document.getElementById("deleteStudentModal");
+    const btnCloseDelete = document.getElementById("btnCloseDeleteStudentModal");
+    const btnCancelDelete = document.getElementById("btnCancelDeleteModal");
+    const btnConfirmDelete = document.getElementById("btnConfirmDeleteStudent");
+
+    function closeDeleteModal() {
+        if (deleteModal) {
+            deleteModal.classList.remove("open");
+            deleteModal.setAttribute("aria-hidden", "true");
+        }
+    }
+
+    if (btnCloseDelete) btnCloseDelete.addEventListener("click", closeDeleteModal);
+    if (btnCancelDelete) btnCancelDelete.addEventListener("click", closeDeleteModal);
+
+    if (btnConfirmDelete) {
+        btnConfirmDelete.addEventListener("click", async () => {
+            const studentId = document.getElementById("deleteStudentId").value;
+            if (!studentId) return;
+
+            btnConfirmDelete.disabled = true;
+            btnConfirmDelete.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Archiving &amp; Deleting...`;
+
+            try {
+                const res = await fetch(`/api/student/${studentId}`, { method: "DELETE" });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message, "success");
+                    closeDeleteModal();
+                    await loadAllDashboardData();
+                    refreshMatplotlibImages();
+                } else {
+                    showToast(data.error || "Failed to delete student.", "error");
+                }
+            } catch (err) {
+                showToast("Network error deleting student.", "error");
+            } finally {
+                btnConfirmDelete.disabled = false;
+                btnConfirmDelete.innerHTML = `<i class="fa-solid fa-trash-can"></i> Yes, Delete &amp; Archive Record`;
+            }
+        });
+    }
+
+    /* ==========================================================================
+       Bulk Student Upload Modal Logic
+       ========================================================================== */
+    const bulkModal = document.getElementById("bulkUploadModal");
+    const btnOpenBulk = document.getElementById("btnOpenBulkUploadModal");
+    const btnCloseBulk = document.getElementById("btnCloseBulkUploadModal");
+    const btnCancelBulk = document.getElementById("btnCancelBulkUpload");
+    const btnDoneBulk = document.getElementById("btnDoneBulkUpload");
+    const bulkForm = document.getElementById("bulkUploadForm");
+    const bulkFileInput = document.getElementById("bulkFileInput");
+    const bulkDropzone = document.getElementById("bulkDropzone");
+    const selectedNotice = document.getElementById("selectedFileNotice");
+    const btnSubmitBulk = document.getElementById("btnSubmitBulkUpload");
+    const bulkResultsPanel = document.getElementById("bulkUploadResults");
+
+    function closeBulkModal() {
+        if (bulkModal) {
+            bulkModal.classList.remove("open");
+            bulkModal.setAttribute("aria-hidden", "true");
+            if (bulkForm) bulkForm.reset();
+            if (selectedNotice) { selectedNotice.style.display = "none"; selectedNotice.textContent = ""; }
+            if (btnSubmitBulk) btnSubmitBulk.disabled = true;
+            if (bulkResultsPanel) bulkResultsPanel.style.display = "none";
+        }
+    }
+
+    if (btnOpenBulk) {
+        btnOpenBulk.addEventListener("click", () => {
+            if (bulkModal) {
+                bulkModal.classList.add("open");
+                bulkModal.setAttribute("aria-hidden", "false");
+                if (bulkResultsPanel) bulkResultsPanel.style.display = "none";
+            }
+        });
+    }
+
+    if (btnCloseBulk) btnCloseBulk.addEventListener("click", closeBulkModal);
+    if (btnCancelBulk) btnCancelBulk.addEventListener("click", closeBulkModal);
+    if (btnDoneBulk) {
+        btnDoneBulk.addEventListener("click", async () => {
+            closeBulkModal();
+            await loadAllDashboardData();
+            refreshMatplotlibImages();
+        });
+    }
+
+    if (bulkFileInput) {
+        bulkFileInput.addEventListener("change", () => {
+            if (bulkFileInput.files && bulkFileInput.files[0]) {
+                const file = bulkFileInput.files[0];
+                if (selectedNotice) {
+                    selectedNotice.innerHTML = `<i class="fa-solid fa-file-csv"></i> Selected File: <strong>${file.name}</strong> (${(file.size / 1024).toFixed(1)} KB)`;
+                    selectedNotice.style.display = "block";
+                }
+                if (btnSubmitBulk) btnSubmitBulk.disabled = false;
+            }
+        });
+    }
+
+    // Drag & Drop
+    if (bulkDropzone) {
+        ["dragenter", "dragover"].forEach(evt => {
+            bulkDropzone.addEventListener(evt, (e) => {
+                e.preventDefault();
+                bulkDropzone.style.borderColor = "var(--royal-600)";
+                bulkDropzone.style.background = "#e0e7ff";
+            });
+        });
+
+        ["dragleave", "drop"].forEach(evt => {
+            bulkDropzone.addEventListener(evt, (e) => {
+                e.preventDefault();
+                bulkDropzone.style.borderColor = "var(--royal-400)";
+                bulkDropzone.style.background = "var(--royal-50)";
+            });
+        });
+
+        bulkDropzone.addEventListener("drop", (e) => {
+            if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+                bulkFileInput.files = e.dataTransfer.files;
+                const file = e.dataTransfer.files[0];
+                if (selectedNotice) {
+                    selectedNotice.innerHTML = `<i class="fa-solid fa-file-csv"></i> Selected File: <strong>${file.name}</strong> (${(file.size / 1024).toFixed(1)} KB)`;
+                    selectedNotice.style.display = "block";
+                }
+                if (btnSubmitBulk) btnSubmitBulk.disabled = false;
+            }
+        });
+    }
+
+    if (bulkForm) {
+        bulkForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            if (!bulkFileInput.files || !bulkFileInput.files[0]) {
+                showToast("Please choose a CSV or Excel file to upload.", "error");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", bulkFileInput.files[0]);
+
+            btnSubmitBulk.disabled = true;
+            btnSubmitBulk.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing Spreadsheet...`;
+
+            try {
+                const res = await fetch("/api/students/bulk-upload", {
+                    method: "POST",
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast(`Successfully processed: ${data.success_count} added, ${data.failed_count} failed.`, data.failed_count > 0 ? "error" : "success");
+                    
+                    if (bulkResultsPanel) {
+                        bulkResultsPanel.style.display = "block";
+                        document.getElementById("bulkTotalParsed").textContent = data.total_records;
+                        document.getElementById("bulkSuccessCount").textContent = data.success_count;
+                        document.getElementById("bulkFailedCount").textContent = data.failed_count;
+
+                        const failedContainer = document.getElementById("bulkFailedContainer");
+                        const failedTbody = document.getElementById("bulkFailedTableBody");
+                        if (data.failed_count > 0) {
+                            failedContainer.style.display = "block";
+                            failedTbody.innerHTML = data.failed_records.map(f => `
+                                <tr>
+                                    <td><strong>Row ${f.row}</strong></td>
+                                    <td><code>${f.roll_no}</code></td>
+                                    <td>${f.name}</td>
+                                    <td><span style="color: var(--rose-600); font-weight: 600;">${f.error}</span></td>
+                                </tr>
+                            `).join("");
+                        } else {
+                            failedContainer.style.display = "none";
+                        }
+                    }
+                } else {
+                    showToast(data.error || "Failed to process bulk upload.", "error");
+                }
+            } catch (err) {
+                showToast("Network error uploading spreadsheet.", "error");
+            } finally {
+                btnSubmitBulk.disabled = false;
+                btnSubmitBulk.innerHTML = `<i class="fa-solid fa-upload"></i> Process &amp; Import Students`;
             }
         });
     }
@@ -922,9 +1524,175 @@ function initModals() {
     window.addEventListener("click", (e) => {
         if (e.target === studentModal) closeStudentModal();
         if (e.target === placementModal) closePlacementModal();
+        if (e.target === editModal) closeEditModal();
+        if (e.target === viewProfileModal) closeViewProfileModal();
+        if (e.target === deleteModal) closeDeleteModal();
+        if (e.target === bulkModal) closeBulkModal();
         if (e.target === imgModal) imgModal.classList.remove("open");
     });
 }
+
+/* ==========================================================================
+   Global Helper Functions for Table Actions (Called inline from rendered HTML)
+   ========================================================================== */
+window.openViewProfileModal = async function(studentId) {
+    try {
+        const res = await fetch(`/api/student/${studentId}`);
+        const data = await res.json();
+        if (!data.success) {
+            showToast(data.error || "Could not fetch student dossier.", "error");
+            return;
+        }
+
+        const s = data.student;
+        document.getElementById("profileStudentName").textContent = s.name;
+        document.getElementById("profileRollAndDept").textContent = `${s.roll_no} • ${s.department}`;
+        document.getElementById("profileEmail").textContent = s.email || `${s.roll_no.toLowerCase()}@eduplace.ac.in`;
+        document.getElementById("profileMobile").textContent = s.mobile || "--";
+        document.getElementById("profileDOB").textContent = s.dob || "--";
+        document.getElementById("profileGender").textContent = s.gender || "--";
+
+        // Badges
+        const isLateral = (s.admission_type && s.admission_type.toLowerCase() === "lateral entry");
+        const admBadge = document.getElementById("profileAdmissionBadge");
+        admBadge.className = isLateral ? "badge-lateral" : "badge-regular";
+        admBadge.innerHTML = isLateral
+            ? `<i class="fa-solid fa-user-graduate"></i> Lateral Entry`
+            : `<i class="fa-solid fa-graduation-cap"></i> Regular`;
+
+        const eligBadge = document.getElementById("profileEligibilityBadge");
+        if (s.placement_eligibility === "Eligible" || s.is_eligible === 1) {
+            eligBadge.className = "kpi-badge badge-success";
+            eligBadge.textContent = "Eligible for Placements";
+        } else if (s.placement_eligibility === "Not Eligible" || s.is_eligible === 0) {
+            eligBadge.className = "kpi-badge badge-warning";
+            eligBadge.style.background = "var(--rose-50)";
+            eligBadge.style.color = "var(--rose-600)";
+            eligBadge.textContent = "Ineligible (Academic Criteria)";
+        } else {
+            eligBadge.className = "kpi-badge badge-secondary";
+            eligBadge.textContent = "Pending Eligibility";
+        }
+
+        const placeBadge = document.getElementById("profilePlacementBadge");
+        const isPlaced = (s.total_offers > 0 || s.placement_status === "Placed");
+        placeBadge.className = isPlaced ? "status-pill status-placed" : "status-pill status-unplaced";
+        placeBadge.textContent = isPlaced ? "Placed" : (s.placement_status || "Unplaced");
+
+        // Academic Stats
+        document.getElementById("profileCGPA").textContent = Number(s.cgpa).toFixed(2);
+        document.getElementById("profileBacklogs").textContent = s.backlogs !== undefined ? s.backlogs : 0;
+        document.getElementById("profileYear").textContent = s.year_of_study || "4th Year";
+        document.getElementById("profileSection").textContent = s.section || "A";
+        document.getElementById("profileAcademicYear").textContent = s.academic_year || "2024-2025";
+        document.getElementById("profileGradYear").textContent = s.graduation_year || 2025;
+
+        // Lateral Entry Card
+        const lateralCard = document.getElementById("profileLateralCard");
+        if (isLateral) {
+            lateralCard.style.display = "block";
+            document.getElementById("profileDiplomaQual").textContent = s.diploma_qualification || "Diploma in " + s.department;
+            document.getElementById("profileDiplomaPct").textContent = s.diploma_percentage ? `${s.diploma_percentage}%` : "--%";
+            document.getElementById("profileDiplomaCollege").textContent = s.diploma_college || "Polytechnic Institute";
+            document.getElementById("profileAdmYear").textContent = s.admission_year || 2022;
+        } else {
+            lateralCard.style.display = "none";
+        }
+
+        // Offers Table
+        const offersCountBadge = document.getElementById("profileOffersCountBadge");
+        offersCountBadge.textContent = `${s.total_offers} Offer(s) • Highest: ${s.highest_package > 0 ? s.highest_package + ' LPA' : '--'}`;
+
+        const offersBody = document.getElementById("profileOffersTableBody");
+        if (s.offers && s.offers.length > 0) {
+            offersBody.innerHTML = s.offers.map(o => `
+                <tr>
+                    <td><strong>${o.company}</strong></td>
+                    <td>${o.role}</td>
+                    <td><strong style="color: var(--emerald-600);">${o.package} LPA</strong></td>
+                    <td>${o.placement_date || '--'}</td>
+                    <td><span class="status-pill status-placed">${o.status}</span></td>
+                </tr>
+            `).join("");
+        } else {
+            offersBody.innerHTML = `<tr><td colspan="5" class="text-center" style="padding: 1rem; color: var(--slate-500);">No placement offers recorded yet.</td></tr>`;
+        }
+
+        // Skills Tags
+        const skillsContainer = document.getElementById("profileSkillsTags");
+        if (s.skills && s.skills.length > 0) {
+            skillsContainer.innerHTML = s.skills.map(sk => `<span class="kpi-badge badge-primary" style="font-size: 0.8rem; padding: 0.25rem 0.65rem;">${sk}</span>`).join("");
+        } else {
+            skillsContainer.innerHTML = `<span style="font-size: 0.8rem; color: var(--slate-500);">No specific technical skills recorded.</span>`;
+        }
+
+        document.getElementById("viewProfileModal").classList.add("open");
+    } catch (e) {
+        showToast("Error loading student dossier.", "error");
+    }
+};
+
+window.openEditStudentModal = async function(studentId) {
+    try {
+        const res = await fetch(`/api/student/${studentId}`);
+        const data = await res.json();
+        if (!data.success) {
+            showToast(data.error || "Could not fetch student details.", "error");
+            return;
+        }
+
+        const s = data.student;
+        document.getElementById("editStudentId").value = s.student_id;
+        document.getElementById("editStudentRollNo").value = s.roll_no;
+        document.getElementById("editStudentName").value = s.name;
+        document.getElementById("editAdmissionType").value = s.admission_type || "Regular";
+        document.getElementById("editStudentDept").value = s.department;
+        document.getElementById("editYearOfStudy").value = s.year_of_study || "4th Year";
+        document.getElementById("editSection").value = s.section || "A";
+        document.getElementById("editEmail").value = s.email || "";
+        document.getElementById("editMobile").value = s.mobile || "";
+        document.getElementById("editDOB").value = s.dob || "2003-05-15";
+        document.getElementById("editGender").value = s.gender || "Male";
+        document.getElementById("editCGPA").value = s.cgpa;
+        document.getElementById("editBacklogs").value = s.backlogs !== undefined ? s.backlogs : 0;
+        document.getElementById("editPlacementEligibility").value = s.placement_eligibility || (s.is_eligible === 1 ? "Eligible" : "Not Eligible");
+        document.getElementById("editPlacementStatus").value = s.placement_status || (s.total_offers > 0 ? "Placed" : "Unplaced");
+
+        // Lateral entry
+        document.getElementById("editDiplomaQual").value = s.diploma_qualification || "";
+        document.getElementById("editDiplomaPct").value = s.diploma_percentage || "";
+        document.getElementById("editDiplomaCollege").value = s.diploma_college || "";
+        document.getElementById("editAdmissionYear").value = s.admission_year || (s.admission_type === "Lateral Entry" ? 2022 : 2021);
+
+        document.getElementById("editStudentModal").classList.add("open");
+    } catch (e) {
+        showToast("Error opening edit form.", "error");
+    }
+};
+
+window.openQuickPlacementModal = function(studentId) {
+    const placementModal = document.getElementById("placementModal");
+    const selectStudent = document.getElementById("selectStudent");
+    if (selectStudent) {
+        selectStudent.value = studentId;
+    }
+    if (placementModal) {
+        placementModal.classList.add("open");
+        placementModal.setAttribute("aria-hidden", "false");
+    }
+};
+
+window.openDeleteStudentModal = function(studentId) {
+    const s = cachedStudents.find(x => x.student_id === studentId);
+    if (!s) return;
+
+    document.getElementById("deleteStudentId").value = studentId;
+    document.getElementById("deleteStudentRoll").textContent = s.roll_no;
+    document.getElementById("deleteStudentName").textContent = s.name;
+    document.getElementById("deleteStudentOffersCount").textContent = s.total_offers || 0;
+
+    document.getElementById("deleteStudentModal").classList.add("open");
+};
 
 function openImageModal(imgSrc, title) {
     const imgModal = document.getElementById("imageModal");

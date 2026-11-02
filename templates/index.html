@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduPlace | Student Placement Data Analysis System</title>
-    <meta name="description" content="Intermediate-level Student Placement Analytics System visualizing placement rates, department comparisons, salary distributions, and skill demand.">
+    <title>Faculty Dashboard | EduPlace University</title>
+    <meta name="description" content="Executive Faculty and Academic Management Dashboard for Student Placement Analytics, Attendance, Marks, and Departmental Performance.">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,572 +13,866 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <!-- Custom Vanilla CSS -->
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
-    <div class="app-layout" id="appLayout">
-        <!-- Top Navigation Bar -->
-        <header class="top-nav" id="topNav">
-            <div class="nav-brand">
-                <div class="brand-icon">
-                    <i class="fa-solid fa-graduation-cap"></i>
+    <div class="portal-layout">
+        <!-- ================= LEFT SIDEBAR NAVIGATION ================= -->
+        <aside class="portal-sidebar" id="facultySidebar">
+            <!-- Sidebar University Branding -->
+            <div class="sidebar-brand">
+                <div class="brand-crest">
+                    <i class="fa-solid fa-building-columns"></i>
                 </div>
-                <div class="brand-details">
-                    <h1>EduPlace Analytics</h1>
-                    <span class="brand-tagline">Student Placement Data Analysis System</span>
+                <div class="brand-info">
+                    <h2>EduPlace University</h2>
+                    <span>Faculty Portal</span>
                 </div>
             </div>
 
-            <div class="nav-actions">
-                <div class="cohort-badge" id="cohortBadge">
-                    <i class="fa-solid fa-calendar-check"></i>
-                    <span>Cohort: <strong>2025</strong></span>
+            <!-- Faculty Profile Widget -->
+            <div class="sidebar-profile">
+                <div class="profile-avatar avatar-faculty">
+                    <i class="fa-solid fa-user-tie"></i>
                 </div>
-                <button type="button" class="btn btn-secondary" id="btnSeedData" title="Reset & populate fictional dataset">
-                    <i class="fa-solid fa-arrows-rotate"></i>
-                    <span>Re-Seed Data</span>
-                </button>
-                <a href="/reports/download" class="btn btn-primary" id="btnDownloadReport" download>
-                    <i class="fa-solid fa-file-arrow-down"></i>
-                    <span>Download Report</span>
+                <div class="profile-details">
+                    <span class="profile-name" title="{{ faculty.name }}">{{ faculty.name }}</span>
+                    <span class="profile-meta">{{ faculty.department }}</span>
+                    <span class="role-pill role-faculty">{{ faculty.faculty_code }} &bull; FACULTY</span>
+                </div>
+            </div>
+
+            <!-- Sidebar Nav Links -->
+            <nav class="sidebar-nav" aria-label="Faculty Portal Menu">
+                <div class="nav-category-label">Academic &amp; Core</div>
+                <ul class="nav-menu-list">
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn active" data-target="view-overview">
+                            <i class="fa-solid fa-chart-pie"></i>
+                            <span>Dashboard Overview</span>
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-students">
+                            <i class="fa-solid fa-users"></i>
+                            <span>Student Management</span>
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-attendance">
+                            <i class="fa-solid fa-clipboard-user"></i>
+                            <span>Attendance Records</span>
+                            {% if academic.low_attendance_students|length > 0 %}
+                                <span class="nav-item-badge" style="background: var(--rose-600);">{{ academic.low_attendance_students|length }} Alert</span>
+                            {% endif %}
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-marks">
+                            <i class="fa-solid fa-award"></i>
+                            <span>Marks &amp; Performance</span>
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-assignments">
+                            <i class="fa-solid fa-book-open-reader"></i>
+                            <span>Assignments &amp; Notes</span>
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-announcements">
+                            <i class="fa-solid fa-bullhorn"></i>
+                            <span>Announcements</span>
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="nav-category-label" style="margin-top: 0.8rem;">Placement &amp; Reports</div>
+                <ul class="nav-menu-list">
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-placements">
+                            <i class="fa-solid fa-file-signature"></i>
+                            <span>Placement Records</span>
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-departments">
+                            <i class="fa-solid fa-sitemap"></i>
+                            <span>Department Analytics</span>
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-packages">
+                            <i class="fa-solid fa-money-bill-trend-up"></i>
+                            <span>Salary &amp; Packages</span>
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-skills">
+                            <i class="fa-solid fa-code"></i>
+                            <span>Skill Demand Matrix</span>
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-charts">
+                            <i class="fa-solid fa-chart-column"></i>
+                            <span>Matplotlib Visuals</span>
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Sidebar Logout -->
+            <div class="sidebar-footer">
+                <a href="/logout" class="sidebar-logout-btn" title="Sign out of faculty session">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span>Log Out</span>
                 </a>
             </div>
-        </header>
+        </aside>
 
-        <!-- Secondary Navigation / Tabs -->
-        <nav class="navigation-bar" id="navigationBar" aria-label="Main Navigation">
-            <ul class="nav-tabs" role="tablist">
-                <li class="nav-item" role="presentation">
-                    <button type="button" class="tab-link active" id="tab-overview" data-target="view-overview" role="tab" aria-selected="true">
-                        <i class="fa-solid fa-chart-pie"></i>
-                        <span>Overview</span>
+        <!-- ================= MAIN CONTENT WRAPPER ================= -->
+        <div class="portal-main-wrapper">
+            <!-- Top Navigation Bar -->
+            <header class="portal-topbar">
+                <div class="topbar-left">
+                    <button type="button" class="sidebar-toggle-btn" id="btnToggleSidebar" aria-label="Toggle Navigation">
+                        <i class="fa-solid fa-bars"></i>
                     </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button type="button" class="tab-link" id="tab-departments" data-target="view-departments" role="tab" aria-selected="false">
-                        <i class="fa-solid fa-building-columns"></i>
-                        <span>Department Analysis</span>
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button type="button" class="tab-link" id="tab-packages" data-target="view-packages" role="tab" aria-selected="false">
-                        <i class="fa-solid fa-money-bill-trend-up"></i>
-                        <span>Package & Salary</span>
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button type="button" class="tab-link" id="tab-skills" data-target="view-skills" role="tab" aria-selected="false">
-                        <i class="fa-solid fa-code"></i>
-                        <span>Skill Demand</span>
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button type="button" class="tab-link" id="tab-students" data-target="view-students" role="tab" aria-selected="false">
-                        <i class="fa-solid fa-user-graduate"></i>
-                        <span>Students & Placements</span>
-                    </button>
-                </li>
-                <li class="nav-item" role="presentation">
-                    <button type="button" class="tab-link" id="tab-charts" data-target="view-charts" role="tab" aria-selected="false">
-                        <i class="fa-solid fa-chart-line"></i>
-                        <span>Matplotlib Visuals</span>
-                    </button>
-                </li>
-            </ul>
-        </nav>
+                    <div class="topbar-breadcrumbs">
+                        <span>University Portal</span>
+                        <i class="fa-solid fa-chevron-right" style="font-size: 0.65rem;"></i>
+                        <span class="active-crumb" id="activeBreadcrumb">Dashboard Overview</span>
+                    </div>
+                </div>
 
-        <!-- Main Content Views Container -->
-        <main class="main-content" id="mainContent">
+                <div class="topbar-right">
+                    <div class="topbar-action-group">
+                        <div class="topbar-badge" title="Active graduation cohort">
+                            <i class="fa-solid fa-calendar-check"></i>
+                            <span>Cohort <strong>2025</strong></span>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm" id="btnSeedData" title="Reset &amp; populate fictional records">
+                            <i class="fa-solid fa-arrows-rotate"></i>
+                            <span>Re-Seed Data</span>
+                        </button>
+                        <a href="/reports/download" class="btn btn-primary btn-sm" id="btnDownloadReport" download>
+                            <i class="fa-solid fa-file-arrow-down"></i>
+                            <span>Download Report</span>
+                        </a>
+                        <button type="button" class="btn btn-navy btn-sm" id="btnOpenAnnounceModal">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Post Notice</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
 
-            <!-- ================= VIEW 1: OVERVIEW DASHBOARD ================= -->
-            <section class="tab-view active" id="view-overview" role="tabpanel" aria-labelledby="tab-overview">
-                <!-- KPI Cards Row -->
-                <div class="kpi-grid">
-                    <!-- Placement Rate Card -->
-                    <div class="kpi-card highlight-card">
-                        <div class="kpi-header">
-                            <span class="kpi-title">Official Placement Rate</span>
-                            <div class="kpi-icon-pill green-pill">
-                                <i class="fa-solid fa-percent"></i>
+            <!-- Main Content Container with Tabs -->
+            <main class="portal-content-container">
+
+                <!-- ================= TAB 1: DASHBOARD OVERVIEW ================= -->
+                <section class="tab-view active" id="view-overview">
+                    <div class="view-header-strip">
+                        <div>
+                            <h1>Executive Academic &amp; Placement Overview</h1>
+                            <p>Real-time university cohort metrics, placement ratios, and performance analytics.</p>
+                        </div>
+                    </div>
+
+                    <!-- KPI Cards Grid -->
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-card-header">
+                                <span class="kpi-title">Official Placement Rate</span>
+                                <div class="kpi-icon-pill pill-emerald">
+                                    <i class="fa-solid fa-percent"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value-row">
+                                <span class="kpi-number" id="kpiPlacementRate">--%</span>
+                                <span class="kpi-badge badge-success">Target &gt;75%</span>
+                            </div>
+                            <p class="kpi-subtext">
+                                <i class="fa-solid fa-circle-info"></i> Denominator: <strong id="kpiEligibleDenominator">--</strong> eligible students
+                            </p>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-card-header">
+                                <span class="kpi-title">Placed Candidates &amp; Offers</span>
+                                <div class="kpi-icon-pill pill-royal">
+                                    <i class="fa-solid fa-user-check"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value-row">
+                                <span class="kpi-number" id="kpiUniquePlaced">--</span>
+                                <span class="kpi-subtext">/ <span id="kpiTotalOffers">--</span> Offers</span>
+                            </div>
+                            <p class="kpi-subtext">
+                                <i class="fa-solid fa-copy"></i> <span id="kpiDuplicateOffers">--</span> duplicate offers handled
+                            </p>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-card-header">
+                                <span class="kpi-title">Average Package (LPA)</span>
+                                <div class="kpi-icon-pill pill-indigo">
+                                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value-row">
+                                <span class="kpi-number" id="kpiAvgPackage">-- LPA</span>
+                                <span class="kpi-subtext">Median: <strong id="kpiMedianPackage">-- LPA</strong></span>
+                            </div>
+                            <p class="kpi-subtext">
+                                <i class="fa-solid fa-arrow-up-right-dots"></i> Highest Offer: <strong id="kpiMaxPackage">-- LPA</strong>
+                            </p>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-card-header">
+                                <span class="kpi-title">Cohort Size &amp; Eligibility</span>
+                                <div class="kpi-icon-pill pill-amber">
+                                    <i class="fa-solid fa-filter-circle-dollar"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value-row">
+                                <span class="kpi-number" id="kpiEligibleCount">--</span>
+                                <span class="kpi-subtext">/ <span id="kpiTotalEnrolled">--</span> Enrolled</span>
+                            </div>
+                            <p class="kpi-subtext">
+                                <i class="fa-solid fa-triangle-exclamation"></i> <span id="kpiIneligibleCount">--</span> Ineligible (CGPA &lt; 6.0 / Backlogs)
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Charts Row 1 -->
+                    <div class="charts-grid-2col">
+                        <div class="white-card">
+                            <div class="white-card-header">
+                                <h3><i class="fa-solid fa-chart-column"></i> Department Placement Rates (%)</h3>
+                                <span class="card-subtitle">Eligible Student Outcomes by Branch</span>
+                            </div>
+                            <div class="white-card-body">
+                                <div class="canvas-wrap">
+                                    <canvas id="chartDeptRate"></canvas>
+                                </div>
                             </div>
                         </div>
-                        <div class="kpi-value-row">
-                            <span class="kpi-number" id="kpiPlacementRate">--%</span>
-                            <span class="kpi-badge badge-success">Target: &gt;75%</span>
-                        </div>
-                        <p class="kpi-caption" id="kpiPlacementFormula">
-                            <i class="fa-solid fa-circle-info"></i> Denominator: Eligible Cohort (<span id="kpiEligibleDenominator">--</span> students)
-                        </p>
-                    </div>
 
-                    <!-- Unique Placed & Duplicate Handling Card -->
-                    <div class="kpi-card">
-                        <div class="kpi-header">
-                            <span class="kpi-title">Placed Candidates & Offers</span>
-                            <div class="kpi-icon-pill blue-pill">
-                                <i class="fa-solid fa-user-check"></i>
+                        <div class="white-card">
+                            <div class="white-card-header">
+                                <h3><i class="fa-solid fa-chart-pie"></i> Placement Cohort Breakdown</h3>
+                                <span class="card-subtitle">Placed vs Unplaced Eligible vs Ineligible</span>
+                            </div>
+                            <div class="white-card-body">
+                                <div class="canvas-wrap">
+                                    <canvas id="chartCohortStatus"></canvas>
+                                </div>
                             </div>
                         </div>
-                        <div class="kpi-value-row">
-                            <span class="kpi-number" id="kpiUniquePlaced">--</span>
-                            <span class="kpi-subtext">/ <span id="kpiTotalOffers">--</span> Offers</span>
-                        </div>
-                        <p class="kpi-caption" id="kpiDuplicatesInfo">
-                            <i class="fa-solid fa-copy"></i> <span id="kpiDuplicateOffers">--</span> duplicate offers handled cleanly
-                        </p>
                     </div>
 
-                    <!-- Average & Median Package Card -->
-                    <div class="kpi-card">
-                        <div class="kpi-header">
-                            <span class="kpi-title">Average Package (LPA)</span>
-                            <div class="kpi-icon-pill purple-pill">
-                                <i class="fa-solid fa-indian-rupee-sign"></i>
+                    <!-- Interactive Charts Row 2 -->
+                    <div class="charts-grid-2col">
+                        <div class="white-card">
+                            <div class="white-card-header">
+                                <h3><i class="fa-solid fa-layer-group"></i> Placement Salary Tiers</h3>
+                                <span class="card-subtitle">Super Dream (&gt;15 LPA) to Entry Tiers</span>
+                            </div>
+                            <div class="white-card-body">
+                                <div class="canvas-wrap">
+                                    <canvas id="chartSalaryTiers"></canvas>
+                                </div>
                             </div>
                         </div>
-                        <div class="kpi-value-row">
-                            <span class="kpi-number" id="kpiAvgPackage">-- LPA</span>
-                            <span class="kpi-subtext">Median: <strong id="kpiMedianPackage">-- LPA</strong></span>
-                        </div>
-                        <p class="kpi-caption">
-                            <i class="fa-solid fa-arrow-up-right-dots"></i> Top Offer: <strong id="kpiMaxPackage">-- LPA</strong>
-                        </p>
-                    </div>
 
-                    <!-- Eligibility & Denominator Card -->
-                    <div class="kpi-card">
-                        <div class="kpi-header">
-                            <span class="kpi-title">Cohort Eligibility</span>
-                            <div class="kpi-icon-pill amber-pill">
-                                <i class="fa-solid fa-filter-circle-dollar"></i>
+                        <div class="white-card">
+                            <div class="white-card-header">
+                                <h3><i class="fa-solid fa-bolt"></i> Top Skills in Demand</h3>
+                                <span class="card-subtitle">Count of Placed Students by Key Skill</span>
+                            </div>
+                            <div class="white-card-body">
+                                <div class="canvas-wrap">
+                                    <canvas id="chartTopSkills"></canvas>
+                                </div>
                             </div>
                         </div>
-                        <div class="kpi-value-row">
-                            <span class="kpi-number" id="kpiEligibleCount">--</span>
-                            <span class="kpi-subtext">Eligible / <span id="kpiTotalEnrolled">--</span> Enrolled</span>
-                        </div>
-                        <p class="kpi-caption">
-                            <i class="fa-solid fa-triangle-exclamation"></i> <span id="kpiIneligibleCount">--</span> Ineligible (CGPA &lt; 6.0 / backlogs)
-                        </p>
                     </div>
-                </div>
+                </section>
 
-                <!-- Interactive Charts Row -->
-                <div class="charts-grid-2col">
-                    <div class="glass-card chart-container">
-                        <div class="card-header">
-                            <h3><i class="fa-solid fa-chart-column"></i> Department Placement Rates (%)</h3>
-                            <span class="card-subtitle">Eligible Student Outcomes by Department</span>
+                <!-- ================= TAB 2: STUDENT MANAGEMENT ================= -->
+                <section class="tab-view" id="view-students">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Student Roster &amp; Profiles Directory</h2>
+                            <p>Manage enrolled students, inspect eligibility status, and enroll new candidates.</p>
                         </div>
-                        <div class="canvas-wrap">
-                            <canvas id="chartDeptRate"></canvas>
+                        <div style="display: flex; gap: 0.6rem;">
+                            <button type="button" class="btn btn-primary" id="btnOpenStudentModal">
+                                <i class="fa-solid fa-user-plus"></i>
+                                <span>Add New Student</span>
+                            </button>
                         </div>
                     </div>
 
-                    <div class="glass-card chart-container">
-                        <div class="card-header">
-                            <h3><i class="fa-solid fa-chart-pie"></i> Placement Cohort Breakdown</h3>
-                            <span class="card-subtitle">Placed vs Unplaced Eligible vs Ineligible</span>
-                        </div>
-                        <div class="canvas-wrap">
-                            <canvas id="chartCohortStatus"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Second Charts Row: Salary Tiers & Top Skills -->
-                <div class="charts-grid-2col">
-                    <div class="glass-card chart-container">
-                        <div class="card-header">
-                            <h3><i class="fa-solid fa-layer-group"></i> Placement Salary Tiers</h3>
-                            <span class="card-subtitle">Super Dream (&gt;15 LPA) to Entry Tiers</span>
-                        </div>
-                        <div class="canvas-wrap">
-                            <canvas id="chartSalaryTiers"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="glass-card chart-container">
-                        <div class="card-header">
-                            <h3><i class="fa-solid fa-bolt"></i> Top Skills in Demand</h3>
-                            <span class="card-subtitle">Count of Placed Students by Key Skill</span>
-                        </div>
-                        <div class="canvas-wrap">
-                            <canvas id="chartTopSkills"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ================= VIEW 2: DEPARTMENT COMPARISON ================= -->
-            <section class="tab-view" id="view-departments" role="tabpanel" aria-labelledby="tab-departments">
-                <div class="view-header">
-                    <div>
-                        <h2>Department-Wise Placement Analytics</h2>
-                        <p class="view-description">
-                            Comparative evaluation of placement outcomes across academic branches. Denominators strictly consider eligible candidates only.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Department Cards Grid -->
-                <div class="department-cards-grid" id="deptCardsGrid">
-                    <!-- Populated dynamically via JS -->
-                </div>
-
-                <!-- Comprehensive Department Comparison Table -->
-                <div class="glass-card table-container">
-                    <div class="card-header">
-                        <h3><i class="fa-solid fa-table-list"></i> Department Summary Table</h3>
-                        <span class="unit-tag">Units: Package in LPA (INR)</span>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="data-table" id="departmentTable">
-                            <thead>
-                                <tr>
-                                    <th>Department</th>
-                                    <th>Enrolled</th>
-                                    <th>Eligible (Denominator)</th>
-                                    <th>Placed Students</th>
-                                    <th>Placement Rate</th>
-                                    <th>Total Offers</th>
-                                    <th>Avg Package</th>
-                                    <th>Max Package</th>
-                                    <th>Min Package</th>
-                                </tr>
-                            </thead>
-                            <tbody id="departmentTableBody">
-                                <tr><td colspan="9" class="text-center">Loading department data...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ================= VIEW 3: PACKAGE & SALARY METRICS ================= -->
-            <section class="tab-view" id="view-packages" role="tabpanel" aria-labelledby="tab-packages">
-                <div class="view-header">
-                    <div>
-                        <h2>Compensation & Package Distribution</h2>
-                        <p class="view-description">
-                            Statistical metrics computed via NumPy (Mean, Median, Standard Deviation, Percentiles, and Interquartile Range).
-                        </p>
-                    </div>
-                    <div class="unit-badge">
-                        <i class="fa-solid fa-circle-check"></i> Standard Unit: <strong>LPA (Lakhs Per Annum)</strong>
-                    </div>
-                </div>
-
-                <!-- Statistical Metric Cards -->
-                <div class="stat-boxes-grid" id="salaryStatBoxes">
-                    <!-- Dynamic Stat Boxes -->
-                </div>
-
-                <div class="charts-grid-2col">
-                    <div class="glass-card chart-container">
-                        <div class="card-header">
-                            <h3><i class="fa-solid fa-chart-area"></i> Package Distribution Curve (LPA)</h3>
-                            <span class="card-subtitle">Frequency density across salary bands</span>
-                        </div>
-                        <div class="canvas-wrap">
-                            <canvas id="chartPackageDistCurve"></canvas>
+                    <!-- Search & Filter Controls -->
+                    <div class="white-card" style="margin-bottom: 1.25rem;">
+                        <div class="white-card-body" style="padding: 1rem 1.25rem;">
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                                <div style="flex: 1; min-width: 220px;">
+                                    <input type="text" id="studentSearchInput" class="form-control" placeholder="Search by student name, roll number, or company...">
+                                </div>
+                                <div style="min-width: 180px;">
+                                    <select id="filterDepartment" class="form-select">
+                                        <option value="ALL">All Departments</option>
+                                        <option value="Computer Science">Computer Science</option>
+                                        <option value="Information Technology">Information Technology</option>
+                                        <option value="Electronics &amp; Comm">Electronics &amp; Comm</option>
+                                        <option value="Mechanical Engg">Mechanical Engg</option>
+                                        <option value="Civil Engg">Civil Engg</option>
+                                    </select>
+                                </div>
+                                <div style="min-width: 150px;">
+                                    <select id="filterStatus" class="form-select">
+                                        <option value="ALL">All Statuses</option>
+                                        <option value="Placed">Placed</option>
+                                        <option value="Unplaced">Unplaced</option>
+                                        <option value="Eligible">Eligible Only</option>
+                                        <option value="Ineligible">Ineligible Only</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="glass-card">
-                        <div class="card-header">
-                            <h3><i class="fa-solid fa-building"></i> Top Recruiting Companies</h3>
-                            <span class="card-subtitle">Average compensation & offer counts</span>
+                    <!-- Student Table Card -->
+                    <div class="white-card">
+                        <div class="white-card-header">
+                            <h3><i class="fa-solid fa-users"></i> Enrolled Students (<span id="filteredStudentCount">0</span> records)</h3>
+                            <span class="card-subtitle">Active Cohort Records</span>
                         </div>
-                        <div class="table-responsive" style="max-height: 380px;">
-                            <table class="data-table" id="companiesTable">
+                        <div class="table-responsive">
+                            <table class="data-table" id="studentsTable">
                                 <thead>
                                     <tr>
-                                        <th>Company</th>
+                                        <th>ID</th>
+                                        <th>Roll Number</th>
+                                        <th>Student Name</th>
+                                        <th>Department</th>
+                                        <th>CGPA</th>
+                                        <th>Eligibility</th>
+                                        <th>Placement</th>
                                         <th>Offers</th>
-                                        <th>Avg Package (LPA)</th>
-                                        <th>Max Package (LPA)</th>
+                                        <th>Top Offer</th>
+                                        <th>Companies</th>
+                                        <th>Skills</th>
                                     </tr>
                                 </thead>
-                                <tbody id="companiesTableBody">
-                                    <!-- Populated dynamically -->
+                                <tbody id="studentsTableBody">
+                                    <tr><td colspan="11" class="text-center" style="padding: 2rem;">Loading student database records...</td></tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            <!-- ================= VIEW 4: SKILL DEMAND ================= -->
-            <section class="tab-view" id="view-skills" role="tabpanel" aria-labelledby="tab-skills">
-                <div class="view-header">
-                    <div>
-                        <h2>Skill Demand & Market Value Analysis</h2>
-                        <p class="view-description">
-                            Examines which technical competencies correlate with higher placement rates and top compensation packages.
-                        </p>
+                <!-- ================= TAB 3: ATTENDANCE MANAGEMENT ================= -->
+                <section class="tab-view" id="view-attendance">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Cohort Attendance Records &amp; Academic Alerts</h2>
+                            <p>Monitor class attendance, examine course attendance compliance, and track low-attendance candidates.</p>
+                        </div>
                     </div>
-                    <div class="search-box">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" id="skillSearchInput" placeholder="Filter skills (e.g., Python, AWS)..." aria-label="Filter skills">
-                    </div>
-                </div>
 
-                <!-- Skill Cards Cloud -->
-                <div class="skill-tags-cloud" id="skillTagsCloud">
-                    <!-- Dynamic skill tags -->
-                </div>
+                    <!-- Attendance KPI Row -->
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-card-header">
+                                <span class="kpi-title">University Attendance Standard</span>
+                                <div class="kpi-icon-pill pill-royal">
+                                    <i class="fa-solid fa-graduation-cap"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value-row">
+                                <span class="kpi-number">75.0%</span>
+                                <span class="kpi-badge badge-primary">Minimum Threshold</span>
+                            </div>
+                            <p class="kpi-subtext">Required for exam registration &amp; placement drives</p>
+                        </div>
 
-                <!-- Skill Demand Table -->
-                <div class="glass-card table-container">
-                    <div class="card-header">
-                        <h3><i class="fa-solid fa-list-check"></i> Skill Performance Matrix</h3>
-                        <span class="card-subtitle">Ranked by placement frequency</span>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="data-table" id="skillsTable">
-                            <thead>
-                                <tr>
-                                    <th>Skill Name</th>
-                                    <th>Students Possessing Skill</th>
-                                    <th>Placed Students</th>
-                                    <th>Success Rate (%)</th>
-                                    <th>Average Package (LPA)</th>
-                                    <th>Market Demand Tier</th>
-                                </tr>
-                            </thead>
-                            <tbody id="skillsTableBody">
-                                <tr><td colspan="6" class="text-center">Loading skills matrix...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
+                        <div class="kpi-card">
+                            <div class="kpi-card-header">
+                                <span class="kpi-title">Average Cohort Attendance</span>
+                                <div class="kpi-icon-pill pill-emerald">
+                                    <i class="fa-solid fa-user-check"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value-row">
+                                <span class="kpi-number">84.2%</span>
+                                <span class="kpi-badge badge-success">Good Standing</span>
+                            </div>
+                            <p class="kpi-subtext">Computed across 5 engineering departments</p>
+                        </div>
 
-            <!-- ================= VIEW 5: STUDENTS & PLACEMENTS DIRECTORY ================= -->
-            <section class="tab-view" id="view-students" role="tabpanel" aria-labelledby="tab-students">
-                <div class="view-header">
-                    <div>
-                        <h2>Students & Offers Directory</h2>
-                        <p class="view-description">
-                            Manage student profiles, verify eligibility status, and inspect individual offer records.
-                        </p>
+                        <div class="kpi-card">
+                            <div class="kpi-card-header">
+                                <span class="kpi-title">Low Attendance Alerts</span>
+                                <div class="kpi-icon-pill pill-amber" style="background: var(--rose-50); color: var(--rose-600); border-color: var(--rose-100);">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value-row">
+                                <span class="kpi-number" style="color: var(--rose-600);">{{ academic.low_attendance_students|length }}</span>
+                                <span class="kpi-badge badge-warning" style="background: var(--rose-50); color: var(--rose-600);">Action Needed</span>
+                            </div>
+                            <p class="kpi-subtext">Students below mandatory 75% threshold</p>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-card-header">
+                                <span class="kpi-title">Total Course Modules Tracked</span>
+                                <div class="kpi-icon-pill pill-indigo">
+                                    <i class="fa-solid fa-book-bookmark"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value-row">
+                                <span class="kpi-number">20</span>
+                                <span class="kpi-subtext">Core &amp; Elective Courses</span>
+                            </div>
+                            <p class="kpi-subtext">Semester 7 active lecture courses</p>
+                        </div>
                     </div>
-                    <div class="header-action-group">
-                        <button type="button" class="btn btn-secondary" id="btnOpenStudentModal">
-                            <i class="fa-solid fa-user-plus"></i>
-                            <span>Add New Student</span>
+
+                    <!-- Low Attendance Warning Table -->
+                    <div class="white-card">
+                        <div class="white-card-header">
+                            <h3><i class="fa-solid fa-triangle-exclamation" style="color: var(--rose-600);"></i> Students Requiring Attendance Intervention (&lt; 75%)</h3>
+                            <span class="card-subtitle">Immediate alert list for academic proctors</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Student ID</th>
+                                        <th>Roll Number</th>
+                                        <th>Student Name</th>
+                                        <th>Department</th>
+                                        <th>Current CGPA</th>
+                                        <th>Overall Attendance</th>
+                                        <th>Academic Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for s in academic.low_attendance_students %}
+                                        <tr>
+                                            <td>#{{ s.student_id }}</td>
+                                            <td><code>{{ s.roll_no }}</code></td>
+                                            <td><strong>{{ s.name }}</strong></td>
+                                            <td>{{ s.department }}</td>
+                                            <td><strong>{{ s.cgpa }}</strong></td>
+                                            <td>
+                                                <span class="status-pill status-danger">
+                                                    <i class="fa-solid fa-arrow-down"></i> {{ s.avg_attendance }}%
+                                                </span>
+                                            </td>
+                                            <td><span class="badge badge-warning">Proctor Notice Issued</span></td>
+                                        </tr>
+                                    {% else %}
+                                        <tr><td colspan="7" class="text-center" style="padding: 1.5rem;">All enrolled students currently meet the minimum 75% attendance criteria.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================= TAB 4: MARKS & PERFORMANCE ================= -->
+                <section class="tab-view" id="view-marks">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Academic Marks &amp; CGPA Performance Analytics</h2>
+                            <p>Evaluates academic grade distribution, internal/external assessments, and top achievers.</p>
+                        </div>
+                    </div>
+
+                    <!-- Marks Summary Grid -->
+                    <div class="charts-grid-2col">
+                        <div class="white-card">
+                            <div class="white-card-header">
+                                <h3><i class="fa-solid fa-medal"></i> Grade Distribution (Semester 7)</h3>
+                                <span class="card-subtitle">Breakdown of student letter grades</span>
+                            </div>
+                            <div class="white-card-body">
+                                <div style="display: flex; justify-content: space-around; text-align: center; padding: 1rem 0;">
+                                    <div>
+                                        <span style="font-size: 2rem; font-weight: 800; color: var(--emerald-600);">{{ academic.grade_distribution.get('O', 0) }}</span>
+                                        <p style="font-size: 0.82rem; font-weight: 700; color: var(--slate-600);">Grade O (&gt;90)</p>
+                                    </div>
+                                    <div>
+                                        <span style="font-size: 2rem; font-weight: 800; color: var(--royal-600);">{{ academic.grade_distribution.get('A+', 0) }}</span>
+                                        <p style="font-size: 0.82rem; font-weight: 700; color: var(--slate-600);">Grade A+ (80-89)</p>
+                                    </div>
+                                    <div>
+                                        <span style="font-size: 2rem; font-weight: 800; color: var(--royal-500);">{{ academic.grade_distribution.get('A', 0) }}</span>
+                                        <p style="font-size: 0.82rem; font-weight: 700; color: var(--slate-600);">Grade A (70-79)</p>
+                                    </div>
+                                    <div>
+                                        <span style="font-size: 2rem; font-weight: 800; color: var(--amber-600);">{{ academic.grade_distribution.get('B+', 0) }}</span>
+                                        <p style="font-size: 0.82rem; font-weight: 700; color: var(--slate-600);">Grade B+ (60-69)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="white-card">
+                            <div class="white-card-header">
+                                <h3><i class="fa-solid fa-graduation-cap"></i> Academic Excellence Standards</h3>
+                                <span class="card-subtitle">Criteria for Placement Eligibility</span>
+                            </div>
+                            <div class="white-card-body" style="font-size: 0.88rem; line-height: 1.6; color: var(--slate-700);">
+                                <p><i class="fa-solid fa-check text-emerald" style="color: var(--emerald-600); margin-right: 6px;"></i> <strong>CGPA &ge; 8.0:</strong> Eligible for Super Dream (&gt;15 LPA) recruitment drives.</p>
+                                <p><i class="fa-solid fa-check text-emerald" style="color: var(--emerald-600); margin-right: 6px;"></i> <strong>CGPA 6.0 - 7.99:</strong> Eligible for Dream and Core industrial placement tracks.</p>
+                                <p><i class="fa-solid fa-circle-exclamation text-amber" style="color: var(--amber-600); margin-right: 6px;"></i> <strong>CGPA &lt; 6.0 or Backlogs:</strong> Placed in academic remediation with special tutoring sessions.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================= TAB 5: ASSIGNMENTS & STUDY MATERIALS ================= -->
+                <section class="tab-view" id="view-assignments">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Course Assignments &amp; Digital Study Materials</h2>
+                            <p>Repository of active course assignments, lab problem statements, and lecture handouts.</p>
+                        </div>
+                    </div>
+
+                    <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--navy-900); margin-bottom: 1rem;">
+                        <i class="fa-solid fa-list-check" style="color: var(--royal-600);"></i> Active Course Assignments
+                    </h3>
+                    <div class="grid-cards-3col" style="margin-bottom: 2rem;">
+                        {% for a in academic.assignments %}
+                            <div class="academic-card">
+                                <div class="academic-card-top">
+                                    <span class="subject-badge">{{ a.department }} &bull; {{ a.subject }}</span>
+                                    <h4 style="margin-top: 0.5rem;">{{ a.title }}</h4>
+                                </div>
+                                <div class="academic-card-bottom">
+                                    <span><i class="fa-regular fa-clock"></i> Due: {{ a.due_date }}</span>
+                                    <span class="status-pill status-eligible">{{ a.status }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--navy-900); margin-bottom: 1rem;">
+                        <i class="fa-solid fa-file-pdf" style="color: var(--royal-600);"></i> Recommended Study Materials &amp; Guides
+                    </h3>
+                    <div class="grid-cards-3col">
+                        {% for m in academic.materials %}
+                            <div class="academic-card">
+                                <div class="academic-card-top">
+                                    <span class="subject-badge">{{ m.department }} &bull; {{ m.subject }}</span>
+                                    <h4 style="margin-top: 0.5rem;">{{ m.title }}</h4>
+                                </div>
+                                <div class="academic-card-bottom">
+                                    <span>{{ m.material_type }} ({{ m.file_size }})</span>
+                                    <a href="#" class="btn btn-secondary btn-sm" onclick="alert('Downloading {{ m.title }}'); return false;">
+                                        <i class="fa-solid fa-download"></i> Download
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <!-- ================= TAB 6: ANNOUNCEMENTS ================= -->
+                <section class="tab-view" id="view-announcements">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>University Announcements &amp; Recruitment Notices</h2>
+                            <p>Official notices broadcast to faculty, proctors, and eligible student cohorts.</p>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="document.getElementById('announceModal').classList.add('open')">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Create New Announcement</span>
                         </button>
+                    </div>
+
+                    <div class="announcements-list">
+                        {% for n in academic.announcements %}
+                            <div class="announcement-item">
+                                <div class="announcement-meta-top">
+                                    <span class="subject-badge">{{ n.category }}</span>
+                                    <span class="announcement-priority priority-{{ n.priority|lower }}">{{ n.priority }} Priority</span>
+                                </div>
+                                <h4>{{ n.title }}</h4>
+                                <p>{{ n.content }}</p>
+                                <div class="announcement-footer">
+                                    <span><i class="fa-solid fa-user-pen"></i> Posted by: <strong>{{ n.author }}</strong></span>
+                                    <span><i class="fa-regular fa-calendar"></i> {{ n.date_posted }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <!-- ================= TAB 7: PLACEMENT RECORDS ================= -->
+                <section class="tab-view" id="view-placements">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Verified Placement Offers &amp; Recruiters</h2>
+                            <p>Log new corporate offers and inspect verified compensation packages.</p>
+                        </div>
                         <button type="button" class="btn btn-primary" id="btnOpenPlacementModal">
                             <i class="fa-solid fa-file-signature"></i>
                             <span>Record Placement Offer</span>
                         </button>
                     </div>
-                </div>
 
-                <!-- Filter & Search Toolbar -->
-                <div class="toolbar-card">
-                    <div class="filter-group">
-                        <label for="filterDepartment">Department:</label>
-                        <select id="filterDepartment" class="form-select">
-                            <option value="ALL">All Departments</option>
-                            <option value="Computer Science">Computer Science</option>
-                            <option value="Information Technology">Information Technology</option>
-                            <option value="Electronics & Comm">Electronics & Comm</option>
-                            <option value="Mechanical Engg">Mechanical Engg</option>
-                            <option value="Civil Engg">Civil Engg</option>
-                        </select>
-                    </div>
-
-                    <div class="filter-group">
-                        <label for="filterStatus">Status:</label>
-                        <select id="filterStatus" class="form-select">
-                            <option value="ALL">All Statuses</option>
-                            <option value="Placed">Placed</option>
-                            <option value="Unplaced">Unplaced</option>
-                            <option value="Eligible">Eligible Only</option>
-                            <option value="Ineligible">Ineligible Only</option>
-                        </select>
-                    </div>
-
-                    <div class="filter-group search-flex">
-                        <label for="studentSearchInput">Search Student:</label>
-                        <div class="search-box">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                            <input type="text" id="studentSearchInput" placeholder="Search by name, roll no, or company..." aria-label="Search student">
+                    <div class="white-card">
+                        <div class="white-card-header">
+                            <h3><i class="fa-solid fa-briefcase"></i> Verified Corporate Placement Offers</h3>
+                            <span class="card-subtitle">Live Recruitment Records</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="companiesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Company Partner</th>
+                                        <th>Total Offers</th>
+                                        <th>Average Package (LPA)</th>
+                                        <th>Maximum Package (LPA)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="companiesTableBody">
+                                    <tr><td colspan="4" class="text-center" style="padding: 2rem;">Loading corporate recruitment metrics...</td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <!-- Students Table -->
-                <div class="glass-card table-container">
-                    <div class="card-header">
-                        <h3><i class="fa-solid fa-users"></i> Student Records (<span id="filteredStudentCount">0</span> found)</h3>
-                        <span class="card-subtitle">Showing active cohort</span>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="data-table" id="studentsTable">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Roll No</th>
-                                    <th>Student Name</th>
-                                    <th>Department</th>
-                                    <th>CGPA</th>
-                                    <th>Eligibility</th>
-                                    <th>Status</th>
-                                    <th>Offers</th>
-                                    <th>Highest Pkg (LPA)</th>
-                                    <th>Companies</th>
-                                    <th>Key Skills</th>
-                                </tr>
-                            </thead>
-                            <tbody id="studentsTableBody">
-                                <tr><td colspan="11" class="text-center">Loading student records...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ================= VIEW 6: MATPLOTLIB VISUALS GALLERY ================= -->
-            <section class="tab-view" id="view-charts" role="tabpanel" aria-labelledby="tab-charts">
-                <div class="view-header">
-                    <div>
-                        <h2>Matplotlib Static Visualizations Gallery</h2>
-                        <p class="view-description">
-                            High-resolution Python Matplotlib charts generated directly from the analysis pipeline and saved on disk.
-                        </p>
-                    </div>
-                    <button type="button" class="btn btn-secondary" id="btnRefreshMatplotlibCharts">
-                        <i class="fa-solid fa-rotate"></i>
-                        <span>Regenerate Figures</span>
-                    </button>
-                </div>
-
-                <div class="gallery-grid">
-                    <div class="gallery-card">
-                        <div class="gallery-card-header">
-                            <h4>Department-Wise Placement Rate</h4>
-                            <span class="badge">Bar Chart</span>
-                        </div>
-                        <div class="gallery-img-wrap" onclick="openImageModal('/charts/department_placement_rate.png', 'Department-Wise Placement Rate')">
-                            <img src="/charts/department_placement_rate.png" alt="Department-Wise Placement Rate Chart" id="imgDeptChart">
-                            <div class="img-overlay"><i class="fa-solid fa-magnifying-glass-plus"></i> View Full Image</div>
+                <!-- ================= TAB 8: DEPARTMENT ANALYTICS ================= -->
+                <section class="tab-view" id="view-departments">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Department-Wise Placement Analytics</h2>
+                            <p>Comparative evaluation across all engineering branches. Denominators consider eligible students only.</p>
                         </div>
                     </div>
 
-                    <div class="gallery-card">
-                        <div class="gallery-card-header">
-                            <h4>Package Distribution & NumPy Metrics</h4>
-                            <span class="badge">Boxplot & Histogram</span>
+                    <div class="white-card">
+                        <div class="white-card-header">
+                            <h3><i class="fa-solid fa-table-list"></i> Academic Branch Performance Matrix</h3>
+                            <span class="card-subtitle">Units: Compensation in LPA (INR)</span>
                         </div>
-                        <div class="gallery-img-wrap" onclick="openImageModal('/charts/package_distribution.png', 'Package Distribution & Metrics')">
-                            <img src="/charts/package_distribution.png" alt="Package Distribution Chart" id="imgPkgChart">
-                            <div class="img-overlay"><i class="fa-solid fa-magnifying-glass-plus"></i> View Full Image</div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="departmentTable">
+                                <thead>
+                                    <tr>
+                                        <th>Department</th>
+                                        <th>Enrolled</th>
+                                        <th>Eligible</th>
+                                        <th>Placed</th>
+                                        <th>Placement Rate</th>
+                                        <th>Offers</th>
+                                        <th>Avg Package</th>
+                                        <th>Max Package</th>
+                                        <th>Min Package</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="departmentTableBody">
+                                    <tr><td colspan="9" class="text-center" style="padding: 2rem;">Loading department data...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================= TAB 9: SALARY & COMPENSATION ================= -->
+                <section class="tab-view" id="view-packages">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Compensation &amp; Salary Distribution</h2>
+                            <p>NumPy statistical computations including Mean, Median, Standard Deviation, and Quartiles.</p>
                         </div>
                     </div>
 
-                    <div class="gallery-card">
-                        <div class="gallery-card-header">
-                            <h4>Top Skills in Demand</h4>
-                            <span class="badge">Horizontal Bar</span>
+                    <div class="white-card">
+                        <div class="white-card-header">
+                            <h3><i class="fa-solid fa-chart-area"></i> Package Density Distribution Curve</h3>
+                            <span class="card-subtitle">Continuous salary frequency across cohorts</span>
                         </div>
-                        <div class="gallery-img-wrap" onclick="openImageModal('/charts/top_skills_demand.png', 'Top Skills in Demand')">
-                            <img src="/charts/top_skills_demand.png" alt="Top Skills in Demand Chart" id="imgSkillChart">
-                            <div class="img-overlay"><i class="fa-solid fa-magnifying-glass-plus"></i> View Full Image</div>
+                        <div class="white-card-body">
+                            <div class="canvas-wrap">
+                                <canvas id="chartPackageDistCurve"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================= TAB 10: SKILL DEMAND ================= -->
+                <section class="tab-view" id="view-skills">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Technical Skill Market Demand Matrix</h2>
+                            <p>Evaluates which technical competencies correlate with higher placement rates and top compensation.</p>
                         </div>
                     </div>
 
-                    <div class="gallery-card">
-                        <div class="gallery-card-header">
-                            <h4>Cohort Placement Status</h4>
-                            <span class="badge">Donut Chart</span>
+                    <div class="white-card">
+                        <div class="white-card-header">
+                            <h3><i class="fa-solid fa-code"></i> Technical Competencies Ranking</h3>
+                            <span class="card-subtitle">Ranked by placement frequency</span>
                         </div>
-                        <div class="gallery-img-wrap" onclick="openImageModal('/charts/placement_status_overview.png', 'Cohort Placement Status Overview')">
-                            <img src="/charts/placement_status_overview.png" alt="Placement Status Donut Chart" id="imgStatusChart">
-                            <div class="img-overlay"><i class="fa-solid fa-magnifying-glass-plus"></i> View Full Image</div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="skillsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Skill Name</th>
+                                        <th>Enrolled with Skill</th>
+                                        <th>Placed Students</th>
+                                        <th>Success Rate (%)</th>
+                                        <th>Average Package (LPA)</th>
+                                        <th>Market Tier</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="skillsTableBody">
+                                    <tr><td colspan="6" class="text-center" style="padding: 2rem;">Loading skill metrics...</td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                </div>
-            </section>
-        </main>
+                </section>
 
-        <!-- Footer -->
-        <footer class="app-footer">
-            <p><strong>Student Placement Data Analysis System</strong> &bull; Intermediate Data Engineering & Analytics Project &bull; Built with Python, Pandas, NumPy, MySQL/SQLite & Vanilla CSS</p>
-        </footer>
+                <!-- ================= TAB 11: MATPLOTLIB VISUALS ================= -->
+                <section class="tab-view" id="view-charts">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Institutional Matplotlib Visuals Gallery</h2>
+                            <p>High-resolution figures generated directly from Python data processing pipeline.</p>
+                        </div>
+                        <button type="button" class="btn btn-secondary" id="btnRefreshMatplotlibCharts">
+                            <i class="fa-solid fa-arrows-rotate"></i>
+                            <span>Regenerate Figures</span>
+                        </button>
+                    </div>
+
+                    <div class="gallery-grid">
+                        <div class="gallery-card">
+                            <div class="gallery-card-header">
+                                <h4>Department-Wise Placement Rate</h4>
+                                <span class="kpi-badge badge-primary">Bar Chart</span>
+                            </div>
+                            <div class="gallery-img-wrap" onclick="openImageModal('/charts/department_placement_rate.png', 'Department Placement Rate')">
+                                <img src="/charts/department_placement_rate.png" alt="Department Placement Rate" id="imgDeptChart">
+                                <div class="img-overlay"><i class="fa-solid fa-magnifying-glass-plus"></i> View Full Chart</div>
+                            </div>
+                        </div>
+
+                        <div class="gallery-card">
+                            <div class="gallery-card-header">
+                                <h4>Package Distribution &amp; Metrics</h4>
+                                <span class="kpi-badge badge-primary">Boxplot &amp; Hist</span>
+                            </div>
+                            <div class="gallery-img-wrap" onclick="openImageModal('/charts/package_distribution.png', 'Package Distribution')">
+                                <img src="/charts/package_distribution.png" alt="Package Distribution" id="imgPkgChart">
+                                <div class="img-overlay"><i class="fa-solid fa-magnifying-glass-plus"></i> View Full Chart</div>
+                            </div>
+                        </div>
+
+                        <div class="gallery-card">
+                            <div class="gallery-card-header">
+                                <h4>Top Skills in Demand</h4>
+                                <span class="kpi-badge badge-primary">Bar Horizontal</span>
+                            </div>
+                            <div class="gallery-img-wrap" onclick="openImageModal('/charts/top_skills_demand.png', 'Top Skills in Demand')">
+                                <img src="/charts/top_skills_demand.png" alt="Top Skills in Demand" id="imgSkillChart">
+                                <div class="img-overlay"><i class="fa-solid fa-magnifying-glass-plus"></i> View Full Chart</div>
+                            </div>
+                        </div>
+
+                        <div class="gallery-card">
+                            <div class="gallery-card-header">
+                                <h4>Cohort Placement Status</h4>
+                                <span class="kpi-badge badge-primary">Donut Chart</span>
+                            </div>
+                            <div class="gallery-img-wrap" onclick="openImageModal('/charts/placement_status_overview.png', 'Cohort Placement Status')">
+                                <img src="/charts/placement_status_overview.png" alt="Cohort Placement Status" id="imgStatusChart">
+                                <div class="img-overlay"><i class="fa-solid fa-magnifying-glass-plus"></i> View Full Chart</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
     </div>
 
     <!-- ================= MODAL: ADD STUDENT ================= -->
     <div class="modal-backdrop" id="studentModal" aria-hidden="true">
-        <div class="modal-card modal-medium" role="dialog" aria-labelledby="studentModalTitle">
+        <div class="modal-card">
             <div class="modal-header">
-                <h3 id="studentModalTitle"><i class="fa-solid fa-user-plus"></i> Add New Student to Cohort</h3>
-                <button type="button" class="btn-close" id="btnCloseStudentModal" aria-label="Close modal">&times;</button>
+                <h3><i class="fa-solid fa-user-plus"></i> Register New Student to Cohort</h3>
+                <button type="button" class="btn-close" id="btnCloseStudentModal">&times;</button>
             </div>
             <form id="addStudentForm">
                 <div class="form-row">
-                    <div class="form-group col-6">
-                        <label for="inputStudentName">Full Name <span class="required">*</span></label>
+                    <div class="col-6">
+                        <label for="inputStudentName">Student Full Name *</label>
                         <input type="text" id="inputStudentName" class="form-control" placeholder="e.g. Aditi Sharma" required>
                     </div>
-                    <div class="form-group col-6">
-                        <label for="inputStudentRollNo">Roll Number <span class="required">*</span></label>
+                    <div class="col-6">
+                        <label for="inputStudentRollNo">Roll Number *</label>
                         <input type="text" id="inputStudentRollNo" class="form-control" placeholder="e.g. CSE2025101" required>
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group col-6">
-                        <label for="selectStudentDept">Department <span class="required">*</span></label>
-                        <select id="selectStudentDept" class="form-control" required>
+                <div class="form-row" style="margin-top: 1rem;">
+                    <div class="col-6">
+                        <label for="selectStudentDept">Department *</label>
+                        <select id="selectStudentDept" class="form-select" required>
                             <option value="Computer Science">Computer Science</option>
                             <option value="Information Technology">Information Technology</option>
-                            <option value="Electronics & Comm">Electronics & Comm</option>
+                            <option value="Electronics &amp; Comm">Electronics &amp; Comm</option>
                             <option value="Mechanical Engg">Mechanical Engg</option>
                             <option value="Civil Engg">Civil Engg</option>
                         </select>
                     </div>
-                    <div class="form-group col-6">
-                        <label for="inputGradYear">Graduation Year <span class="required">*</span></label>
-                        <input type="number" id="inputGradYear" class="form-control" value="2025" min="2020" max="2035" required>
+                    <div class="col-6">
+                        <label for="inputGradYear">Graduation Year *</label>
+                        <input type="number" id="inputGradYear" class="form-control" value="2025" required>
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group col-6">
-                        <label for="inputStudentCGPA">CGPA (0.0 - 10.0) <span class="required">*</span></label>
-                        <input type="number" id="inputStudentCGPA" class="form-control" step="0.01" min="0.0" max="10.0" placeholder="e.g. 8.45" required>
+                <div class="form-row" style="margin-top: 1rem;">
+                    <div class="col-6">
+                        <label for="inputStudentCGPA">CGPA (0.0 - 10.0) *</label>
+                        <input type="number" id="inputStudentCGPA" class="form-control" step="0.01" min="0" max="10" placeholder="e.g. 8.45" required>
                     </div>
-                    <div class="form-group col-6">
-                        <label for="selectStudentEligibility">Eligibility Status <span class="required">*</span></label>
-                        <select id="selectStudentEligibility" class="form-control" required>
-                            <option value="1" selected>Eligible for Placements (CGPA &ge; 6.0, No backlogs)</option>
-                            <option value="0">Ineligible (Active backlogs / Disciplinary criteria)</option>
+                    <div class="col-6">
+                        <label for="selectStudentEligibility">Eligibility Status *</label>
+                        <select id="selectStudentEligibility" class="form-select" required>
+                            <option value="1" selected>Eligible for Placements (CGPA &ge; 6.0)</option>
+                            <option value="0">Ineligible (Backlogs / Academic criteria)</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="form-group">
+                <div style="margin-top: 1rem;">
                     <label>Assign Student Skills</label>
                     <div class="skills-select-grid" id="modalSkillsCheckboxGrid">
-                        <!-- Populated dynamically via JS -->
-                    </div>
-                    <div class="custom-skill-input-row">
-                        <input type="text" id="inputCustomSkill" class="form-control" placeholder="Type new skill and click Add...">
-                        <button type="button" class="btn btn-secondary" id="btnAddCustomSkill">
-                            <i class="fa-solid fa-plus"></i> Add Skill
-                        </button>
+                        <!-- Populated dynamically -->
                     </div>
                 </div>
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" id="btnCancelStudentModal">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="btnSubmitStudent">
-                        <i class="fa-solid fa-check"></i> Register Student
-                    </button>
+                    <button type="submit" class="btn btn-primary" id="btnSubmitStudent">Save Student Record</button>
                 </div>
             </form>
         </div>
@@ -586,77 +880,200 @@
 
     <!-- ================= MODAL: RECORD PLACEMENT ================= -->
     <div class="modal-backdrop" id="placementModal" aria-hidden="true">
-        <div class="modal-card" role="dialog" aria-labelledby="modalTitle">
+        <div class="modal-card">
             <div class="modal-header">
-                <h3 id="modalTitle"><i class="fa-solid fa-file-signature"></i> Record Placement Offer</h3>
-                <button type="button" class="btn-close" id="btnClosePlacementModal" aria-label="Close modal">&times;</button>
+                <h3><i class="fa-solid fa-file-signature"></i> Record Corporate Placement Offer</h3>
+                <button type="button" class="btn-close" id="btnClosePlacementModal">&times;</button>
             </div>
             <form id="recordPlacementForm">
-                <div class="form-group">
-                    <label for="selectStudent">Select Student <span class="required">*</span></label>
-                    <select id="selectStudent" class="form-control" required>
+                <div class="form-group-clean">
+                    <label for="selectStudent">Select Eligible Student *</label>
+                    <select id="selectStudent" class="form-select" required>
                         <option value="">-- Choose Eligible Student --</option>
                     </select>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group col-6">
-                        <label for="inputCompany">Company Name <span class="required">*</span></label>
+                <div class="form-row" style="margin-top: 1rem;">
+                    <div class="col-6">
+                        <label for="inputCompany">Recruiting Company *</label>
                         <input type="text" id="inputCompany" class="form-control" placeholder="e.g. Google, Microsoft" required>
                     </div>
-                    <div class="form-group col-6">
-                        <label for="inputRole">Job Role <span class="required">*</span></label>
+                    <div class="col-6">
+                        <label for="inputRole">Job Role Title *</label>
                         <input type="text" id="inputRole" class="form-control" placeholder="e.g. Software Engineer" required>
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group col-6">
-                        <label for="inputPackage">Package (in LPA) <span class="required">*</span></label>
-                        <input type="number" id="inputPackage" class="form-control" step="0.1" min="1.0" max="150.0" placeholder="e.g. 14.5" required>
+                <div class="form-row" style="margin-top: 1rem;">
+                    <div class="col-6">
+                        <label for="inputPackage">Package (in LPA) *</label>
+                        <input type="number" id="inputPackage" class="form-control" step="0.1" min="1" max="150" placeholder="e.g. 14.5" required>
                     </div>
-                    <div class="form-group col-6">
-                        <label for="inputPlacementDate">Placement Date</label>
+                    <div class="col-6">
+                        <label for="inputPlacementDate">Offer Date</label>
                         <input type="date" id="inputPlacementDate" class="form-control">
                     </div>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group-clean" style="margin-top: 1rem;">
                     <label for="selectOfferStatus">Offer Status</label>
-                    <select id="selectOfferStatus" class="form-control">
+                    <select id="selectOfferStatus" class="form-select">
                         <option value="Placed" selected>Placed (Offer Accepted)</option>
-                        <option value="Offered">Offered (Dual/Multiple Offer)</option>
+                        <option value="Offered">Offered (Dual / Multiple Offer)</option>
                         <option value="Accepted">Accepted</option>
                     </select>
                 </div>
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" id="btnCancelPlacementModal">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="btnSubmitPlacement">
-                        <i class="fa-solid fa-check"></i> Save Placement Record
-                    </button>
+                    <button type="submit" class="btn btn-primary" id="btnSubmitPlacement">Save Placement Offer</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- ================= MODAL: FULL-RES IMAGE VIEWER ================= -->
+    <!-- ================= MODAL: POST ANNOUNCEMENT ================= -->
+    <div class="modal-backdrop" id="announceModal" aria-hidden="true">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-bullhorn"></i> Post Official University Notice</h3>
+                <button type="button" class="btn-close" onclick="document.getElementById('announceModal').classList.remove('open')">&times;</button>
+            </div>
+            <form id="postAnnounceForm">
+                <div class="form-group-clean">
+                    <label for="inputAnnounceTitle">Notice Title *</label>
+                    <input type="text" id="inputAnnounceTitle" class="form-control" placeholder="e.g. Campus Recruitment Schedule" required>
+                </div>
+                <div class="form-row" style="margin-top: 1rem;">
+                    <div class="col-6">
+                        <label for="selectAnnounceCategory">Category *</label>
+                        <select id="selectAnnounceCategory" class="form-select">
+                            <option value="Placement">Placement</option>
+                            <option value="Academic">Academic</option>
+                            <option value="Workshop">Workshop</option>
+                            <option value="General">General</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label for="selectAnnouncePriority">Priority Level *</label>
+                        <select id="selectAnnouncePriority" class="form-select">
+                            <option value="Normal">Normal</option>
+                            <option value="High">High</option>
+                            <option value="Urgent">Urgent</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group-clean" style="margin-top: 1rem;">
+                    <label for="textareaAnnounceContent">Notice Details *</label>
+                    <textarea id="textareaAnnounceContent" class="form-control" rows="4" placeholder="Enter complete notice content..." required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('announceModal').classList.remove('open')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Broadcast Notice</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Full Image Viewer Modal -->
     <div class="modal-backdrop" id="imageModal" aria-hidden="true">
         <div class="modal-card modal-large">
             <div class="modal-header">
                 <h3 id="imageModalTitle">Visualization Preview</h3>
-                <button type="button" class="btn-close" id="btnCloseImageModal" aria-label="Close image modal">&times;</button>
+                <button type="button" class="btn-close" id="btnCloseImageModal">&times;</button>
             </div>
-            <div class="image-preview-body">
-                <img src="" alt="Full view preview" id="fullPreviewImage">
+            <div style="padding: 1rem; text-align: center;">
+                <img src="" alt="Full view preview" id="fullPreviewImage" style="max-width: 100%; border-radius: var(--radius-md);">
             </div>
         </div>
     </div>
 
-    <!-- Toast Notification Container -->
-    <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Custom Frontend Logic -->
+    <!-- Application Script -->
     <script src="/static/js/app.js"></script>
+
+    <!-- Faculty Portal Sidebar & UI Switcher Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Sidebar Navigation Switching
+            const sidebarButtons = document.querySelectorAll('.sidebar-tab-btn');
+            const tabViews = document.querySelectorAll('.tab-view');
+            const breadcrumb = document.getElementById('activeBreadcrumb');
+
+            sidebarButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetId = btn.getAttribute('data-target');
+                    sidebarButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    tabViews.forEach(v => {
+                        v.classList.remove('active');
+                        if (v.id === targetId) v.classList.add('active');
+                    });
+
+                    if (breadcrumb) {
+                        breadcrumb.textContent = btn.querySelector('span').textContent;
+                    }
+
+                    window.dispatchEvent(new Event('resize'));
+                });
+            });
+
+            // Mobile Sidebar Toggle
+            const toggleBtn = document.getElementById('btnToggleSidebar');
+            const sidebar = document.getElementById('facultySidebar');
+            if (toggleBtn && sidebar) {
+                toggleBtn.addEventListener('click', () => {
+                    sidebar.classList.toggle('sidebar-open');
+                });
+            }
+
+            // Post Announcement Form Submit
+            const announceForm = document.getElementById('postAnnounceForm');
+            if (announceForm) {
+                announceForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const title = document.getElementById('inputAnnounceTitle').value.trim();
+                    const category = document.getElementById('selectAnnounceCategory').value;
+                    const priority = document.getElementById('selectAnnouncePriority').value;
+                    const content = document.getElementById('textareaAnnounceContent').value.trim();
+
+                    try {
+                        const res = await fetch('/api/announcements', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ title, category, priority, content })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            alert('Notice broadcasted successfully!');
+                            document.getElementById('announceModal').classList.remove('open');
+                            window.location.reload();
+                        } else {
+                            alert(data.error || 'Failed to post notice.');
+                        }
+                    } catch (err) {
+                        alert('Error communicating with server.');
+                    }
+                });
+            }
+
+            // Quick Modal Button Trigger
+            const btnOpenAnnounceModal = document.getElementById('btnOpenAnnounceModal');
+            if (btnOpenAnnounceModal) {
+                btnOpenAnnounceModal.addEventListener('click', () => {
+                    document.getElementById('announceModal').classList.add('open');
+                });
+            }
+        });
+
+        function openImageModal(imgSrc, title) {
+            document.getElementById('fullPreviewImage').src = imgSrc;
+            document.getElementById('imageModalTitle').textContent = title;
+            document.getElementById('imageModal').classList.add('active');
+        }
+    </script>
 </body>
 </html>

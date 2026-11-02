@@ -1,12 +1,11 @@
 services:
   - type: web
-    name: student-placement-analysis
-    runtime: python
-    plan: free
+    name: student-placement-portal
+    env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    startCommand: gunicorn app:app
     envVars:
-      - key: DB_ENGINE
-        value: sqlite
       - key: PYTHON_VERSION
         value: 3.11.9
+      - key: SECRET_KEY
+        generateValue: true

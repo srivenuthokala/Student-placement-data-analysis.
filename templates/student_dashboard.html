@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Portal | {{ student.name }} ({{ student.roll_no }})</title>
+    <meta name="description" content="Official Student Academic Portal for Attendance, Marks, Timetable, Assignments, Study Materials, and Placement Portfolio.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="portal-layout">
+        <!-- ================= LEFT SIDEBAR NAVIGATION ================= -->
+        <aside class="portal-sidebar" id="studentSidebar">
+            <!-- Sidebar University Branding -->
+            <div class="sidebar-brand">
+                <div class="brand-crest">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div class="brand-info">
+                    <h2>EduPlace University</h2>
+                    <span>Student Portal</span>
+                </div>
+            </div>
+
+            <!-- Student Profile Widget -->
+            <div class="sidebar-profile">
+                <div class="profile-avatar avatar-student">
+                    <i class="fa-solid fa-user-graduate"></i>
+                </div>
+                <div class="profile-details">
+                    <span class="profile-name" title="{{ student.name }}">{{ student.name }}</span>
+                    <span class="profile-meta">{{ student.roll_no }} &bull; {{ student.department }}</span>
+                    <span class="role-pill role-student">ENROLLED STUDENT</span>
+                </div>
+            </div>
+
+            <!-- Sidebar Nav Links -->
+            <nav class="sidebar-nav" aria-label="Student Portal Menu">
+                <div class="nav-category-label">My Academics</div>
+                <ul class="nav-menu-list">
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn active" data-target="view-profile">
+                            <i class="fa-solid fa-id-card-clip"></i>
+                            <span>My Profile &amp; Overview</span>
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-attendance">
+                            <i class="fa-solid fa-calendar-check"></i>
+                            <span>Attendance Overview</span>
+                            <span class="nav-item-badge">{{ academic.overall_attendance }}%</span>
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-marks">
+                            <i class="fa-solid fa-file-invoice"></i>
+                            <span>Marks &amp; Results</span>
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-timetable">
+                            <i class="fa-solid fa-calendar-days"></i>
+                            <span>Class Timetable</span>
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-assignments">
+                            <i class="fa-solid fa-pen-ruler"></i>
+                            <span>Assignments</span>
+                            <span class="nav-item-badge">{{ academic.assignments|length }} Active</span>
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-materials">
+                            <i class="fa-solid fa-book"></i>
+                            <span>Study Materials</span>
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-announcements">
+                            <i class="fa-solid fa-bullhorn"></i>
+                            <span>Announcements</span>
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="nav-category-label" style="margin-top: 0.8rem;">Career &amp; Placement</div>
+                <ul class="nav-menu-list">
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-offers">
+                            <i class="fa-solid fa-briefcase"></i>
+                            <span>Placement Offers</span>
+                            {% if offers|length > 0 %}
+                                <span class="nav-item-badge" style="background: var(--emerald-600);">{{ offers|length }} Offer</span>
+                            {% endif %}
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-skills">
+                            <i class="fa-solid fa-brain"></i>
+                            <span>Skill Insights</span>
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-benchmarks">
+                            <i class="fa-solid fa-chart-simple"></i>
+                            <span>Campus Benchmarks</span>
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-charts">
+                            <i class="fa-solid fa-chart-pie"></i>
+                            <span>Placement Visuals</span>
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Sidebar Logout -->
+            <div class="sidebar-footer">
+                <a href="/logout" class="sidebar-logout-btn" title="Sign out of student account">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span>Log Out</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- ================= MAIN CONTENT WRAPPER ================= -->
+        <div class="portal-main-wrapper">
+            <!-- Top Navigation Bar -->
+            <header class="portal-topbar">
+                <div class="topbar-left">
+                    <button type="button" class="sidebar-toggle-btn" id="btnToggleSidebar" aria-label="Toggle Navigation">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div class="topbar-breadcrumbs">
+                        <span>Student Portal</span>
+                        <i class="fa-solid fa-chevron-right" style="font-size: 0.65rem;"></i>
+                        <span class="active-crumb" id="activeBreadcrumb">My Profile &amp; Overview</span>
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="topbar-action-group">
+                        <div class="topbar-badge" title="Overall Attendance Percentage">
+                            <i class="fa-regular fa-calendar-check"></i>
+                            <span>Attendance: <strong>{{ academic.overall_attendance }}%</strong></span>
+                        </div>
+                        <div class="topbar-badge" title="Academic Standing">
+                            <i class="fa-solid fa-star" style="color: #f59e0b;"></i>
+                            <span>CGPA: <strong>{{ student.cgpa }}</strong> / 10.0</span>
+                        </div>
+                        <div class="topbar-badge">
+                            {% if student.is_eligible == 1 %}
+                                <span class="badge-success" style="padding: 0.15rem 0.45rem; border-radius: 9999px;">
+                                    <i class="fa-solid fa-check"></i> Placement Eligible
+                                </span>
+                            {% else %}
+                                <span class="badge-warning" style="padding: 0.15rem 0.45rem; border-radius: 9999px;">
+                                    <i class="fa-solid fa-triangle-exclamation"></i> Academic Review
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content Area with Views -->
+            <main class="portal-content-container">
+
+                <!-- ================= TAB 1: PROFILE & OVERVIEW ================= -->
+                <section class="tab-view active" id="view-profile">
+                    <!-- Student University Hero Banner -->
+                    <div class="student-university-hero">
+                        <div class="student-hero-content">
+                            <div class="student-hero-avatar">
+                                <i class="fa-solid fa-user-graduate"></i>
+                            </div>
+                            <div class="student-hero-text">
+                                <h2>{{ student.name }}</h2>
+                                <p>Roll Number: <strong>{{ student.roll_no }}</strong> &bull; Department: <strong>{{ student.department }}</strong></p>
+                                <div class="student-hero-badges">
+                                    <span class="hero-chip">Graduation Cohort {{ student.graduation_year }}</span>
+                                    {% if student.is_eligible == 1 %}
+                                        <span class="hero-chip" style="background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(16, 185, 129, 0.4);">
+                                            <i class="fa-solid fa-circle-check"></i> Placement Cleared
+                                        </span>
+                                    {% else %}
+                                        <span class="hero-chip" style="background: rgba(245, 158, 11, 0.25); border: 1px solid rgba(245, 158, 11, 0.4);">
+                                            <i class="fa-solid fa-triangle-exclamation"></i> Remediation Active
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="student-hero-quickstats">
+                            <div class="quickstat-box">
+                                <div class="quickstat-val">{{ student.cgpa }}</div>
+                                <div class="quickstat-lbl">Cumulative GPA</div>
+                            </div>
+                            <div class="quickstat-box">
+                                <div class="quickstat-val">{{ academic.overall_attendance }}%</div>
+                                <div class="quickstat-lbl">Attendance</div>
+                            </div>
+                            <div class="quickstat-box">
+                                <div class="quickstat-val">{{ offers|length }}</div>
+                                <div class="quickstat-lbl">Job Offers</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Overview Cards -->
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-card-header">
+                                <span class="kpi-title">Placement Status</span>
+                                <div class="kpi-icon-pill pill-emerald">
+                                    <i class="fa-solid fa-briefcase"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value-row">
+                                {% if offers|length > 0 %}
+                                    <span class="kpi-number" style="color: var(--emerald-600);">Placed</span>
+                                    <span class="kpi-badge badge-success">{{ offers|length }} Verified</span>
+                                {% else %}
+                                    <span class="kpi-number" style="color: var(--amber-600); font-size: 1.4rem;">In Process</span>
+                                    <span class="kpi-badge badge-warning">Drive Active</span>
+                                {% endif %}
+                            </div>
+                            <p class="kpi-subtext">
+                                {% if offers|length > 0 %}
+                                    Top Offer: <strong>{{ offers[0].package }} LPA</strong> at {{ offers[0].company }}
+                                {% else %}
+                                    Eligible for upcoming recruitment interviews
+                                {% endif %}
+                            </p>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-card-header">
+                                <span class="kpi-title">Academic Attendance</span>
+                                <div class="kpi-icon-pill pill-royal">
+                                    <i class="fa-solid fa-clipboard-user"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value-row">
+                                <span class="kpi-number">{{ academic.overall_attendance }}%</span>
+                                {% if academic.overall_attendance >= 75.0 %}
+                                    <span class="kpi-badge badge-success">Approved</span>
+                                {% else %}
+                                    <span class="kpi-badge badge-warning">Warning</span>
+                                {% endif %}
+                            </div>
+                            <p class="kpi-subtext">Minimum 75% required for examination hall ticket</p>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-card-header">
+                                <span class="kpi-title">Branch Placement Rate</span>
+                                <div class="kpi-icon-pill pill-indigo">
+                                    <i class="fa-solid fa-building-columns"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value-row">
+                                <span class="kpi-number">{{ dept_stats.placement_rate }}%</span>
+                                <span class="kpi-subtext">{{ student.department }}</span>
+                            </div>
+                            <p class="kpi-subtext">{{ dept_stats.placed_students }} placed of {{ dept_stats.eligible_students }} eligible students</p>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-card-header">
+                                <span class="kpi-title">Branch Average Offer</span>
+                                <div class="kpi-icon-pill pill-amber">
+                                    <i class="fa-solid fa-indian-rupee-sign"></i>
+                                </div>
+                            </div>
+                            <div class="kpi-value-row">
+                                <span class="kpi-number">{{ dept_stats.avg_package or '0.0' }} LPA</span>
+                                <span class="kpi-subtext">Highest: {{ dept_stats.max_package }} LPA</span>
+                            </div>
+                            <p class="kpi-subtext">Standard placement benchmark for {{ student.department }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Split Profile Row -->
+                    <div class="charts-grid-2col">
+                        <!-- Left: Enrolled Skills -->
+                        <div class="white-card">
+                            <div class="white-card-header">
+                                <h3><i class="fa-solid fa-bolt"></i> My Registered Competencies</h3>
+                                <span class="card-subtitle">{{ skills|length }} Skills Verified</span>
+                            </div>
+                            <div class="white-card-body">
+                                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                                    {% for sk in skills %}
+                                        <span style="background: var(--royal-50); border: 1px solid var(--royal-100); color: var(--royal-700); font-weight: 600; font-size: 0.82rem; padding: 0.35rem 0.75rem; border-radius: var(--radius-sm); display: inline-flex; align-items: center; gap: 0.4rem;">
+                                            <i class="fa-solid fa-check" style="color: var(--emerald-600);"></i> {{ sk }}
+                                        </span>
+                                    {% else %}
+                                        <p style="color: var(--slate-500); font-size: 0.85rem;">No skills currently mapped. Contact your department placement coordinator.</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Academic Status Overview -->
+                        <div class="white-card">
+                            <div class="white-card-header">
+                                <h3><i class="fa-solid fa-scale-balanced"></i> Academic Assessment Standing</h3>
+                                <span class="card-subtitle">Semester 7 Evaluation</span>
+                            </div>
+                            <div class="white-card-body" style="font-size: 0.88rem; line-height: 1.6; color: var(--slate-700);">
+                                <p><strong>Academic Status:</strong> Regular Candidate (Good Standing)</p>
+                                <p><strong>Curriculum Term:</strong> Semester 7 (Final Year Engineering)</p>
+                                <p><strong>Mandatory Project:</strong> In Progress (Phase 2 Submission)</p>
+                                <p><strong>Institutional Code:</strong> NIT/EDU/2025/{{ student.student_id }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================= TAB 2: ATTENDANCE OVERVIEW ================= -->
+                <section class="tab-view" id="view-attendance">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Course Attendance &amp; Hall Ticket Eligibility</h2>
+                            <p>Detailed lecture and lab attendance breakdown across registered course subjects.</p>
+                        </div>
+                        <div class="topbar-badge" style="font-size: 0.95rem; padding: 0.5rem 1rem;">
+                            <span>Overall Attendance: <strong>{{ academic.overall_attendance }}%</strong></span>
+                        </div>
+                    </div>
+
+                    <div class="white-card">
+                        <div class="white-card-header">
+                            <h3><i class="fa-solid fa-clipboard-check"></i> Subject Attendance Roster</h3>
+                            <span class="card-subtitle">Standard: 75% minimum attendance required</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Subject Name</th>
+                                        <th>Classes Conducted</th>
+                                        <th>Classes Attended</th>
+                                        <th>Attendance Percentage</th>
+                                        <th>Compliance Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for a in academic.attendance %}
+                                        <tr>
+                                            <td><strong>{{ a.subject }}</strong></td>
+                                            <td>{{ a.total_classes }}</td>
+                                            <td>{{ a.attended_classes }}</td>
+                                            <td>
+                                                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                                    <div style="flex: 1; max-width: 120px; height: 8px; background: var(--slate-200); border-radius: 9999px; overflow: hidden;">
+                                                        <div style="height: 100%; width: {{ a.percentage }}%; background: {% if a.percentage >= 75.0 %}var(--emerald-500){% else %}var(--rose-500){% endif %};"></div>
+                                                    </div>
+                                                    <span style="font-weight: 700; color: {% if a.percentage >= 75.0 %}var(--emerald-600){% else %}var(--rose-600){% endif %};">
+                                                        {{ a.percentage }}%
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                {% if a.percentage >= 75.0 %}
+                                                    <span class="status-pill status-eligible"><i class="fa-solid fa-check"></i> Eligible</span>
+                                                {% else %}
+                                                    <span class="status-pill status-danger"><i class="fa-solid fa-triangle-exclamation"></i> Shortage</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================= TAB 3: MARKS & RESULTS ================= -->
+                <section class="tab-view" id="view-marks">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Academic Examination Marks &amp; Grades</h2>
+                            <p>Official statement of marks, continuous internal evaluation, and university grading.</p>
+                        </div>
+                        <div class="topbar-badge">
+                            <span>Cumulative CGPA: <strong>{{ student.cgpa }}</strong> / 10.0</span>
+                        </div>
+                    </div>
+
+                    <div class="white-card">
+                        <div class="white-card-header">
+                            <h3><i class="fa-solid fa-award"></i> Semester 7 Marks Statement</h3>
+                            <span class="card-subtitle">Grade Scale: O (&gt;90), A+ (80-89), A (70-79), B+ (60-69)</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Course Subject</th>
+                                        <th>Term</th>
+                                        <th>Internal (30)</th>
+                                        <th>External (70)</th>
+                                        <th>Total (100)</th>
+                                        <th>Letter Grade</th>
+                                        <th>Credits</th>
+                                        <th>Result Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for m in academic.marks %}
+                                        <tr>
+                                            <td><strong>{{ m.subject }}</strong></td>
+                                            <td>{{ m.semester }}</td>
+                                            <td>{{ m.internal_marks }}</td>
+                                            <td>{{ m.external_marks }}</td>
+                                            <td><strong>{{ m.total_marks }}</strong></td>
+                                            <td>
+                                                <span class="status-pill {% if m.grade in ['O', 'A+'] %}status-eligible{% else %}status-placed{% endif %}">
+                                                    Grade {{ m.grade }}
+                                                </span>
+                                            </td>
+                                            <td>{{ m.credits }}</td>
+                                            <td><span class="badge badge-success">Passed</span></td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================= TAB 4: CLASS TIMETABLE ================= -->
+                <section class="tab-view" id="view-timetable">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Weekly Lecture &amp; Laboratory Schedule</h2>
+                            <p>Department timetable for {{ student.department }} (Academic Term 2024-2025).</p>
+                        </div>
+                    </div>
+
+                    <div class="timetable-grid">
+                        {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] %}
+                        {% for day in days %}
+                            <div class="timetable-day-card">
+                                <div class="timetable-day-header">
+                                    <i class="fa-regular fa-calendar" style="color: var(--royal-600);"></i>
+                                    <h4>{{ day }}</h4>
+                                </div>
+                                <div class="timetable-slots-list">
+                                    {% for slot in academic.timetable if slot.day_of_week == day %}
+                                        <div class="timetable-slot-item">
+                                            <span class="slot-time">{{ slot.time_slot }}</span>
+                                            <div class="slot-subject">{{ slot.subject }}</div>
+                                            <div class="slot-room">
+                                                <i class="fa-solid fa-location-dot"></i> {{ slot.room }} &bull; {{ slot.faculty_name }}
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <p style="font-size: 0.8rem; color: var(--slate-400); padding: 0.5rem 0;">No lectures scheduled</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <!-- ================= TAB 5: ASSIGNMENTS ================= -->
+                <section class="tab-view" id="view-assignments">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Course Assignments &amp; Project Problem Statements</h2>
+                            <p>Active course assignments with submission deadlines and deliverables.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid-cards-3col">
+                        {% for a in academic.assignments %}
+                            <div class="academic-card">
+                                <div class="academic-card-top">
+                                    <span class="subject-badge">{{ a.subject }}</span>
+                                    <h4 style="margin-top: 0.5rem;">{{ a.title }}</h4>
+                                </div>
+                                <div class="academic-card-bottom">
+                                    <span><i class="fa-regular fa-clock"></i> Deadline: <strong>{{ a.due_date }}</strong></span>
+                                    <span class="status-pill status-eligible">{{ a.status }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <!-- ================= TAB 6: STUDY MATERIALS ================= -->
+                <section class="tab-view" id="view-materials">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Course Handouts &amp; Digital Study Materials</h2>
+                            <p>Downloadable lecture presentations, laboratory guides, and code reference documents.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid-cards-3col">
+                        {% for m in academic.materials %}
+                            <div class="academic-card">
+                                <div class="academic-card-top">
+                                    <span class="subject-badge">{{ m.subject }}</span>
+                                    <h4 style="margin-top: 0.5rem;">{{ m.title }}</h4>
+                                    <p style="font-size: 0.78rem; color: var(--slate-500); margin-top: 0.2rem;">{{ m.material_type }} &bull; {{ m.file_size }}</p>
+                                </div>
+                                <div class="academic-card-bottom">
+                                    <a href="#" class="btn btn-primary btn-sm" onclick="alert('Downloading {{ m.title }}'); return false;">
+                                        <i class="fa-solid fa-download"></i> Download PDF
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <!-- ================= TAB 7: ANNOUNCEMENTS ================= -->
+                <section class="tab-view" id="view-announcements">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Official University Circulars &amp; Drive Notices</h2>
+                            <p>Institutional updates broadcasted by university administration and the placement cell.</p>
+                        </div>
+                    </div>
+
+                    <div class="announcements-list">
+                        {% for n in academic.announcements %}
+                            <div class="announcement-item">
+                                <div class="announcement-meta-top">
+                                    <span class="subject-badge">{{ n.category }}</span>
+                                    <span class="announcement-priority priority-{{ n.priority|lower }}">{{ n.priority }} Priority</span>
+                                </div>
+                                <h4>{{ n.title }}</h4>
+                                <p>{{ n.content }}</p>
+                                <div class="announcement-footer">
+                                    <span><i class="fa-solid fa-user-pen"></i> Authority: <strong>{{ n.author }}</strong></span>
+                                    <span><i class="fa-regular fa-calendar"></i> {{ n.date_posted }}</span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <!-- ================= TAB 8: PLACEMENT OFFERS ================= -->
+                <section class="tab-view" id="view-offers">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Verified Corporate Placement Offers</h2>
+                            <p>Verified campus recruitment offers, roles, and compensation packages.</p>
+                        </div>
+                    </div>
+
+                    {% if offers|length > 0 %}
+                        <div class="white-card">
+                            <div class="white-card-header">
+                                <h3><i class="fa-solid fa-briefcase"></i> My Received Job Offers ({{ offers|length }})</h3>
+                                <span class="card-subtitle">Verified Institutional Recruitment Records</span>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Recruiting Company</th>
+                                            <th>Role Title</th>
+                                            <th>Package (LPA)</th>
+                                            <th>Placement Date</th>
+                                            <th>Offer Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for offer in offers %}
+                                            <tr>
+                                                <td><strong>{{ offer.company }}</strong></td>
+                                                <td>{{ offer.role }}</td>
+                                                <td><strong style="color: var(--emerald-600); font-size: 1.05rem;">{{ offer.package }} LPA</strong></td>
+                                                <td>{{ offer.placement_date or 'Recorded' }}</td>
+                                                <td>
+                                                    <span class="status-pill status-eligible">
+                                                        <i class="fa-solid fa-circle-check"></i> {{ offer.status }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="white-card" style="padding: 3rem 2rem; text-align: center;">
+                            <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--amber-50); color: var(--amber-600); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 1rem;">
+                                <i class="fa-solid fa-briefcase"></i>
+                            </div>
+                            <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--navy-900); margin-bottom: 0.4rem;">No Placement Offers Logged Yet</h3>
+                            <p style="color: var(--slate-500); max-width: 500px; margin: 0 auto 1.5rem; font-size: 0.88rem;">
+                                Your campus placement drives are actively scheduled. Review the in-demand skills and company compensation trends to maximize your performance.
+                            </p>
+                        </div>
+                    {% endif %}
+                </section>
+
+                <!-- ================= TAB 9: SKILL INSIGHTS ================= -->
+                <section class="tab-view" id="view-skills">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Recruiter Skill Demand &amp; Compensation Correlator</h2>
+                            <p>Identify highest-demand technical competencies and average market packages.</p>
+                        </div>
+                    </div>
+
+                    <div class="white-card">
+                        <div class="white-card-header">
+                            <h3><i class="fa-solid fa-code"></i> High-Demand Industry Skills</h3>
+                            <span class="card-subtitle">Derived from campus hiring outcomes</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="studentSkillsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Skill Name</th>
+                                        <th>Total Students with Skill</th>
+                                        <th>Placed Students</th>
+                                        <th>Success Rate (%)</th>
+                                        <th>Average Package (LPA)</th>
+                                        <th>Market Tier</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="studentSkillsBody">
+                                    <tr><td colspan="6" class="text-center" style="padding: 2rem;">Loading skill benchmarks...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================= TAB 10: CAMPUS BENCHMARKS ================= -->
+                <section class="tab-view" id="view-benchmarks">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Campus Placement Benchmarks &amp; Visiting Companies</h2>
+                            <p>Comparative evaluation across all engineering branches and active recruiters.</p>
+                        </div>
+                    </div>
+
+                    <!-- Top Companies Table -->
+                    <div class="white-card">
+                        <div class="white-card-header">
+                            <h3><i class="fa-solid fa-building"></i> Top Visiting Recruiters &amp; Compensation</h3>
+                            <span class="card-subtitle">Active Corporate Placement Partners</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="studentCompaniesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Recruiter Name</th>
+                                        <th>Offers Extended</th>
+                                        <th>Average Package (LPA)</th>
+                                        <th>Maximum Package (LPA)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="studentCompaniesBody">
+                                    <tr><td colspan="4" class="text-center" style="padding: 2rem;">Loading corporate recruitment metrics...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================= TAB 11: PLACEMENT VISUALS ================= -->
+                <section class="tab-view" id="view-charts">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Institutional Matplotlib Placement Visuals</h2>
+                            <p>High-resolution figures generated from official cohort placement computations.</p>
+                        </div>
+                    </div>
+
+                    <div class="gallery-grid">
+                        <div class="gallery-card">
+                            <div class="gallery-card-header">
+                                <h4>Department-Wise Placement Rate</h4>
+                                <span class="kpi-badge badge-primary">Bar Chart</span>
+                            </div>
+                            <div class="gallery-img-wrap" onclick="openStudentImageModal('/charts/department_placement_rate.png', 'Department Placement Rate')">
+                                <img src="/charts/department_placement_rate.png" alt="Department Placement Rate">
+                                <div class="img-overlay"><i class="fa-solid fa-magnifying-glass-plus"></i> View Full Chart</div>
+                            </div>
+                        </div>
+
+                        <div class="gallery-card">
+                            <div class="gallery-card-header">
+                                <h4>Package Distribution &amp; Metrics</h4>
+                                <span class="kpi-badge badge-primary">Boxplot &amp; Hist</span>
+                            </div>
+                            <div class="gallery-img-wrap" onclick="openStudentImageModal('/charts/package_distribution.png', 'Package Distribution')">
+                                <img src="/charts/package_distribution.png" alt="Package Distribution">
+                                <div class="img-overlay"><i class="fa-solid fa-magnifying-glass-plus"></i> View Full Chart</div>
+                            </div>
+                        </div>
+
+                        <div class="gallery-card">
+                            <div class="gallery-card-header">
+                                <h4>Top Skills in Demand</h4>
+                                <span class="kpi-badge badge-primary">Bar Horizontal</span>
+                            </div>
+                            <div class="gallery-img-wrap" onclick="openStudentImageModal('/charts/top_skills_demand.png', 'Top Skills in Demand')">
+                                <img src="/charts/top_skills_demand.png" alt="Top Skills in Demand">
+                                <div class="img-overlay"><i class="fa-solid fa-magnifying-glass-plus"></i> View Full Chart</div>
+                            </div>
+                        </div>
+
+                        <div class="gallery-card">
+                            <div class="gallery-card-header">
+                                <h4>Cohort Placement Status</h4>
+                                <span class="kpi-badge badge-primary">Donut Chart</span>
+                            </div>
+                            <div class="gallery-img-wrap" onclick="openStudentImageModal('/charts/placement_status_overview.png', 'Cohort Placement Status')">
+                                <img src="/charts/placement_status_overview.png" alt="Cohort Placement Status">
+                                <div class="img-overlay"><i class="fa-solid fa-magnifying-glass-plus"></i> View Full Chart</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Image Viewer Modal -->
+    <div class="modal-backdrop" id="studentImageModal" aria-hidden="true">
+        <div class="modal-card modal-large">
+            <div class="modal-header">
+                <h3 id="studentImageModalTitle">Chart Preview</h3>
+                <button type="button" class="btn-close" onclick="document.getElementById('studentImageModal').classList.remove('active')">&times;</button>
+            </div>
+            <div style="padding: 1rem; text-align: center;">
+                <img src="" alt="Full view preview" id="studentFullPreviewImage" style="max-width: 100%; border-radius: var(--radius-md);">
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Portal Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Sidebar Navigation Switching
+            const sidebarButtons = document.querySelectorAll('.sidebar-tab-btn');
+            const tabViews = document.querySelectorAll('.tab-view');
+            const breadcrumb = document.getElementById('activeBreadcrumb');
+
+            sidebarButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetId = btn.getAttribute('data-target');
+                    sidebarButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    tabViews.forEach(v => {
+                        v.classList.remove('active');
+                        if (v.id === targetId) v.classList.add('active');
+                    });
+
+                    if (breadcrumb) {
+                        breadcrumb.textContent = btn.querySelector('span').textContent;
+                    }
+
+                    window.dispatchEvent(new Event('resize'));
+                });
+            });
+
+            // Mobile Sidebar Toggle
+            const toggleBtn = document.getElementById('btnToggleSidebar');
+            const sidebar = document.getElementById('studentSidebar');
+            if (toggleBtn && sidebar) {
+                toggleBtn.addEventListener('click', () => {
+                    sidebar.classList.toggle('sidebar-open');
+                });
+            }
+
+            // Load async benchmarks (companies & skills)
+            loadStudentBenchData();
+        });
+
+        async function loadStudentBenchData() {
+            try {
+                // Fetch packages for companies
+                const pkgRes = await fetch('/api/packages');
+                const pkgData = await pkgRes.json();
+                renderStudentCompanies(pkgData.companies || []);
+
+                // Fetch skills
+                const skillsRes = await fetch('/api/skills');
+                const skills = await skillsRes.json();
+                renderStudentSkills(skills);
+            } catch (err) {
+                console.error('Error fetching benchmarks:', err);
+            }
+        }
+
+        function renderStudentCompanies(companies) {
+            const tbody = document.getElementById('studentCompaniesBody');
+            if (!tbody) return;
+            if (!companies.length) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center" style="padding: 1.5rem;">No corporate data available.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = companies.map(c => `
+                <tr>
+                    <td><strong>${c.company}</strong></td>
+                    <td><span class="badge badge-primary">${c.count} offer(s)</span></td>
+                    <td><strong>${c.mean.toFixed(2)} LPA</strong></td>
+                    <td><strong style="color: var(--emerald-600);">${c.max.toFixed(2)} LPA</strong></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderStudentSkills(skills) {
+            const tbody = document.getElementById('studentSkillsBody');
+            if (!tbody) return;
+            if (!skills.length) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center" style="padding: 1.5rem;">No skill data available.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = skills.map(s => {
+                const tierClass = s["Demand Tier"] === "High Demand" ? "badge-success" : 
+                                  s["Demand Tier"] === "Moderate Demand" ? "badge-primary" : "badge-secondary";
+                return `
+                    <tr>
+                        <td><strong>${s["Skill Name"]}</strong></td>
+                        <td>${s["Total Students With Skill"]}</td>
+                        <td>${s["Placed Students"]}</td>
+                        <td>${s["Placement Success Rate (%)"]}%</td>
+                        <td><strong>${s["Average Package (LPA)"]} LPA</strong></td>
+                        <td><span class="badge ${tierClass}">${s["Demand Tier"]}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openStudentImageModal(imgSrc, title) {
+            document.getElementById('studentFullPreviewImage').src = imgSrc;
+            document.getElementById('studentImageModalTitle').textContent = title;
+            document.getElementById('studentImageModal').classList.add('active');
+        }
+    </script>
+</body>
+</html>

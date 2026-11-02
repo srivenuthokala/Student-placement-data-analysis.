@@ -21,10 +21,49 @@ CREATE TABLE students (
     student_id INT AUTO_INCREMENT PRIMARY KEY,
     roll_no VARCHAR(20) NOT NULL UNIQUE,
     name VARCHAR(100) NOT NULL,
+    admission_type VARCHAR(30) DEFAULT 'Regular', -- 'Regular' or 'Lateral Entry'
     department VARCHAR(50) NOT NULL,
+    year_of_study VARCHAR(20) DEFAULT '4th Year',
+    section VARCHAR(10) DEFAULT 'A',
+    email VARCHAR(100),
+    mobile VARCHAR(20),
+    dob DATE,
+    gender VARCHAR(20) DEFAULT 'Male',
     graduation_year INT NOT NULL,
+    academic_year VARCHAR(20) DEFAULT '2024-2025',
     cgpa DECIMAL(3, 2) NOT NULL,
+    backlogs INT DEFAULT 0,
     is_eligible TINYINT(1) DEFAULT 1, -- 1: Eligible for placements, 0: Ineligible
+    placement_eligibility VARCHAR(30) DEFAULT 'Eligible', -- 'Eligible', 'Not Eligible', 'Pending'
+    placement_status VARCHAR(30) DEFAULT 'Unplaced', -- 'Placed', 'Unplaced', 'Pending'
+    diploma_qualification VARCHAR(100) NULL,
+    diploma_percentage DECIMAL(5, 2) NULL,
+    diploma_college VARCHAR(150) NULL,
+    admission_year INT DEFAULT 2021,
+    password_hash VARCHAR(255) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 1a. Placement Audit Logs Table
+CREATE TABLE IF NOT EXISTS placement_audit_logs (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    action VARCHAR(50) NOT NULL,
+    student_id INT NULL,
+    roll_no VARCHAR(20) NULL,
+    details TEXT NOT NULL,
+    performed_by VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 1b. Faculty Table for Authentication
+CREATE TABLE IF NOT EXISTS faculty (
+    faculty_id INT AUTO_INCREMENT PRIMARY KEY,
+    faculty_code VARCHAR(30) NOT NULL UNIQUE,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    name VARCHAR(100) NOT NULL,
+    department VARCHAR(50) NOT NULL,
+    email VARCHAR(100),
+    password_hash VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
