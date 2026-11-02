@@ -414,6 +414,42 @@ def fetch_dataframe(query: str, params=None) -> pd.DataFrame:
         conn.close()
 
 
+def clean_records(data):
+    """
+    Converts a pandas DataFrame, list of dicts, or single dict to standard JSON-compliant data,
+    replacing all NaN, inf, -inf with None (which cleanly serializes to valid JSON null).
+    Handles nested lists and dicts safely without ambiguous array truth-value errors.
+    """
+    import numpy as np
+
+    def clean_val(v):
+        if isinstance(v, (list, tuple)):
+            return [clean_val(item) for item in v]
+        if isinstance(v, dict):
+            return {k: clean_val(val) for k, val in v.items()}
+        if isinstance(v, float):
+            if np.isnan(v) or np.isinf(v):
+                return None
+            return v
+        if np.isscalar(v):
+            try:
+                if pd.isna(v):
+                    return None
+            except Exception:
+                pass
+        return v
+
+    if isinstance(data, pd.DataFrame):
+        records = data.to_dict(orient="records")
+        return [clean_val(r) for r in records]
+    elif isinstance(data, list):
+        return [clean_val(r) for r in data]
+    elif isinstance(data, dict):
+        return clean_val(data)
+    else:
+        return clean_val(data)
+
+
 def execute_non_query(query: str, params=None):
     """Executes an INSERT, UPDATE, or DELETE query."""
     conn = get_connection()

@@ -15,6 +15,19 @@ let chartPackageDistCurveInstance = null;
 let cachedStudents = [];
 let cachedSkills = [];
 
+/**
+ * Universal HTML escape helper to prevent XSS and rendering breakages.
+ */
+function escapeHtml(str) {
+    if (str === null || str === undefined) return "";
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     initThemeToggle();
     initNavigationTabs();
@@ -65,33 +78,61 @@ function initThemeToggle() {
    Navigation Tabs
    ========================================================================== */
 function initNavigationTabs() {
-    const tabLinks = document.querySelectorAll(".tab-link");
+    const navButtons = document.querySelectorAll(".sidebar-tab-btn, .tab-link");
     const tabViews = document.querySelectorAll(".tab-view");
+    const breadcrumb = document.getElementById("activeBreadcrumb");
 
-    tabLinks.forEach(link => {
-        link.addEventListener("click", () => {
-            const targetId = link.getAttribute("data-target");
+    window.switchDashboardTab = function(targetId) {
+        if (!targetId) return;
 
-            // Update Tab Link States
-            tabLinks.forEach(tl => {
-                tl.classList.remove("active");
-                tl.setAttribute("aria-selected", "false");
-            });
-            link.classList.add("active");
-            link.setAttribute("aria-selected", "true");
+        let matchedBtn = null;
+        navButtons.forEach(btn => {
+            if (btn.getAttribute("data-target") === targetId) {
+                btn.classList.add("active");
+                btn.setAttribute("aria-selected", "true");
+                matchedBtn = btn;
+            } else {
+                btn.classList.remove("active");
+                btn.setAttribute("aria-selected", "false");
+            }
+        });
 
-            // Update Tab View Visibility
-            tabViews.forEach(view => {
+        tabViews.forEach(view => {
+            if (view.id === targetId) {
+                view.classList.add("active");
+            } else {
                 view.classList.remove("active");
-                if (view.id === targetId) {
-                    view.classList.add("active");
-                }
-            });
+            }
+        });
 
-            // Trigger chart resize if needed
-            window.dispatchEvent(new Event("resize"));
+        if (breadcrumb && matchedBtn) {
+            const span = matchedBtn.querySelector("span");
+            if (span) breadcrumb.textContent = span.textContent;
+        }
+
+        if (targetId === "view-students" && (!cachedStudents || cachedStudents.length === 0)) {
+            fetchStudentsDirectory();
+        }
+
+        try {
+            history.replaceState(null, "", `#${targetId}`);
+        } catch (e) {}
+
+        window.dispatchEvent(new Event("resize"));
+    };
+
+    navButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const targetId = btn.getAttribute("data-target");
+            if (targetId) window.switchDashboardTab(targetId);
         });
     });
+
+    // Check if initial hash matches a view
+    const initialHash = window.location.hash.replace("#", "");
+    if (initialHash && document.getElementById(initialHash)) {
+        window.switchDashboardTab(initialHash);
+    }
 }
 
 /* ==========================================================================
@@ -738,30 +779,41 @@ function filterSkillsByTag(skillName) {
    5. Students Directory & Offers Tab
    ========================================================================== */
 async function fetchStudentsDirectory() {
-    const res = await fetch("/api/students");
-    cachedStudents = await res.json();
+    try {
+        const res = await fetch("/api/students");
+        if (!res.ok) {
+            throw new Error(`Server returned HTTP ${res.status}`);
+        }
+        cachedStudents = await res.json();
 
-    // Populate student modal select dropdown
-    const selectStudent = document.getElementById("selectStudent");
-    if (selectStudent) {
-        selectStudent.innerHTML = `<option value="">-- Choose Eligible Student --</option>` +
-            cachedStudents
-                .filter(s => s.is_eligible === 1)
-                .map(s => `<option value="${s.student_id}">${s.roll_no} - ${s.name} (${s.department}, CGPA: ${s.cgpa})</option>`)
-                .join("");
+        // Populate student modal select dropdown
+        const selectStudent = document.getElementById("selectStudent");
+        if (selectStudent && Array.isArray(cachedStudents)) {
+            selectStudent.innerHTML = `<option value="">-- Choose Eligible Student --</option>` +
+                cachedStudents
+                    .filter(s => s.is_eligible === 1)
+                    .map(s => `<option value="${s.student_id}">${escapeHtml(s.roll_no)} - ${escapeHtml(s.name)} (${escapeHtml(s.department)}, CGPA: ${s.cgpa || '--'})</option>`)
+                    .join("");
+        }
+
+        renderStudentsTable(cachedStudents);
+    } catch (err) {
+        console.error("Error loading students directory:", err);
+        const tbody = document.getElementById("studentsTableBody");
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="12" class="text-center" style="padding: 2.5rem; color: var(--rose-600);"><i class="fa-solid fa-triangle-exclamation" style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem;"></i>Failed to load students: ${escapeHtml(err.message || err)}</td></tr>`;
+        }
     }
-
-    renderStudentsTable(cachedStudents);
 }
 
 function renderStudentsTable(students) {
     const tbody = document.getElementById("studentsTableBody");
     const countSpan = document.getElementById("filteredStudentCount");
-    if (countSpan) countSpan.textContent = students.length;
+    if (countSpan) countSpan.textContent = Array.isArray(students) ? students.length : 0;
 
     if (!tbody) return;
 
-    if (students.length === 0) {
+    if (!Array.isArray(students) || students.length === 0) {
         tbody.innerHTML = `<tr><td colspan="12" class="text-center" style="padding: 2.5rem; color: var(--slate-500);"><i class="fa-solid fa-users-slash" style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem; opacity: 0.5;"></i>No matching student records found.</td></tr>`;
         return;
     }
@@ -780,33 +832,37 @@ function renderStudentsTable(students) {
         }
 
         let statusBadge = `<span class="status-pill status-unplaced">Unplaced</span>`;
-        if (s.placement_status === "Placed" || s.total_offers > 0) {
+        if (s.placement_status === "Placed" || (s.total_offers && s.total_offers > 0)) {
             statusBadge = `<span class="status-pill status-placed">Placed</span>`;
         } else if (s.placement_status === "Pending") {
             statusBadge = `<span class="badge-pending">Pending</span>`;
         }
 
-        const highestPkg = s.highest_package > 0 ? `${s.highest_package} LPA` : "--";
-        const offersCount = s.total_offers > 1
+        const highestPkg = (s.highest_package && Number(s.highest_package) > 0) ? `${Number(s.highest_package).toFixed(2)} LPA` : "--";
+        const offersCount = (s.total_offers > 1)
             ? `<strong style="color: var(--royal-600);">${s.total_offers} (Multi)</strong>`
-            : (s.total_offers > 0 ? `<strong style="color: var(--emerald-600);">1 Offer</strong>` : "0");
+            : ((s.total_offers > 0) ? `<strong style="color: var(--emerald-600);">1 Offer</strong>` : "0");
 
         const yearSec = `${s.year_of_study || '4th Year'} (${s.section || 'A'})`;
-        const backlogsBadge = s.backlogs > 0
+        const backlogsBadge = (s.backlogs !== undefined && s.backlogs > 0)
             ? `<strong style="color: var(--rose-600);">${s.backlogs}</strong>`
             : `<span style="color: var(--emerald-600);">0</span>`;
 
+        const cgpaFormatted = (s.cgpa !== null && s.cgpa !== undefined && !isNaN(Number(s.cgpa)))
+            ? Number(s.cgpa).toFixed(2)
+            : "--";
+
         return `
             <tr>
-                <td><code>${s.roll_no}</code></td>
+                <td><code>${escapeHtml(s.roll_no)}</code></td>
                 <td>
-                    <div class="student-name-text" style="font-weight: 700;">${s.name}</div>
-                    <div style="font-size: 0.75rem; color: var(--slate-500); margin-top: 2px;">${s.email || ''}</div>
+                    <div class="student-name-text" style="font-weight: 700;">${escapeHtml(s.name)}</div>
+                    <div style="font-size: 0.75rem; color: var(--slate-500); margin-top: 2px;">${escapeHtml(s.email || '')}</div>
                 </td>
                 <td>${typeBadge}</td>
-                <td>${s.department}</td>
-                <td><span style="font-size: 0.82rem; font-weight: 600;">${yearSec}</span></td>
-                <td><strong>${Number(s.cgpa).toFixed(2)}</strong></td>
+                <td>${escapeHtml(s.department)}</td>
+                <td><span style="font-size: 0.82rem; font-weight: 600;">${escapeHtml(yearSec)}</span></td>
+                <td><strong>${cgpaFormatted}</strong></td>
                 <td>${backlogsBadge}</td>
                 <td>${eligBadge}</td>
                 <td>${statusBadge}</td>
@@ -849,7 +905,7 @@ function initEventListeners() {
         const status = statusSelect ? statusSelect.value : "ALL";
         const query = studentSearch ? studentSearch.value.trim().toLowerCase() : "";
 
-        const filtered = cachedStudents.filter(s => {
+        const filtered = (cachedStudents || []).filter(s => {
             const matchesDept = (dept === "ALL" || s.department === dept);
 
             let matchesType = true;
@@ -859,15 +915,15 @@ function initEventListeners() {
             }
 
             let matchesStatus = true;
-            if (status === "Placed") matchesStatus = (s.placement_status === "Placed" || s.total_offers > 0);
-            else if (status === "Unplaced") matchesStatus = (s.placement_status === "Unplaced" && s.total_offers === 0);
+            if (status === "Placed") matchesStatus = (s.placement_status === "Placed" || (s.total_offers && s.total_offers > 0));
+            else if (status === "Unplaced") matchesStatus = (s.placement_status === "Unplaced" && (!s.total_offers || s.total_offers === 0));
             else if (status === "Eligible") matchesStatus = (s.placement_eligibility === "Eligible" || s.is_eligible === 1);
             else if (status === "Ineligible") matchesStatus = (s.placement_eligibility === "Not Eligible" || s.is_eligible === 0);
             else if (status === "Pending") matchesStatus = (s.placement_eligibility === "Pending" || s.placement_status === "Pending");
 
             const matchesQuery = !query ||
-                s.name.toLowerCase().includes(query) ||
-                s.roll_no.toLowerCase().includes(query) ||
+                (s.name && s.name.toLowerCase().includes(query)) ||
+                (s.roll_no && s.roll_no.toLowerCase().includes(query)) ||
                 (s.department && s.department.toLowerCase().includes(query)) ||
                 (s.diploma_college && s.diploma_college.toLowerCase().includes(query)) ||
                 (s.diploma_qualification && s.diploma_qualification.toLowerCase().includes(query)) ||

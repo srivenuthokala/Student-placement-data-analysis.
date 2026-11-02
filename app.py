@@ -23,7 +23,7 @@ import io
 import pandas as pd
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from database import fetch_dataframe, execute_non_query, init_database, log_audit_event
+from database import fetch_dataframe, execute_non_query, init_database, log_audit_event, clean_records
 from academic_data import SUBJECTS_BY_DEPARTMENT
 from analysis import (
     calculate_placement_rate,
@@ -368,7 +368,7 @@ def api_student_me():
     student["total_offers"] = len(student["offers"])
     student["highest_package"] = max([o["package"] for o in student["offers"]], default=0.0)
 
-    return jsonify({"success": True, "student": student})
+    return jsonify({"success": True, "student": clean_records(student)})
 
 
 @app.route("/api/summary")
@@ -525,16 +525,29 @@ def api_students():
                s.placement_eligibility, s.placement_status,
                s.diploma_qualification, s.diploma_percentage, s.diploma_college,
                s.admission_year, s.graduation_year,
-               GROUP_CONCAT(sk.skill_name, ', ') AS skills,
-               COUNT(p.placement_id) AS total_offers,
-               MAX(p.package) AS highest_package,
-               GROUP_CONCAT(DISTINCT p.company) AS companies
+               (
+                   SELECT GROUP_CONCAT(sk.skill_name, ', ')
+                   FROM student_skills ss
+                   JOIN skills sk ON ss.skill_id = sk.skill_id
+                   WHERE ss.student_id = s.student_id
+               ) AS skills,
+               (
+                   SELECT COUNT(p.placement_id)
+                   FROM placements p
+                   WHERE p.student_id = s.student_id
+               ) AS total_offers,
+               (
+                   SELECT MAX(p.package)
+                   FROM placements p
+                   WHERE p.student_id = s.student_id
+               ) AS highest_package,
+               (
+                   SELECT GROUP_CONCAT(DISTINCT p.company)
+                   FROM placements p
+                   WHERE p.student_id = s.student_id
+               ) AS companies
         FROM students s
-        LEFT JOIN student_skills ss ON s.student_id = ss.student_id
-        LEFT JOIN skills sk ON ss.skill_id = sk.skill_id
-        LEFT JOIN placements p ON s.student_id = p.student_id
         WHERE s.graduation_year = ?
-        GROUP BY s.student_id
         ORDER BY s.student_id ASC
     """
     df = fetch_dataframe(query, params=(grad_year,))
@@ -558,7 +571,7 @@ def api_students():
         if admission_type_filter != "ALL":
             df = df[df["admission_type"].str.lower() == admission_type_filter.lower()]
 
-    return jsonify(df.to_dict(orient="records"))
+    return jsonify(clean_records(df))
 
 
 @app.route("/api/student/<int:student_id>", methods=["GET"])
@@ -599,7 +612,7 @@ def api_get_student_profile(student_id):
     marks_df = fetch_dataframe("SELECT subject, semester, internal_marks, external_marks, total_marks, grade, credits FROM marks WHERE student_id = ?", (student_id,))
     student["marks_records"] = marks_df.to_dict(orient="records") if not marks_df.empty else []
 
-    return jsonify({"success": True, "student": student})
+    return jsonify({"success": True, "student": clean_records(student)})
 
 
 @app.route("/api/student/<int:student_id>", methods=["PUT"])
@@ -1219,7 +1232,7 @@ def api_audit_logs():
         ORDER BY log_id DESC
         LIMIT 50
     """)
-    return jsonify(df.to_dict(orient="records"))
+    return jsonify(clean_records(df))
 
 
 
@@ -1259,7 +1272,7 @@ def api_companies():
         GROUP BY c.company_id, c.name
         ORDER BY total_offers DESC, c.name ASC
     """)
-    return jsonify(df.to_dict(orient="records"))
+    return jsonify(clean_records(df))
 
 
 @app.route("/api/placement-drives", methods=["GET", "POST"])
@@ -1298,7 +1311,7 @@ def api_placement_drives():
         FROM placement_drives
         ORDER BY drive_date ASC
     """)
-    return jsonify(df.to_dict(orient="records"))
+    return jsonify(clean_records(df))
 
 
 @app.route("/api/applications", methods=["GET", "POST"])
@@ -1332,7 +1345,7 @@ def api_applications():
         FROM applications
         ORDER BY application_id DESC
     """)
-    return jsonify(df.to_dict(orient="records"))
+    return jsonify(clean_records(df))
 
 
 @app.route("/api/eligibility-rules", methods=["GET", "POST"])
@@ -1444,7 +1457,7 @@ def api_users():
         FROM faculty
         ORDER BY faculty_id ASC
     """)
-    return jsonify(df.to_dict(orient="records"))
+    return jsonify(clean_records(df))
 
 
 @app.route("/api/export/<dataset>", methods=["GET"])

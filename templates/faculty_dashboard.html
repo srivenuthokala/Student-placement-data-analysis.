@@ -2354,7 +2354,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- Application Script -->
-    <script src="/static/js/app.js?v=2.2"></script>
+    <script src="/static/js/app.js?v=2.3"></script>
 
     <!-- Faculty Portal Sidebar & UI Switcher Script -->
     <script>
@@ -2367,19 +2367,23 @@
             sidebarButtons.forEach(btn => {
                 btn.addEventListener('click', () => {
                     const targetId = btn.getAttribute('data-target');
-                    sidebarButtons.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
+                    if (window.switchDashboardTab) {
+                        window.switchDashboardTab(targetId);
+                    } else {
+                        sidebarButtons.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
 
-                    tabViews.forEach(v => {
-                        v.classList.remove('active');
-                        if (v.id === targetId) v.classList.add('active');
-                    });
+                        tabViews.forEach(v => {
+                            v.classList.remove('active');
+                            if (v.id === targetId) v.classList.add('active');
+                        });
 
-                    if (breadcrumb) {
-                        breadcrumb.textContent = btn.querySelector('span').textContent;
+                        if (breadcrumb) {
+                            breadcrumb.textContent = btn.querySelector('span').textContent;
+                        }
+
+                        window.dispatchEvent(new Event('resize'));
                     }
-
-                    window.dispatchEvent(new Event('resize'));
                 });
             });
 
