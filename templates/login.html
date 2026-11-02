@@ -3,8 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>University Portal | Academic &amp; Placement Gateway</title>
-    <meta name="description" content="Secure University Portal login gateway for Faculty members and Student candidates.">
+    <title>Login to Dashboard | EduPlace University Portal</title>
+    <meta name="description" content="Unified Institutional Login Portal for Faculty members and Student candidates.">
+    <!-- Immediate Theme Application Script (Prevents FOUC) -->
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('eduplace_theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,7 +19,7 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css?v=2.3">
 </head>
 <body class="login-page-body">
     <!-- Top University Banner Header -->
@@ -23,30 +30,29 @@
             </div>
             <div class="login-brand-title">
                 <h1>EduPlace University Portal</h1>
-                <span>Integrated Academic &amp; Placement Analytics System</span>
+                <span>Institutional Sign In Gateway</span>
             </div>
         </div>
-        <div class="login-academic-session">
-            <i class="fa-regular fa-calendar-check" style="color: #60a5fa; margin-right: 4px;"></i>
-            <span>Academic Year 2024-2025 &bull; Active</span>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <a href="/" class="landing-nav-link" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+                <i class="fa-solid fa-house"></i>
+                <span>Return to Landing Page</span>
+            </a>
+            <!-- Dark / Light Mode Switcher -->
+            <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle Dark or Light Theme" title="Toggle Theme">
+                <i class="fa-solid fa-moon"></i>
+                <span class="theme-toggle-text">Dark Mode</span>
+            </button>
         </div>
     </header>
 
     <!-- Main Container -->
-    <main class="login-main-container">
-        <!-- Welcome Message Heading -->
-        <div class="login-welcome-box">
-            <span class="welcome-eyebrow">Institutional Access Portal</span>
-            <h2 class="welcome-title">Welcome to Our Portal</h2>
-            <p class="welcome-subtitle" id="portalSubheading">
-                Please select your role below to access your academic dashboard, student records, and institutional services.
-            </p>
-        </div>
+    <main class="login-main-container" style="justify-content: center; align-items: center; min-height: 75vh; margin-top: 1.5rem; margin-bottom: 2rem;">
 
         <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
-                <div style="max-width: 580px; margin: 0 auto 1.5rem;">
+                <div style="max-width: 480px; width: 100%; margin: 0 auto 1.25rem;">
                     {% for category, message in messages %}
                         <div class="toast {% if category == 'error' %}toast-error{% else %}toast-success{% endif %}" style="display: flex; margin-bottom: 0.5rem;">
                             <i class="fa-solid {% if category == 'error' %}fa-circle-exclamation{% else %}fa-circle-check{% endif %}"></i>
@@ -58,221 +64,80 @@
         {% endwith %}
 
         <!-- Client Alert Box -->
-        <div id="jsAlertBox" class="toast toast-error" style="display: none; max-width: 500px; margin: 0 auto 1.5rem;">
+        <div id="jsAlertBox" class="toast toast-error" style="display: none; max-width: 480px; width: 100%; margin: 0 auto 1.25rem;">
             <i class="fa-solid fa-circle-exclamation"></i>
             <span id="jsAlertMessage">Invalid credentials.</span>
         </div>
 
-        <!-- ================= VIEW 1: ROLE SELECTION CARDS ================= -->
-        <div class="login-cards-grid" id="roleSelectionGrid">
-            <!-- Faculty Login Card -->
-            <div class="login-choice-card" id="btnSelectFaculty" role="button" tabindex="0">
-                <div class="card-banner-stripe stripe-faculty"></div>
-                <div class="login-choice-body">
-                    <div class="choice-icon-wrap icon-faculty-theme">
-                        <i class="fa-solid fa-chalkboard-user"></i>
-                    </div>
-                    <span class="choice-role-tag tag-faculty">Faculty &amp; Administration</span>
-                    <h3>Faculty Login</h3>
-                    <p>
-                        Comprehensive portal for professors, course instructors, and placement coordinators to manage academic progress and cohorts.
-                    </p>
-                    <ul class="choice-features-list">
-                        <li><i class="fa-solid fa-check"></i> Dashboard Overview &amp; Placement KPIs</li>
-                        <li><i class="fa-solid fa-check"></i> Student &amp; Attendance Management</li>
-                        <li><i class="fa-solid fa-check"></i> Marks, Performance &amp; Study Materials</li>
-                        <li><i class="fa-solid fa-check"></i> Official Reports &amp; Placement Drives</li>
-                    </ul>
-                </div>
-                <div class="login-choice-footer">
-                    <div class="choice-action-text">
-                        <span>Sign In as Faculty</span>
-                        <i class="fa-solid fa-arrow-right"></i>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Student Login Card -->
-            <div class="login-choice-card" id="btnSelectStudent" role="button" tabindex="0">
-                <div class="card-banner-stripe stripe-student"></div>
-                <div class="login-choice-body">
-                    <div class="choice-icon-wrap icon-student-theme">
-                        <i class="fa-solid fa-user-graduate"></i>
-                    </div>
-                    <span class="choice-role-tag tag-student">Student Candidate</span>
-                    <h3>Student Login</h3>
-                    <p>
-                        Personalized academic workspace for enrolled students to monitor curriculum progress, attendance, and placement offers.
-                    </p>
-                    <ul class="choice-features-list">
-                        <li><i class="fa-solid fa-check"></i> Personal Attendance &amp; Subject Progress</li>
-                        <li><i class="fa-solid fa-check"></i> Academic Marks, SGPA &amp; Results</li>
-                        <li><i class="fa-solid fa-check"></i> Timetable, Assignments &amp; Handouts</li>
-                        <li><i class="fa-solid fa-check"></i> Verified Job Offers &amp; Skill Insights</li>
-                    </ul>
-                </div>
-                <div class="login-choice-footer">
-                    <div class="choice-action-text">
-                        <span style="color: var(--emerald-600);">Sign In as Student</span>
-                        <i class="fa-solid fa-arrow-right" style="color: var(--emerald-600);"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================= VIEW 2: FACULTY LOGIN FORM ================= -->
-        <div class="auth-box-card" id="facultyFormBox" style="display: none;">
+        <!-- ================= UNIFIED LOGIN CARD ================= -->
+        <div class="auth-box-card" style="box-shadow: var(--shadow-modal);">
             <div class="auth-box-header">
-                <button type="button" class="auth-back-btn" id="btnBackFromFaculty">
-                    <i class="fa-solid fa-arrow-left"></i>
-                    <span>Back to Role Selection</span>
-                </button>
                 <div class="auth-box-title-group">
-                    <div class="auth-title-pill icon-faculty-theme">
-                        <i class="fa-solid fa-chalkboard-user"></i>
+                    <div class="auth-title-pill" style="background: linear-gradient(135deg, var(--royal-600), var(--navy-800)); color: #fff;">
+                        <i class="fa-solid fa-user-lock"></i>
                     </div>
                     <div>
-                        <h3>Faculty Portal Sign In</h3>
-                        <p>Authorized access for professors &amp; department heads</p>
+                        <h3 style="font-size: 1.35rem; font-weight: 800;">Login to Dashboard</h3>
+                        <p style="font-size: 0.8rem; color: var(--slate-500); margin-top: 2px;">
+                            Unified portal access &bull; Auto-detects Faculty vs. Student
+                        </p>
                     </div>
                 </div>
             </div>
 
-            <form id="facultyLoginForm" method="POST" action="/login/faculty">
+            <form id="unifiedLoginForm" method="POST" action="/login">
                 <div class="form-group-clean">
-                    <label for="facultyIdentifier">Faculty ID / Username <span style="color: var(--rose-600);">*</span></label>
+                    <label for="loginIdentifier">Username / Roll Number / ID <span style="color: var(--rose-600);">*</span></label>
                     <div class="form-control-wrap">
-                        <i class="fa-solid fa-id-badge field-leading-icon"></i>
+                        <i class="fa-solid fa-user field-leading-icon"></i>
                         <input 
                             type="text" 
-                            id="facultyIdentifier" 
+                            id="loginIdentifier" 
                             name="identifier" 
                             class="form-input-clean" 
-                            placeholder="Enter Faculty ID (e.g. FAC001) or Username" 
+                            placeholder="Enter username (faculty or student)" 
                             required 
+                            autofocus 
                             autocomplete="username"
                         >
                     </div>
                 </div>
 
                 <div class="form-group-clean">
-                    <label for="facultyPassword">Password <span style="color: var(--rose-600);">*</span></label>
+                    <label for="loginPassword">Password <span style="color: var(--rose-600);">*</span></label>
                     <div class="form-control-wrap">
                         <i class="fa-solid fa-lock field-leading-icon"></i>
                         <input 
                             type="password" 
-                            id="facultyPassword" 
+                            id="loginPassword" 
                             name="password" 
                             class="form-input-clean" 
-                            placeholder="Enter password" 
+                            placeholder="Enter your password" 
                             required 
                             autocomplete="current-password"
                         >
-                        <button type="button" class="field-password-toggle" id="toggleFacultyPassword" title="Show/Hide Password" aria-label="Toggle password visibility">
-                            <i class="fa-regular fa-eye" id="facultyEyeIcon"></i>
+                        <button type="button" class="field-password-toggle" id="toggleLoginPassword" title="Show/Hide Password" aria-label="Toggle password visibility">
+                            <i class="fa-regular fa-eye" id="loginEyeIcon"></i>
                         </button>
                     </div>
                 </div>
 
                 <div style="margin-top: 1.5rem;">
-                    <button type="submit" class="btn btn-primary btn-block" id="btnSubmitFacultyLogin" style="padding: 0.85rem;">
+                    <button type="submit" class="btn btn-primary btn-block" id="btnSubmitLogin" style="padding: 0.85rem; font-size: 0.95rem;">
                         <i class="fa-solid fa-arrow-right-to-bracket"></i>
-                        <span>Sign In to Faculty Dashboard</span>
+                        <span>Sign In to Dashboard</span>
                     </button>
                 </div>
 
-                <!-- Auto-fill Demo Credentials -->
-                <div class="demo-credentials-banner">
-                    <div style="display: flex; align-items: center; gap: 0.4rem; font-weight: 700; color: var(--navy-900);">
-                        <i class="fa-solid fa-key" style="color: var(--royal-600);"></i>
-                        <span>Quick Demo Credentials (Click to Auto-Fill):</span>
-                    </div>
-                    <button type="button" class="demo-chip-action" onclick="autoFillFaculty('faculty', 'Faculty@123')">
-                        <strong>Username:</strong> <code>faculty</code> &bull; <strong>Password:</strong> <code>Faculty@123</code>
-                    </button>
-                    <button type="button" class="demo-chip-action" onclick="autoFillFaculty('FAC001', 'Faculty@123')">
-                        <strong>Faculty ID:</strong> <code>FAC001</code> &bull; <strong>Password:</strong> <code>Faculty@123</code>
-                    </button>
+                <div style="text-align: center; margin-top: 1.5rem;">
+                    <a href="/" class="landing-nav-link" style="font-size: 0.82rem; color: var(--slate-500); display: inline-flex; align-items: center; gap: 0.35rem;">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Back to Landing Page</span>
+                    </a>
                 </div>
             </form>
         </div>
 
-        <!-- ================= VIEW 3: STUDENT LOGIN FORM ================= -->
-        <div class="auth-box-card" id="studentFormBox" style="display: none;">
-            <div class="auth-box-header">
-                <button type="button" class="auth-back-btn" id="btnBackFromStudent">
-                    <i class="fa-solid fa-arrow-left"></i>
-                    <span>Back to Role Selection</span>
-                </button>
-                <div class="auth-box-title-group">
-                    <div class="auth-title-pill icon-student-theme">
-                        <i class="fa-solid fa-user-graduate"></i>
-                    </div>
-                    <div>
-                        <h3>Student Portal Sign In</h3>
-                        <p>Access your individual marks, attendance &amp; offers</p>
-                    </div>
-                </div>
-            </div>
-
-            <form id="studentLoginForm" method="POST" action="/login/student">
-                <div class="form-group-clean">
-                    <label for="studentIdentifier">Student ID / Roll Number <span style="color: var(--rose-600);">*</span></label>
-                    <div class="form-control-wrap">
-                        <i class="fa-solid fa-address-card field-leading-icon"></i>
-                        <input 
-                            type="text" 
-                            id="studentIdentifier" 
-                            name="identifier" 
-                            class="form-input-clean" 
-                            placeholder="Enter Roll No (e.g. COM2025001) or ID" 
-                            required 
-                            autocomplete="username"
-                        >
-                    </div>
-                </div>
-
-                <div class="form-group-clean">
-                    <label for="studentPassword">Password <span style="color: var(--rose-600);">*</span></label>
-                    <div class="form-control-wrap">
-                        <i class="fa-solid fa-lock field-leading-icon"></i>
-                        <input 
-                            type="password" 
-                            id="studentPassword" 
-                            name="password" 
-                            class="form-input-clean" 
-                            placeholder="Enter password" 
-                            required 
-                            autocomplete="current-password"
-                        >
-                        <button type="button" class="field-password-toggle" id="toggleStudentPassword" title="Show/Hide Password" aria-label="Toggle password visibility">
-                            <i class="fa-regular fa-eye" id="studentEyeIcon"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div style="margin-top: 1.5rem;">
-                    <button type="submit" class="btn btn-success btn-block" id="btnSubmitStudentLogin" style="padding: 0.85rem; background-color: var(--royal-600);">
-                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
-                        <span>Sign In to Student Dashboard</span>
-                    </button>
-                </div>
-
-                <!-- Auto-fill Demo Credentials -->
-                <div class="demo-credentials-banner">
-                    <div style="display: flex; align-items: center; gap: 0.4rem; font-weight: 700; color: var(--navy-900);">
-                        <i class="fa-solid fa-key" style="color: var(--emerald-600);"></i>
-                        <span>Quick Demo Credentials (Click to Auto-Fill):</span>
-                    </div>
-                    <button type="button" class="demo-chip-action" onclick="autoFillStudent('COM2025001', 'Student@123')">
-                        <strong>Roll No:</strong> <code>COM2025001</code> &bull; <strong>Password:</strong> <code>Student@123</code>
-                    </button>
-                    <button type="button" class="demo-chip-action" onclick="autoFillStudent('INF2025004', 'Student@123')">
-                        <strong>Roll No:</strong> <code>INF2025004</code> &bull; <strong>Password:</strong> <code>Student@123</code>
-                    </button>
-                </div>
-            </form>
-        </div>
     </main>
 
     <!-- University Footer -->
@@ -283,122 +148,91 @@
     <!-- Interactive Script -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const roleSelectionGrid = document.getElementById('roleSelectionGrid');
-            const facultyFormBox = document.getElementById('facultyFormBox');
-            const studentFormBox = document.getElementById('studentFormBox');
-            const portalSubheading = document.getElementById('portalSubheading');
-
-            const btnSelectFaculty = document.getElementById('btnSelectFaculty');
-            const btnSelectStudent = document.getElementById('btnSelectStudent');
-            const btnBackFromFaculty = document.getElementById('btnBackFromFaculty');
-            const btnBackFromStudent = document.getElementById('btnBackFromStudent');
-
-            function showSelection() {
-                roleSelectionGrid.style.display = 'grid';
-                facultyFormBox.style.display = 'none';
-                studentFormBox.style.display = 'none';
-                portalSubheading.textContent = 'Please select your role below to access your academic dashboard, student records, and institutional services.';
-                window.history.replaceState({}, '', '/login');
-            }
-
-            function showFaculty() {
-                roleSelectionGrid.style.display = 'none';
-                facultyFormBox.style.display = 'block';
-                studentFormBox.style.display = 'none';
-                portalSubheading.textContent = 'Faculty Verification Portal. Authenticate with your Faculty ID or registered username.';
-                document.getElementById('facultyIdentifier').focus();
-            }
-
-            function showStudent() {
-                roleSelectionGrid.style.display = 'none';
-                facultyFormBox.style.display = 'none';
-                studentFormBox.style.display = 'block';
-                portalSubheading.textContent = 'Student Candidate Portal. Authenticate with your Student Roll Number or ID.';
-                document.getElementById('studentIdentifier').focus();
-            }
-
-            btnSelectFaculty.addEventListener('click', showFaculty);
-            btnSelectFaculty.addEventListener('keydown', (e) => { if (e.key === 'Enter') showFaculty(); });
-
-            btnSelectStudent.addEventListener('click', showStudent);
-            btnSelectStudent.addEventListener('keydown', (e) => { if (e.key === 'Enter') showStudent(); });
-
-            btnBackFromFaculty.addEventListener('click', showSelection);
-            btnBackFromStudent.addEventListener('click', showSelection);
-
-            // Toggle Password Visibility
-            setupPasswordToggle('facultyPassword', 'toggleFacultyPassword', 'facultyEyeIcon');
-            setupPasswordToggle('studentPassword', 'toggleStudentPassword', 'studentEyeIcon');
-
-            function setupPasswordToggle(inputElId, btnElId, iconElId) {
-                const inputEl = document.getElementById(inputElId);
-                const btnEl = document.getElementById(btnElId);
-                const iconEl = document.getElementById(iconElId);
-                btnEl.addEventListener('click', () => {
-                    const isPass = inputEl.getAttribute('type') === 'password';
-                    inputEl.setAttribute('type', isPass ? 'text' : 'password');
-                    iconEl.className = isPass ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+            // Setup Password Toggle
+            const inputPass = document.getElementById('loginPassword');
+            const btnToggle = document.getElementById('toggleLoginPassword');
+            const iconEye = document.getElementById('loginEyeIcon');
+            if (btnToggle && inputPass && iconEye) {
+                btnToggle.addEventListener('click', () => {
+                    const isPass = inputPass.getAttribute('type') === 'password';
+                    inputPass.setAttribute('type', isPass ? 'text' : 'password');
+                    iconEye.className = isPass ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
                 });
             }
 
-            // Check initial view from query param
-            const urlParams = new URLSearchParams(window.location.search);
-            const role = urlParams.get('role');
-            if (role === 'faculty') showFaculty();
-            else if (role === 'student') showStudent();
-
-            // Setup AJAX login for instant error feedback
-            setupAjax('facultyLoginForm', 'btnSubmitFacultyLogin');
-            setupAjax('studentLoginForm', 'btnSubmitStudentLogin');
-        });
-
-        function setupAjax(formId, submitBtnId) {
-            const form = document.getElementById(formId);
-            const btn = document.getElementById(submitBtnId);
+            // Setup AJAX Unified Login
+            const form = document.getElementById('unifiedLoginForm');
+            const btnSubmit = document.getElementById('btnSubmitLogin');
             const alertBox = document.getElementById('jsAlertBox');
             const alertMsg = document.getElementById('jsAlertMessage');
 
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 alertBox.style.display = 'none';
-                const originalHtml = btn.innerHTML;
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Verifying...</span>';
+                const originalHtml = btnSubmit.innerHTML;
+                btnSubmit.disabled = true;
+                btnSubmit.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Authenticating...</span>';
 
                 const formData = new FormData(form);
                 const jsonPayload = {};
                 formData.forEach((v, k) => jsonPayload[k] = v);
 
                 try {
-                    const res = await fetch(form.action, {
+                    const res = await fetch('/login', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
                         body: JSON.stringify(jsonPayload)
                     });
                     const data = await res.json();
                     if (res.ok && data.success) {
-                        btn.innerHTML = '<i class="fa-solid fa-check"></i> <span>Authorized! Loading...</span>';
+                        btnSubmit.innerHTML = '<i class="fa-solid fa-check"></i> <span>Authorized! Opening Dashboard...</span>';
                         window.location.href = data.redirect || '/';
                     } else {
-                        btn.disabled = false;
-                        btn.innerHTML = originalHtml;
-                        alertMsg.textContent = data.error || 'Invalid credentials. Please verify and try again.';
+                        btnSubmit.disabled = false;
+                        btnSubmit.innerHTML = originalHtml;
+                        alertMsg.textContent = data.error || 'Invalid credentials. Please verify username and password.';
                         alertBox.style.display = 'flex';
                     }
                 } catch (err) {
                     form.submit();
                 }
             });
-        }
 
-        function autoFillFaculty(u, p) {
-            document.getElementById('facultyIdentifier').value = u;
-            document.getElementById('facultyPassword').value = p;
-        }
+            // Theme Switcher Logic
+            initThemeToggle();
+        });
 
-        function autoFillStudent(r, p) {
-            document.getElementById('studentIdentifier').value = r;
-            document.getElementById('studentPassword').value = p;
+        function initThemeToggle() {
+            const toggleBtn = document.getElementById('themeToggleBtn');
+            if (!toggleBtn) return;
+
+            function updateThemeUI(theme) {
+                const icon = toggleBtn.querySelector('i');
+                const label = toggleBtn.querySelector('.theme-toggle-text');
+                if (theme === 'dark') {
+                    if (icon) icon.className = 'fa-solid fa-sun';
+                    if (label) label.textContent = 'Light Mode';
+                    toggleBtn.setAttribute('title', 'Switch to Light Mode');
+                } else {
+                    if (icon) icon.className = 'fa-solid fa-moon';
+                    if (label) label.textContent = 'Dark Mode';
+                    toggleBtn.setAttribute('title', 'Switch to Dark Mode');
+                }
+            }
+
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            updateThemeUI(currentTheme);
+
+            toggleBtn.addEventListener('click', () => {
+                const active = document.documentElement.getAttribute('data-theme') || 'light';
+                const nextTheme = active === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', nextTheme);
+                localStorage.setItem('eduplace_theme', nextTheme);
+                updateThemeUI(nextTheme);
+            });
         }
     </script>
 </body>

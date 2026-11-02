@@ -16,11 +16,50 @@ let cachedStudents = [];
 let cachedSkills = [];
 
 document.addEventListener("DOMContentLoaded", () => {
+    initThemeToggle();
     initNavigationTabs();
     initModals();
     initEventListeners();
     loadAllDashboardData();
 });
+
+/* ==========================================================================
+   Theme Switcher (Dark Mode / Light Mode)
+   ========================================================================== */
+function initThemeToggle() {
+    const toggleBtn = document.getElementById("themeToggleBtn");
+    if (!toggleBtn) return;
+
+    function updateThemeUI(theme) {
+        const icon = toggleBtn.querySelector("i");
+        const label = toggleBtn.querySelector(".theme-toggle-text");
+        if (theme === "dark") {
+            if (icon) icon.className = "fa-solid fa-sun";
+            if (label) label.textContent = "Light Mode";
+            toggleBtn.setAttribute("title", "Switch to Light Mode");
+        } else {
+            if (icon) icon.className = "fa-solid fa-moon";
+            if (label) label.textContent = "Dark Mode";
+            toggleBtn.setAttribute("title", "Switch to Dark Mode");
+        }
+        if (window.Chart) {
+            Chart.defaults.color = theme === "dark" ? "#94a3b8" : "#64748b";
+            Chart.defaults.borderColor = theme === "dark" ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.06)";
+        }
+    }
+
+    const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
+    updateThemeUI(currentTheme);
+
+    toggleBtn.addEventListener("click", () => {
+        const active = document.documentElement.getAttribute("data-theme") || "light";
+        const nextTheme = active === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", nextTheme);
+        localStorage.setItem("eduplace_theme", nextTheme);
+        updateThemeUI(nextTheme);
+        window.dispatchEvent(new Event("resize"));
+    });
+}
 
 /* ==========================================================================
    Navigation Tabs
@@ -66,11 +105,16 @@ async function loadAllDashboardData() {
             fetchPackageAnalytics(),
             fetchSkillDemand(),
             fetchStudentsDirectory(),
-            fetchCompanyPartners()
+            fetchCompanyPartners(),
+            fetchCompaniesList(),
+            fetchPlacementDrives(),
+            fetchApplications(),
+            fetchEligibilityRules(),
+            fetchUsersList(),
+            fetchAuditLogs()
         ]);
     } catch (err) {
         console.error("Error loading dashboard data:", err);
-        showToast("Error connecting to server. Please check backend.", "error");
     }
 }
 
@@ -307,7 +351,7 @@ async function fetchPackageAnalytics() {
                 </div>
                 <div class="stat-box">
                     <div class="stat-box-title">Std Deviation</div>
-                    <div class="stat-box-value" style="color: var(--navy-900);">${stats["Std Dev"] || "--"}</div>
+                    <div class="stat-box-value">${stats["Std Dev"] || "--"}</div>
                 </div>
                 <div class="stat-box">
                     <div class="stat-box-title">Interquartile Range</div>
@@ -420,7 +464,7 @@ async function fetchCompanyPartners() {
                     <td><strong>${item.name}</strong></td>
                     <td><span style="font-size: 0.82rem; color: var(--slate-600);">${item.department}</span></td>
                     <td>
-                        <strong style="color: var(--navy-900);"><i class="fa-solid fa-briefcase" style="color: var(--royal-600); margin-right: 4px;"></i> ${item.company}</strong>
+                        <strong class="student-name-text"><i class="fa-solid fa-briefcase" style="color: var(--royal-600); margin-right: 4px;"></i> ${item.company}</strong>
                     </td>
                     <td>${item.role}</td>
                     <td><strong style="color: var(--emerald-600); font-size: 0.92rem;">${item.package} LPA</strong></td>
@@ -756,7 +800,7 @@ function renderStudentsTable(students) {
             <tr>
                 <td><code>${s.roll_no}</code></td>
                 <td>
-                    <div style="font-weight: 700; color: var(--navy-900);">${s.name}</div>
+                    <div class="student-name-text" style="font-weight: 700;">${s.name}</div>
                     <div style="font-size: 0.75rem; color: var(--slate-500); margin-top: 2px;">${s.email || ''}</div>
                 </td>
                 <td>${typeBadge}</td>
@@ -1485,7 +1529,7 @@ function initModals() {
 
                 if (data.success) {
                     showToast(`Successfully processed: ${data.success_count} added, ${data.failed_count} failed.`, data.failed_count > 0 ? "error" : "success");
-                    
+
                     if (bulkResultsPanel) {
                         bulkResultsPanel.style.display = "block";
                         document.getElementById("bulkTotalParsed").textContent = data.total_records;
@@ -1535,7 +1579,7 @@ function initModals() {
 /* ==========================================================================
    Global Helper Functions for Table Actions (Called inline from rendered HTML)
    ========================================================================== */
-window.openViewProfileModal = async function(studentId) {
+window.openViewProfileModal = async function (studentId) {
     try {
         const res = await fetch(`/api/student/${studentId}`);
         const data = await res.json();
@@ -1632,7 +1676,7 @@ window.openViewProfileModal = async function(studentId) {
     }
 };
 
-window.openEditStudentModal = async function(studentId) {
+window.openEditStudentModal = async function (studentId) {
     try {
         const res = await fetch(`/api/student/${studentId}`);
         const data = await res.json();
@@ -1670,7 +1714,7 @@ window.openEditStudentModal = async function(studentId) {
     }
 };
 
-window.openQuickPlacementModal = function(studentId) {
+window.openQuickPlacementModal = function (studentId) {
     const placementModal = document.getElementById("placementModal");
     const selectStudent = document.getElementById("selectStudent");
     if (selectStudent) {
@@ -1682,7 +1726,7 @@ window.openQuickPlacementModal = function(studentId) {
     }
 };
 
-window.openDeleteStudentModal = function(studentId) {
+window.openDeleteStudentModal = function (studentId) {
     const s = cachedStudents.find(x => x.student_id === studentId);
     if (!s) return;
 
@@ -1720,4 +1764,296 @@ function showToast(message, type = "success") {
         toast.style.transform = "translateX(100%)";
         setTimeout(() => toast.remove(), 300);
     }, 4000);
+}
+
+/* ==========================================================================
+   Companies, Drives, Applications, Eligibility, Users & Audit Logs Handlers
+   ========================================================================== */
+
+async function fetchCompaniesList() {
+    try {
+        const res = await fetch("/api/companies");
+        if (!res.ok) return;
+        const data = await res.json();
+        const tbody = document.getElementById("companiesTableBody");
+        const kpiTotal = document.getElementById("kpiTotalCompanies");
+        if (kpiTotal) kpiTotal.textContent = data.length || 10;
+        if (tbody && data.length > 0) {
+            tbody.innerHTML = data.map(c => `
+                <tr>
+                    <td><strong>${escapeHtml(c.name)}</strong></td>
+                    <td>${escapeHtml(c.industry || "Technology")}</td>
+                    <td><span class="kpi-badge ${c.tier && c.tier.includes('1') ? 'badge-success' : 'badge-primary'}">${escapeHtml(c.tier || "Tier 2")}</span></td>
+                    <td>${escapeHtml(c.location || "Pan India")}</td>
+                    <td><strong>${c.total_offers || 0}</strong></td>
+                    <td><strong style="color: var(--royal-600);">${c.avg_package ? c.avg_package + " LPA" : "N/A"}</strong></td>
+                    <td><code>${escapeHtml(c.contact_email || "-")}</code></td>
+                </tr>
+            `).join("");
+        }
+    } catch (e) {
+        console.error("Error fetching companies:", e);
+    }
+}
+
+async function fetchPlacementDrives() {
+    try {
+        const res = await fetch("/api/placement-drives");
+        if (!res.ok) return;
+        const data = await res.json();
+        const tbody = document.getElementById("drivesTableBody");
+        if (tbody && data.length > 0) {
+            tbody.innerHTML = data.map(d => `
+                <tr>
+                    <td><strong>${escapeHtml(d.company_name)}</strong></td>
+                    <td>${escapeHtml(d.role)}</td>
+                    <td><strong style="color: var(--royal-600);">${d.package_lpa} LPA</strong></td>
+                    <td>${escapeHtml(d.drive_date)}</td>
+                    <td>${escapeHtml(d.eligible_departments || "All")}</td>
+                    <td><strong>&ge; ${d.min_cgpa} CGPA</strong></td>
+                    <td><span class="status-pill ${d.status === 'Active' ? 'status-eligible' : (d.status === 'Completed' ? 'status-placed' : 'badge-warning')}">${escapeHtml(d.status)}</span></td>
+                    <td><strong>${d.registered_count || 0} Candidates</strong></td>
+                </tr>
+            `).join("");
+        }
+    } catch (e) {
+        console.error("Error fetching drives:", e);
+    }
+}
+
+async function fetchApplications() {
+    try {
+        const res = await fetch("/api/applications");
+        if (!res.ok) return;
+        const data = await res.json();
+        const tbody = document.getElementById("applicationsTableBody");
+        if (tbody && data.length > 0) {
+            tbody.innerHTML = data.map(a => `
+                <tr>
+                    <td><code>${escapeHtml(a.roll_no)}</code></td>
+                    <td><strong>${escapeHtml(a.student_name)}</strong></td>
+                    <td>${escapeHtml(a.department)}</td>
+                    <td><strong>${escapeHtml(a.company)}</strong></td>
+                    <td>${escapeHtml(a.role)}</td>
+                    <td><span class="badge ${a.current_round && (a.current_round.includes('HR') || a.current_round.includes('Offer')) ? 'badge-success' : 'badge-warning'}">${escapeHtml(a.current_round || "Round 1")}</span></td>
+                    <td><span class="status-pill ${a.status === 'Placed' || a.status === 'Selected' ? 'status-placed' : 'status-eligible'}">${escapeHtml(a.status || "In Progress")}</span></td>
+                    <td><strong>${a.package_lpa ? a.package_lpa + " LPA" : "-"}</strong></td>
+                </tr>
+            `).join("");
+        }
+    } catch (e) {
+        console.error("Error fetching applications:", e);
+    }
+}
+
+async function fetchEligibilityRules() {
+    try {
+        const res = await fetch("/api/eligibility-rules");
+        if (!res.ok) return;
+        const data = await res.json();
+        const minCgpaInput = document.getElementById("ruleMinCgpa");
+        const maxBacklogsInput = document.getElementById("ruleMaxBacklogs");
+        const elEligible = document.getElementById("elCountEligible");
+        const elIneligible = document.getElementById("elCountIneligible");
+
+        if (minCgpaInput && data.min_cgpa) minCgpaInput.value = data.min_cgpa;
+        if (maxBacklogsInput && data.max_backlogs !== undefined) maxBacklogsInput.value = data.max_backlogs;
+        if (elEligible && data.stats) elEligible.textContent = data.stats.eligible_count;
+        if (elIneligible && data.stats) elIneligible.textContent = data.stats.ineligible_count;
+    } catch (e) {
+        console.error("Error fetching eligibility rules:", e);
+    }
+}
+
+async function handleSaveEligibility(e) {
+    e.preventDefault();
+    const btn = document.getElementById("btnApplyEligibility");
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Re-Calculating...';
+
+    const minCgpa = parseFloat(document.getElementById("ruleMinCgpa").value);
+    const maxBacklogs = parseInt(document.getElementById("ruleMaxBacklogs").value);
+
+    try {
+        const res = await fetch("/api/eligibility-rules", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ min_cgpa: minCgpa, max_backlogs: maxBacklogs })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast(data.message, "success");
+            fetchEligibilityRules();
+            fetchStudentsDirectory();
+            fetchSummaryKPIs();
+        } else {
+            showToast(data.error || "Failed to update eligibility rules", "error");
+        }
+    } catch (err) {
+        showToast("Error updating rules: " + err, "error");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+}
+
+async function handleSaveCompany(e) {
+    e.preventDefault();
+    const name = document.getElementById("compName").value;
+    const industry = document.getElementById("compIndustry").value;
+    const tier = document.getElementById("compTier").value;
+    const email = document.getElementById("compEmail").value;
+    const location = document.getElementById("compLocation").value;
+
+    try {
+        const res = await fetch("/api/companies", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, industry, tier, contact_email: email, location })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast(data.message, "success");
+            document.getElementById("companyModal").classList.remove("open");
+            document.getElementById("addCompanyForm").reset();
+            fetchCompaniesList();
+        } else {
+            showToast(data.error || "Failed to save company", "error");
+        }
+    } catch (err) {
+        showToast("Error: " + err, "error");
+    }
+}
+
+async function handleSaveDrive(e) {
+    e.preventDefault();
+    const company = document.getElementById("drvCompany").value;
+    const role = document.getElementById("drvRole").value;
+    const pkg = parseFloat(document.getElementById("drvPackage").value);
+    const date = document.getElementById("drvDate").value;
+    const minCgpa = parseFloat(document.getElementById("drvMinCgpa").value);
+    const depts = document.getElementById("drvDepartments").value;
+
+    try {
+        const res = await fetch("/api/placement-drives", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                company_name: company,
+                role,
+                package_lpa: pkg,
+                drive_date: date,
+                min_cgpa: minCgpa,
+                eligible_departments: depts
+            })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast(data.message, "success");
+            document.getElementById("driveModal").classList.remove("open");
+            document.getElementById("scheduleDriveForm").reset();
+            fetchPlacementDrives();
+        } else {
+            showToast(data.error || "Failed to schedule drive", "error");
+        }
+    } catch (err) {
+        showToast("Error: " + err, "error");
+    }
+}
+
+async function handleSaveUser(e) {
+    e.preventDefault();
+    const code = document.getElementById("usrCode").value;
+    const username = document.getElementById("usrUsername").value;
+    const name = document.getElementById("usrName").value;
+    const dept = document.getElementById("usrDept").value;
+    const email = document.getElementById("usrEmail").value;
+    const pass = document.getElementById("usrPass").value;
+
+    try {
+        const res = await fetch("/api/users", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ faculty_code: code, username, name, department: dept, email, password: pass })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast(data.message, "success");
+            document.getElementById("userModal").classList.remove("open");
+            document.getElementById("addUserForm").reset();
+            fetchUsersList();
+        } else {
+            showToast(data.error || "Failed to create user", "error");
+        }
+    } catch (err) {
+        showToast("Error: " + err, "error");
+    }
+}
+
+async function handleSaveSettings(e) {
+    e.preventDefault();
+    const targetYear = document.getElementById("cfgTargetYear").value;
+    const instName = document.getElementById("cfgInstName").value;
+    const tpoEmail = document.getElementById("cfgTpoEmail").value;
+
+    try {
+        const res = await fetch("/api/system-settings", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ target_graduation_year: targetYear, institution_name: instName, contact_email: tpoEmail })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showToast("System settings saved successfully.", "success");
+        }
+    } catch (err) {
+        showToast("Error saving settings: " + err, "error");
+    }
+}
+
+async function fetchUsersList() {
+    try {
+        const res = await fetch("/api/users");
+        if (!res.ok) return;
+        const data = await res.json();
+        const tbody = document.getElementById("usersTableBody");
+        if (tbody && data.length > 0) {
+            tbody.innerHTML = data.map(u => `
+                <tr>
+                    <td><code>${escapeHtml(u.faculty_code)}</code></td>
+                    <td><strong>${escapeHtml(u.name)}</strong></td>
+                    <td><code>${escapeHtml(u.username)}</code></td>
+                    <td>${escapeHtml(u.department || "-")}</td>
+                    <td>${escapeHtml(u.email || "-")}</td>
+                    <td><span class="role-pill role-faculty">${escapeHtml(u.username === 'faculty' ? 'Faculty Coordinator' : 'Placement Officer')}</span></td>
+                    <td><span class="status-pill status-placed">Active</span></td>
+                </tr>
+            `).join("");
+        }
+    } catch (e) {
+        console.error("Error fetching users:", e);
+    }
+}
+
+async function fetchAuditLogs() {
+    try {
+        const res = await fetch("/api/audit-logs");
+        if (!res.ok) return;
+        const data = await res.json();
+        const tbody = document.getElementById("auditLogsTableBody");
+        if (tbody && data.length > 0) {
+            tbody.innerHTML = data.map(l => `
+                <tr>
+                    <td><span style="font-family: var(--font-mono); font-size: 0.8rem;">${escapeHtml(l.created_at)}</span></td>
+                    <td><span class="kpi-badge badge-primary">${escapeHtml(l.action)}</span></td>
+                    <td><code>${escapeHtml(l.roll_no || '# ' + l.student_id)}</code></td>
+                    <td><strong>${escapeHtml(l.performed_by)}</strong></td>
+                    <td><div style="max-height: 48px; overflow-y: auto; font-family: var(--font-mono); font-size: 0.75rem; color: var(--slate-600);">${escapeHtml(l.details)}</div></td>
+                </tr>
+            `).join("");
+        }
+    } catch (e) {
+        console.error("Error fetching audit logs:", e);
+    }
 }

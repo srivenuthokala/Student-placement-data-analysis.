@@ -41,6 +41,8 @@ app.secret_key = os.getenv("SECRET_KEY", "eduplace_student_placement_analytics_s
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
+app.config["TEMPLATES_AUTO_RELOAD"] = True
+app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
 
 # Ensure required directories exist
 os.makedirs(CHARTS_DIR, exist_ok=True)
@@ -110,110 +112,99 @@ def student_required(f):
 # ============================================================================
 @app.route("/")
 def index():
-    """Root entry point: redirects authenticated users to their dashboard, else login page."""
+    """Root entry point: renders the informational landing page with 'Login to Dashboard' CTA."""
     if "role" in session:
         if session["role"] == "faculty":
             return redirect(url_for("faculty_dashboard"))
         elif session["role"] == "student":
             return redirect(url_for("student_dashboard"))
-    return redirect(url_for("login"))
+    return render_template("landing.html")
 
 
-@app.route("/login", methods=["GET"])
+@app.route("/login", methods=["GET", "POST"])
 def login():
-    """Renders the login selection page with Faculty Login and Student Login options."""
-    if "role" in session:
-        if session["role"] == "faculty":
-            return redirect(url_for("faculty_dashboard"))
-        elif session["role"] == "student":
-            return redirect(url_for("student_dashboard"))
+    """Unified login gateway: renders login page on GET, auto-detects Faculty vs. Student on POST."""
+    if request.method == "GET":
+        if "role" in session:
+            if session["role"] == "faculty":
+                return redirect(url_for("faculty_dashboard"))
+            elif session["role"] == "student":
+                return redirect(url_for("student_dashboard"))
+        return render_template("login.html")
 
-    active_tab = request.args.get("role", "selection").lower()
-    return render_template("login.html", active_tab=active_tab)
-
-
-@app.route("/login/faculty", methods=["POST"])
-def login_faculty():
-    """Authenticates faculty members by Faculty ID or Username."""
+    # POST: Unified Auto-detecting authentication
     data = request.get_json(silent=True) or request.form
-    identifier = str(data.get("identifier", "")).strip()
+    identifier = str(data.get("identifier", data.get("username", ""))).strip()
     password = str(data.get("password", "")).strip()
 
     if not (identifier and password):
-        msg = "Please enter both Faculty ID / Username and Password."
+        msg = "Please enter both Username / Roll Number and Password."
         if request.is_json:
             return jsonify({"success": False, "error": msg}), 400
         flash(msg, "error")
-        return redirect(url_for("login", role="faculty"))
+        return redirect(url_for("login"))
 
-    df = fetch_dataframe(
+    # 1. Try authenticating as Faculty (username: faculty / password: faculty123)
+    df_fac = fetch_dataframe(
         "SELECT faculty_id, faculty_code, username, name, department, email, password_hash "
         "FROM faculty WHERE LOWER(username) = LOWER(?) OR LOWER(faculty_code) = LOWER(?)",
         (identifier, identifier)
     )
+    if not df_fac.empty and check_password_hash(df_fac.iloc[0]["password_hash"], password):
+        row = df_fac.iloc[0]
+        session.clear()
+        session["user_id"] = int(row["faculty_id"])
+        session["role"] = "faculty"
+        session["faculty_code"] = str(row["faculty_code"])
+        session["username"] = str(row["username"])
+        session["name"] = str(row["name"])
+        session["department"] = str(row["department"])
+        session.permanent = True
 
-    if df.empty or not check_password_hash(df.iloc[0]["password_hash"], password):
-        msg = "Invalid Faculty ID / Username or Password."
         if request.is_json:
-            return jsonify({"success": False, "error": msg}), 401
-        flash(msg, "error")
-        return redirect(url_for("login", role="faculty"))
+            return jsonify({"success": True, "role": "faculty", "redirect": url_for("faculty_dashboard")})
+        return redirect(url_for("faculty_dashboard"))
 
-    row = df.iloc[0]
-    session.clear()
-    session["user_id"] = int(row["faculty_id"])
-    session["role"] = "faculty"
-    session["faculty_code"] = str(row["faculty_code"])
-    session["username"] = str(row["username"])
-    session["name"] = str(row["name"])
-    session["department"] = str(row["department"])
-    session.permanent = True
+    # 2. Try authenticating as Student (username: student / password: student123 or roll_no)
+    student_id_val = int(identifier) if identifier.isdigit() else -1
+    df_stu = fetch_dataframe(
+        "SELECT student_id, roll_no, name, department, graduation_year, cgpa, is_eligible, password_hash "
+        "FROM students WHERE LOWER(roll_no) = LOWER(?) OR LOWER(username) = LOWER(?) OR student_id = ? "
+        "OR (LOWER(?) = 'student' AND student_id = (SELECT MIN(student_id) FROM students))",
+        (identifier, identifier, student_id_val, identifier)
+    )
+    if not df_stu.empty and check_password_hash(df_stu.iloc[0]["password_hash"], password):
+        row = df_stu.iloc[0]
+        session.clear()
+        session["user_id"] = int(row["student_id"])
+        session["role"] = "student"
+        session["roll_no"] = str(row["roll_no"])
+        session["name"] = str(row["name"])
+        session["department"] = str(row["department"])
+        session.permanent = True
 
+        if request.is_json:
+            return jsonify({"success": True, "role": "student", "redirect": url_for("student_dashboard")})
+        return redirect(url_for("student_dashboard"))
+
+    # Neither matched
+    msg = "Invalid credentials. Please verify your username and password."
     if request.is_json:
-        return jsonify({"success": True, "redirect": url_for("faculty_dashboard")})
-    return redirect(url_for("faculty_dashboard"))
+        return jsonify({"success": False, "error": msg}), 401
+    flash(msg, "error")
+    return redirect(url_for("login"))
+
+
+@app.route("/login/faculty", methods=["POST"])
+def login_faculty():
+    """Backward compatibility wrapper: delegates to unified login."""
+    return login()
 
 
 @app.route("/login/student", methods=["POST"])
 def login_student():
-    """Authenticates students by Student ID or Roll Number."""
-    data = request.get_json(silent=True) or request.form
-    identifier = str(data.get("identifier", "")).strip()
-    password = str(data.get("password", "")).strip()
-
-    if not (identifier and password):
-        msg = "Please enter both Student ID / Roll Number and Password."
-        if request.is_json:
-            return jsonify({"success": False, "error": msg}), 400
-        flash(msg, "error")
-        return redirect(url_for("login", role="student"))
-
-    student_id_val = int(identifier) if identifier.isdigit() else -1
-    df = fetch_dataframe(
-        "SELECT student_id, roll_no, name, department, graduation_year, cgpa, is_eligible, password_hash "
-        "FROM students WHERE LOWER(roll_no) = LOWER(?) OR student_id = ?",
-        (identifier, student_id_val)
-    )
-
-    if df.empty or not check_password_hash(df.iloc[0]["password_hash"], password):
-        msg = "Invalid Student ID / Roll Number or Password."
-        if request.is_json:
-            return jsonify({"success": False, "error": msg}), 401
-        flash(msg, "error")
-        return redirect(url_for("login", role="student"))
-
-    row = df.iloc[0]
-    session.clear()
-    session["user_id"] = int(row["student_id"])
-    session["role"] = "student"
-    session["roll_no"] = str(row["roll_no"])
-    session["name"] = str(row["name"])
-    session["department"] = str(row["department"])
-    session.permanent = True
-
-    if request.is_json:
-        return jsonify({"success": True, "redirect": url_for("student_dashboard")})
-    return redirect(url_for("student_dashboard"))
+    """Backward compatibility wrapper: delegates to unified login."""
+    return login()
 
 
 @app.route("/logout")
@@ -233,20 +224,18 @@ from academic_data import get_faculty_academic_bundle, get_student_academic_bund
 @app.route("/faculty/dashboard")
 @faculty_required
 def faculty_dashboard():
-    """Faculty Dashboard: complete access to faculty & administrative analytics."""
+    """Faculty Dashboard: complete access to faculty & administrative placement analytics."""
     faculty_info = {
         "name": session.get("name", "Faculty Member"),
         "username": session.get("username", "faculty"),
         "faculty_code": session.get("faculty_code", "FAC"),
         "department": session.get("department", "Computer Science")
     }
-    academic_data = get_faculty_academic_bundle(session.get("department"))
     return render_template(
         "faculty_dashboard.html",
         package_unit=PACKAGE_UNIT,
         grad_year=TARGET_GRADUATION_YEAR,
-        faculty=faculty_info,
-        academic=academic_data
+        faculty=faculty_info
     )
 
 
@@ -305,16 +294,13 @@ def student_dashboard():
     else:
         dept_stats["placement_rate"] = 0.0
 
-    academic_data = get_student_academic_bundle(student_id, student["department"])
-
     return render_template(
         "student_dashboard.html",
         package_unit=PACKAGE_UNIT,
         student=student,
         skills=skills,
         offers=offers,
-        dept_stats=dept_stats,
-        academic=academic_data
+        dept_stats=dept_stats
     )
 
 
@@ -1235,6 +1221,267 @@ def api_audit_logs():
     """)
     return jsonify(df.to_dict(orient="records"))
 
+
+
+@app.route("/api/companies", methods=["GET", "POST"])
+@login_required
+def api_companies():
+    """Returns partner companies with statistics or adds a new company."""
+    if request.method == "POST":
+        if session.get("role") != "faculty":
+            return jsonify({"success": False, "error": "Faculty permissions required."}), 403
+        data = request.get_json(silent=True) or request.form
+        name = str(data.get("name", "")).strip()
+        industry = str(data.get("industry", "Technology & Software")).strip()
+        tier = str(data.get("tier", "Tier 2 (Dream)")).strip()
+        website = str(data.get("website", "")).strip()
+        email = str(data.get("contact_email", "")).strip()
+        location = str(data.get("location", "Pan India")).strip()
+        if not name:
+            return jsonify({"success": False, "error": "Company name is required."}), 400
+        try:
+            execute_non_query("""
+                INSERT INTO companies (name, industry, tier, website, contact_email, location)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (name, industry, tier, website, email, location))
+            log_audit_event("COMPANY_ADDED", 0, "SYSTEM", json.dumps({"company": name, "tier": tier}), session.get("username", "faculty"))
+            return jsonify({"success": True, "message": f"Company '{name}' registered successfully."})
+        except Exception as e:
+            return jsonify({"success": False, "error": f"Error saving company: {e}"}), 400
+
+    df = fetch_dataframe("""
+        SELECT c.company_id, c.name, c.industry, c.tier, c.website, c.contact_email, c.location,
+               COUNT(p.placement_id) as total_offers,
+               ROUND(AVG(p.package), 2) as avg_package,
+               ROUND(MAX(p.package), 2) as max_package
+        FROM companies c
+        LEFT JOIN placements p ON LOWER(p.company) = LOWER(c.name)
+        GROUP BY c.company_id, c.name
+        ORDER BY total_offers DESC, c.name ASC
+    """)
+    return jsonify(df.to_dict(orient="records"))
+
+
+@app.route("/api/placement-drives", methods=["GET", "POST"])
+@login_required
+def api_placement_drives():
+    """Lists scheduled placement drives or creates a new drive."""
+    if request.method == "POST":
+        if session.get("role") != "faculty":
+            return jsonify({"success": False, "error": "Faculty permissions required."}), 403
+        data = request.get_json(silent=True) or request.form
+        company = str(data.get("company_name", "")).strip()
+        role = str(data.get("role", "")).strip()
+        package_lpa = float(data.get("package_lpa", 0))
+        drive_date = str(data.get("drive_date", "")).strip()
+        min_cgpa = float(data.get("min_cgpa", 6.0))
+        eligible_depts = str(data.get("eligible_departments", "All Departments")).strip()
+        max_backlogs = int(data.get("max_backlogs", 0))
+        status = str(data.get("status", "Upcoming")).strip()
+
+        if not (company and role and package_lpa > 0 and drive_date):
+            return jsonify({"success": False, "error": "Company, role, positive package, and drive date are required."}), 400
+
+        try:
+            execute_non_query("""
+                INSERT INTO placement_drives (company_name, role, package_lpa, drive_date, min_cgpa, eligible_departments, max_backlogs, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (company, role, package_lpa, drive_date, min_cgpa, eligible_depts, max_backlogs, status))
+            log_audit_event("DRIVE_SCHEDULED", 0, "SYSTEM", json.dumps({"company": company, "role": role, "package": package_lpa}), session.get("username", "faculty"))
+            return jsonify({"success": True, "message": f"Placement drive for '{company}' scheduled successfully."})
+        except Exception as e:
+            return jsonify({"success": False, "error": str(e)}), 400
+
+    df = fetch_dataframe("""
+        SELECT drive_id, company_name, role, package_lpa, drive_date, min_cgpa,
+               eligible_departments, max_backlogs, status, registered_count
+        FROM placement_drives
+        ORDER BY drive_date ASC
+    """)
+    return jsonify(df.to_dict(orient="records"))
+
+
+@app.route("/api/applications", methods=["GET", "POST"])
+@login_required
+def api_applications():
+    """Returns candidate applications or updates interview stage."""
+    if request.method == "POST":
+        if session.get("role") != "faculty":
+            return jsonify({"success": False, "error": "Faculty permissions required."}), 403
+        data = request.get_json(silent=True) or request.form
+        app_id = int(data.get("application_id", 0))
+        new_round = str(data.get("current_round", "")).strip()
+        new_status = str(data.get("status", "")).strip()
+
+        if not app_id:
+            return jsonify({"success": False, "error": "Application ID is required."}), 400
+
+        try:
+            execute_non_query("""
+                UPDATE applications
+                SET current_round = ?, status = ?
+                WHERE application_id = ?
+            """, (new_round, new_status, app_id))
+            return jsonify({"success": True, "message": "Candidate interview status updated."})
+        except Exception as e:
+            return jsonify({"success": False, "error": str(e)}), 400
+
+    df = fetch_dataframe("""
+        SELECT application_id, student_id, roll_no, student_name, department, company,
+               role, applied_date, current_round, status, package_lpa
+        FROM applications
+        ORDER BY application_id DESC
+    """)
+    return jsonify(df.to_dict(orient="records"))
+
+
+@app.route("/api/eligibility-rules", methods=["GET", "POST"])
+@faculty_required
+def api_eligibility_rules():
+    """Manages placement cutoff rules and recalculates cohort eligibility."""
+    if request.method == "POST":
+        data = request.get_json(silent=True) or request.form
+        min_cgpa = float(data.get("min_cgpa", 6.0))
+        max_backlogs = int(data.get("max_backlogs", 0))
+
+        # Update settings
+        execute_non_query("REPLACE INTO system_settings (setting_key, setting_val) VALUES ('min_cgpa_cutoff', ?)", (str(min_cgpa),))
+        execute_non_query("REPLACE INTO system_settings (setting_key, setting_val) VALUES ('max_backlogs_allowed', ?)", (str(max_backlogs),))
+
+        # Re-evaluate all students in cohort
+        execute_non_query("""
+            UPDATE students
+            SET is_eligible = CASE
+                WHEN cgpa >= ? AND COALESCE(backlogs, 0) <= ? THEN 1
+                ELSE 0
+            END,
+            placement_eligibility = CASE
+                WHEN cgpa >= ? AND COALESCE(backlogs, 0) <= ? THEN 'Eligible'
+                ELSE 'Not Eligible'
+            END
+        """, (min_cgpa, max_backlogs, min_cgpa, max_backlogs))
+
+        log_audit_event("ELIGIBILITY_RULES_UPDATED", 0, "SYSTEM", json.dumps({"min_cgpa": min_cgpa, "max_backlogs": max_backlogs}), session.get("username", "faculty"))
+
+        # Fetch new summary
+        eligible_cnt = fetch_dataframe("SELECT COUNT(*) as cnt FROM students WHERE is_eligible = 1").iloc[0]["cnt"]
+        total_cnt = fetch_dataframe("SELECT COUNT(*) as cnt FROM students").iloc[0]["cnt"]
+
+        return jsonify({
+            "success": True,
+            "message": f"Eligibility rules updated. {eligible_cnt} of {total_cnt} students are now marked eligible.",
+            "eligible_count": int(eligible_cnt),
+            "total_count": int(total_cnt)
+        })
+
+    # GET: return current rules & breakdown
+    settings_df = fetch_dataframe("SELECT setting_key, setting_val FROM system_settings")
+    settings_dict = dict(zip(settings_df["setting_key"], settings_df["setting_val"])) if not settings_df.empty else {}
+
+    min_cgpa = float(settings_dict.get("min_cgpa_cutoff", 6.0))
+    max_backlogs = int(settings_dict.get("max_backlogs_allowed", 0))
+
+    cohort_stats = fetch_dataframe("""
+        SELECT 
+            COUNT(*) as total_students,
+            SUM(CASE WHEN is_eligible = 1 THEN 1 ELSE 0 END) as eligible_count,
+            SUM(CASE WHEN is_eligible = 0 THEN 1 ELSE 0 END) as ineligible_count,
+            SUM(CASE WHEN cgpa < ? THEN 1 ELSE 0 END) as low_cgpa_count,
+            SUM(CASE WHEN COALESCE(backlogs, 0) > ? THEN 1 ELSE 0 END) as backlog_count
+        FROM students
+    """, (min_cgpa, max_backlogs)).iloc[0].to_dict()
+
+    return jsonify({
+        "min_cgpa": min_cgpa,
+        "max_backlogs": max_backlogs,
+        "policy_one_dream": settings_dict.get("policy_one_dream_offer", "Enabled"),
+        "stats": cohort_stats
+    })
+
+
+@app.route("/api/system-settings", methods=["GET", "POST"])
+@faculty_required
+def api_system_settings():
+    """Fetches or updates system configurations."""
+    if request.method == "POST":
+        data = request.get_json(silent=True) or request.form
+        for k, v in data.items():
+            execute_non_query("REPLACE INTO system_settings (setting_key, setting_val) VALUES (?, ?)", (str(k), str(v)))
+        return jsonify({"success": True, "message": "System settings saved successfully."})
+
+    df = fetch_dataframe("SELECT setting_key, setting_val FROM system_settings")
+    return jsonify(dict(zip(df["setting_key"], df["setting_val"])))
+
+
+@app.route("/api/users", methods=["GET", "POST"])
+@faculty_required
+def api_users():
+    """Lists authorized faculty and administrative accounts or creates a new account."""
+    if request.method == "POST":
+        data = request.get_json(silent=True) or request.form
+        code = str(data.get("faculty_code", "")).strip().upper()
+        username = str(data.get("username", "")).strip().lower()
+        name = str(data.get("name", "")).strip()
+        dept = str(data.get("department", "Training & Placement Cell")).strip()
+        email = str(data.get("email", "")).strip()
+        password = str(data.get("password", "Faculty@123")).strip()
+
+        if not (code and username and name):
+            return jsonify({"success": False, "error": "Faculty code, username, and full name are required."}), 400
+
+        try:
+            execute_non_query("""
+                INSERT INTO faculty (faculty_code, username, name, department, email, password_hash)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (code, username, name, dept, email, generate_password_hash(password)))
+            log_audit_event("USER_CREATED", 0, code, json.dumps({"username": username, "name": name, "department": dept}), session.get("username", "faculty"))
+            return jsonify({"success": True, "message": f"User account '{username}' created successfully."})
+        except Exception as e:
+            return jsonify({"success": False, "error": f"Failed to create user: {e}"}), 400
+
+    df = fetch_dataframe("""
+        SELECT faculty_id, faculty_code, username, name, department, email, created_at
+        FROM faculty
+        ORDER BY faculty_id ASC
+    """)
+    return jsonify(df.to_dict(orient="records"))
+
+
+@app.route("/api/export/<dataset>", methods=["GET"])
+@faculty_required
+def api_export_dataset(dataset):
+    """Exports dataset (students, placements, companies, drives) as CSV."""
+    if dataset == "students":
+        df = fetch_dataframe("""
+            SELECT roll_no, name, department, graduation_year, cgpa, is_eligible, placement_status,
+                   placement_eligibility, email, mobile, backlogs
+            FROM students ORDER BY roll_no ASC
+        """)
+        filename = "students_cohort_export.csv"
+    elif dataset == "placements":
+        df = fetch_dataframe("""
+            SELECT p.placement_id, s.roll_no, s.name as student_name, s.department, p.company,
+                   p.role, p.package as package_lpa, p.placement_date, p.status
+            FROM placements p
+            JOIN students s ON p.student_id = s.student_id
+            ORDER BY p.placement_date DESC
+        """)
+        filename = "placements_export.csv"
+    elif dataset == "companies":
+        df = fetch_dataframe("SELECT name, industry, tier, website, contact_email, location FROM companies ORDER BY name ASC")
+        filename = "recruiting_companies_export.csv"
+    elif dataset == "drives":
+        df = fetch_dataframe("SELECT company_name, role, package_lpa, drive_date, min_cgpa, eligible_departments, max_backlogs, status FROM placement_drives ORDER BY drive_date ASC")
+        filename = "placement_drives_schedule.csv"
+    else:
+        return jsonify({"success": False, "error": "Invalid export dataset."}), 400
+
+    csv_data = df.to_csv(index=False)
+    return Response(
+        csv_data,
+        mimetype="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
 
 
 @app.route("/api/seed", methods=["POST"])

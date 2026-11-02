@@ -1,21 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faculty Dashboard | EduPlace University</title>
-    <meta name="description" content="Executive Faculty and Academic Management Dashboard for Student Placement Analytics, Attendance, Marks, and Departmental Performance.">
+    <meta name="description"
+        content="Executive Faculty and Placement Portal for Campus Drives, Eligibility Cutoffs, Corporate Partners, Analytics, and Student Roster.">
+    <!-- Immediate Theme Application Script (Prevents FOUC) -->
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('eduplace_theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css?v=2.2">
 </head>
+
 <body>
     <div class="portal-layout">
         <!-- ================= LEFT SIDEBAR NAVIGATION ================= -->
@@ -43,81 +55,85 @@
                 </div>
             </div>
 
-            <!-- Sidebar Nav Links -->
-            <nav class="sidebar-nav" aria-label="Faculty Portal Menu">
-                <div class="nav-category-label">Academic &amp; Core</div>
+            <!-- Sidebar Nav Links (13 Placement Features) -->
+            <nav class="sidebar-nav" aria-label="Placement Portal Menu">
                 <ul class="nav-menu-list">
                     <li class="sidebar-nav-item">
                         <button type="button" class="sidebar-tab-btn active" data-target="view-overview">
-                            <i class="fa-solid fa-chart-pie"></i>
-                            <span>Dashboard Overview</span>
+                            <i class="fa-solid fa-table-cells-large"></i>
+                            <span>Dashboard</span>
                         </button>
                     </li>
                     <li class="sidebar-nav-item">
                         <button type="button" class="sidebar-tab-btn" data-target="view-students">
                             <i class="fa-solid fa-users"></i>
-                            <span>Student Management</span>
+                            <span>Students</span>
                         </button>
                     </li>
                     <li class="sidebar-nav-item">
-                        <button type="button" class="sidebar-tab-btn" data-target="view-attendance">
-                            <i class="fa-solid fa-clipboard-user"></i>
-                            <span>Attendance Records</span>
-                            {% if academic.low_attendance_students|length > 0 %}
-                                <span class="nav-item-badge" style="background: var(--rose-600);">{{ academic.low_attendance_students|length }} Alert</span>
-                            {% endif %}
+                        <button type="button" class="sidebar-tab-btn" data-target="view-companies">
+                            <i class="fa-solid fa-building"></i>
+                            <span>Companies</span>
                         </button>
                     </li>
                     <li class="sidebar-nav-item">
-                        <button type="button" class="sidebar-tab-btn" data-target="view-marks">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-drives">
+                            <i class="fa-solid fa-briefcase"></i>
+                            <span>Placement Drives</span>
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-applications">
+                            <i class="fa-regular fa-file-lines"></i>
+                            <span>Applications &amp; Interviews</span>
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-eligibility">
+                            <i class="fa-solid fa-sliders"></i>
+                            <span>Eligibility Rules &amp; Cutoffs</span>
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-offers">
                             <i class="fa-solid fa-award"></i>
-                            <span>Marks &amp; Performance</span>
+                            <span>Offers &amp; Salaries</span>
                         </button>
                     </li>
                     <li class="sidebar-nav-item">
-                        <button type="button" class="sidebar-tab-btn" data-target="view-assignments">
-                            <i class="fa-solid fa-book-open-reader"></i>
-                            <span>Assignments &amp; Notes</span>
-                        </button>
-                    </li>
-                    <li class="sidebar-nav-item">
-                        <button type="button" class="sidebar-tab-btn" data-target="view-announcements">
-                            <i class="fa-solid fa-bullhorn"></i>
-                            <span>Announcements</span>
-                        </button>
-                    </li>
-                </ul>
-
-                <div class="nav-category-label" style="margin-top: 0.8rem;">Placement &amp; Reports</div>
-                <ul class="nav-menu-list">
-                    <li class="sidebar-nav-item">
-                        <button type="button" class="sidebar-tab-btn" data-target="view-placements">
-                            <i class="fa-solid fa-file-signature"></i>
-                            <span>Placement Records</span>
-                        </button>
-                    </li>
-                    <li class="sidebar-nav-item">
-                        <button type="button" class="sidebar-tab-btn" data-target="view-departments">
-                            <i class="fa-solid fa-sitemap"></i>
-                            <span>Department Analytics</span>
-                        </button>
-                    </li>
-                    <li class="sidebar-nav-item">
-                        <button type="button" class="sidebar-tab-btn" data-target="view-packages">
-                            <i class="fa-solid fa-money-bill-trend-up"></i>
-                            <span>Salary &amp; Packages</span>
-                        </button>
-                    </li>
-                    <li class="sidebar-nav-item">
-                        <button type="button" class="sidebar-tab-btn" data-target="view-skills">
-                            <i class="fa-solid fa-code"></i>
-                            <span>Skill Demand Matrix</span>
-                        </button>
-                    </li>
-                    <li class="sidebar-nav-item">
-                        <button type="button" class="sidebar-tab-btn" data-target="view-charts">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-analytics">
                             <i class="fa-solid fa-chart-column"></i>
-                            <span>Matplotlib Visuals</span>
+                            <span>Placement Analytics</span>
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-import-export">
+                            <i class="fa-solid fa-table"></i>
+                            <span>Data Import &amp; Export</span>
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-reports">
+                            <i class="fa-solid fa-file-invoice"></i>
+                            <span>Reports</span>
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-users">
+                            <i class="fa-solid fa-user-gear"></i>
+                            <span>User Management</span>
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-settings">
+                            <i class="fa-solid fa-gear"></i>
+                            <span>System Settings</span>
+                        </button>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <button type="button" class="sidebar-tab-btn" data-target="view-audit-logs">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                            <span>Audit Logs</span>
                         </button>
                     </li>
                 </ul>
@@ -137,7 +153,8 @@
             <!-- Top Navigation Bar -->
             <header class="portal-topbar">
                 <div class="topbar-left">
-                    <button type="button" class="sidebar-toggle-btn" id="btnToggleSidebar" aria-label="Toggle Navigation">
+                    <button type="button" class="sidebar-toggle-btn" id="btnToggleSidebar"
+                        aria-label="Toggle Navigation">
                         <i class="fa-solid fa-bars"></i>
                     </button>
                     <div class="topbar-breadcrumbs">
@@ -149,11 +166,17 @@
 
                 <div class="topbar-right">
                     <div class="topbar-action-group">
+                        <!-- Dark / Light Mode Switcher -->
+                        <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle Theme" title="Toggle Dark/Light Mode">
+                            <i class="fa-solid fa-moon"></i>
+                            <span class="theme-toggle-text">Dark Mode</span>
+                        </button>
                         <div class="topbar-badge" title="Active graduation cohort">
                             <i class="fa-solid fa-calendar-check"></i>
                             <span>Cohort <strong>2025</strong></span>
                         </div>
-                        <button type="button" class="btn btn-secondary btn-sm" id="btnSeedData" title="Reset &amp; populate fictional records">
+                        <button type="button" class="btn btn-secondary btn-sm" id="btnSeedData"
+                            title="Reset &amp; populate fictional records">
                             <i class="fa-solid fa-arrows-rotate"></i>
                             <span>Re-Seed Data</span>
                         </button>
@@ -195,7 +218,8 @@
                                 <span class="kpi-badge badge-success">Target &gt;75%</span>
                             </div>
                             <p class="kpi-subtext">
-                                <i class="fa-solid fa-circle-info"></i> Denominator: <strong id="kpiEligibleDenominator">--</strong> eligible students
+                                <i class="fa-solid fa-circle-info"></i> Denominator: <strong
+                                    id="kpiEligibleDenominator">--</strong> eligible students
                             </p>
                         </div>
 
@@ -211,7 +235,8 @@
                                 <span class="kpi-subtext">/ <span id="kpiTotalOffers">--</span> Offers</span>
                             </div>
                             <p class="kpi-subtext">
-                                <i class="fa-solid fa-copy"></i> <span id="kpiDuplicateOffers">--</span> duplicate offers handled
+                                <i class="fa-solid fa-copy"></i> <span id="kpiDuplicateOffers">--</span> duplicate
+                                offers handled
                             </p>
                         </div>
 
@@ -227,7 +252,8 @@
                                 <span class="kpi-subtext">Median: <strong id="kpiMedianPackage">-- LPA</strong></span>
                             </div>
                             <p class="kpi-subtext">
-                                <i class="fa-solid fa-arrow-up-right-dots"></i> Highest Offer: <strong id="kpiMaxPackage">-- LPA</strong>
+                                <i class="fa-solid fa-arrow-up-right-dots"></i> Highest Offer: <strong
+                                    id="kpiMaxPackage">-- LPA</strong>
                             </p>
                         </div>
 
@@ -243,7 +269,8 @@
                                 <span class="kpi-subtext">/ <span id="kpiTotalEnrolled">--</span> Enrolled</span>
                             </div>
                             <p class="kpi-subtext">
-                                <i class="fa-solid fa-triangle-exclamation"></i> <span id="kpiIneligibleCount">--</span> Ineligible (CGPA &lt; 6.0 / Backlogs)
+                                <i class="fa-solid fa-triangle-exclamation"></i> <span id="kpiIneligibleCount">--</span>
+                                Ineligible (CGPA &lt; 6.0 / Backlogs)
                             </p>
                         </div>
                     </div>
@@ -308,22 +335,27 @@
                     <div class="view-header-strip">
                         <div>
                             <h2>All College Students &amp; Placement Directory</h2>
-                            <p>Manage enrolled regular and lateral-entry students, update eligibility, record company offers, and perform bulk roster uploads.</p>
+                            <p>Manage enrolled regular and lateral-entry students, update eligibility, record company
+                                offers, and perform bulk roster uploads.</p>
                         </div>
                         <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
                             <button type="button" class="btn btn-primary" id="btnOpenStudentModal">
                                 <i class="fa-solid fa-user-plus"></i>
                                 <span>Add New Student</span>
                             </button>
-                            <button type="button" class="btn" id="btnOpenLateralModal" style="background: #7c3aed; color: #fff; border: 1px solid #6d28d9;">
+                            <button type="button" class="btn" id="btnOpenLateralModal"
+                                style="background: #7c3aed; color: #fff; border: 1px solid #6d28d9;">
                                 <i class="fa-solid fa-user-graduate"></i>
                                 <span>Register Lateral Entry</span>
                             </button>
-                            <button type="button" class="btn" id="btnOpenBulkUploadModal" style="background: #059669; color: #fff; border: 1px solid #047857;">
+                            <button type="button" class="btn" id="btnOpenBulkUploadModal"
+                                style="background: #059669; color: #fff; border: 1px solid #047857;">
                                 <i class="fa-solid fa-file-excel"></i>
                                 <span>Bulk Student Upload</span>
                             </button>
-                            <a href="/api/students/sample-template" class="btn btn-secondary" id="btnDownloadSampleTemplate" download style="display: inline-flex; align-items: center; gap: 0.4rem;">
+                            <a href="/api/students/sample-template" class="btn btn-secondary"
+                                id="btnDownloadSampleTemplate" download
+                                style="display: inline-flex; align-items: center; gap: 0.4rem;">
                                 <i class="fa-solid fa-download"></i>
                                 <span>Sample Template</span>
                             </a>
@@ -335,7 +367,8 @@
                         <div class="white-card-body" style="padding: 1rem 1.25rem;">
                             <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
                                 <div style="flex: 1; min-width: 240px;">
-                                    <input type="text" id="studentSearchInput" class="form-control" placeholder="Search by name, roll no, department, diploma college, or company...">
+                                    <input type="text" id="studentSearchInput" class="form-control"
+                                        placeholder="Search by name, roll no, department, diploma college, or company...">
                                 </div>
                                 <div style="min-width: 170px;">
                                     <select id="filterDepartment" class="form-select">
@@ -370,14 +403,18 @@
 
                     <!-- Student Table Card -->
                     <div class="white-card">
-                        <div class="white-card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div class="white-card-header"
+                            style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
-                                <h3><i class="fa-solid fa-users"></i> All College Students (<span id="filteredStudentCount">0</span> records)</h3>
-                                <span class="card-subtitle">Active Database Records &bull; Real-time Placement Status</span>
+                                <h3><i class="fa-solid fa-users"></i> All College Students (<span
+                                        id="filteredStudentCount">0</span> records)</h3>
+                                <span class="card-subtitle">Active Database Records &bull; Real-time Placement
+                                    Status</span>
                             </div>
                             <div style="display: flex; gap: 0.5rem; align-items: center; font-size: 0.8rem;">
                                 <span class="badge-regular"><i class="fa-solid fa-graduation-cap"></i> Regular</span>
-                                <span class="badge-lateral"><i class="fa-solid fa-user-graduate"></i> Lateral Entry</span>
+                                <span class="badge-lateral"><i class="fa-solid fa-user-graduate"></i> Lateral
+                                    Entry</span>
                             </div>
                         </div>
                         <div class="table-responsive">
@@ -399,264 +436,485 @@
                                     </tr>
                                 </thead>
                                 <tbody id="studentsTableBody">
-                                    <tr><td colspan="12" class="text-center" style="padding: 2rem;">Loading student database records...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- ================= TAB 3: ATTENDANCE MANAGEMENT ================= -->
-                <section class="tab-view" id="view-attendance">
-                    <div class="view-header-strip">
-                        <div>
-                            <h2>Cohort Attendance Records &amp; Academic Alerts</h2>
-                            <p>Monitor class attendance, examine course attendance compliance, and track low-attendance candidates.</p>
-                        </div>
-                    </div>
-
-                    <!-- Attendance KPI Row -->
-                    <div class="kpi-grid">
-                        <div class="kpi-card">
-                            <div class="kpi-card-header">
-                                <span class="kpi-title">University Attendance Standard</span>
-                                <div class="kpi-icon-pill pill-royal">
-                                    <i class="fa-solid fa-graduation-cap"></i>
-                                </div>
-                            </div>
-                            <div class="kpi-value-row">
-                                <span class="kpi-number">75.0%</span>
-                                <span class="kpi-badge badge-primary">Minimum Threshold</span>
-                            </div>
-                            <p class="kpi-subtext">Required for exam registration &amp; placement drives</p>
-                        </div>
-
-                        <div class="kpi-card">
-                            <div class="kpi-card-header">
-                                <span class="kpi-title">Average Cohort Attendance</span>
-                                <div class="kpi-icon-pill pill-emerald">
-                                    <i class="fa-solid fa-user-check"></i>
-                                </div>
-                            </div>
-                            <div class="kpi-value-row">
-                                <span class="kpi-number">84.2%</span>
-                                <span class="kpi-badge badge-success">Good Standing</span>
-                            </div>
-                            <p class="kpi-subtext">Computed across 5 engineering departments</p>
-                        </div>
-
-                        <div class="kpi-card">
-                            <div class="kpi-card-header">
-                                <span class="kpi-title">Low Attendance Alerts</span>
-                                <div class="kpi-icon-pill pill-amber" style="background: var(--rose-50); color: var(--rose-600); border-color: var(--rose-100);">
-                                    <i class="fa-solid fa-triangle-exclamation"></i>
-                                </div>
-                            </div>
-                            <div class="kpi-value-row">
-                                <span class="kpi-number" style="color: var(--rose-600);">{{ academic.low_attendance_students|length }}</span>
-                                <span class="kpi-badge badge-warning" style="background: var(--rose-50); color: var(--rose-600);">Action Needed</span>
-                            </div>
-                            <p class="kpi-subtext">Students below mandatory 75% threshold</p>
-                        </div>
-
-                        <div class="kpi-card">
-                            <div class="kpi-card-header">
-                                <span class="kpi-title">Total Course Modules Tracked</span>
-                                <div class="kpi-icon-pill pill-indigo">
-                                    <i class="fa-solid fa-book-bookmark"></i>
-                                </div>
-                            </div>
-                            <div class="kpi-value-row">
-                                <span class="kpi-number">20</span>
-                                <span class="kpi-subtext">Core &amp; Elective Courses</span>
-                            </div>
-                            <p class="kpi-subtext">Semester 7 active lecture courses</p>
-                        </div>
-                    </div>
-
-                    <!-- Low Attendance Warning Table -->
-                    <div class="white-card">
-                        <div class="white-card-header">
-                            <h3><i class="fa-solid fa-triangle-exclamation" style="color: var(--rose-600);"></i> Students Requiring Attendance Intervention (&lt; 75%)</h3>
-                            <span class="card-subtitle">Immediate alert list for academic proctors</span>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="data-table">
-                                <thead>
                                     <tr>
-                                        <th>Student ID</th>
-                                        <th>Roll Number</th>
-                                        <th>Student Name</th>
-                                        <th>Department</th>
-                                        <th>Current CGPA</th>
-                                        <th>Overall Attendance</th>
-                                        <th>Academic Status</th>
+                                        <td colspan="12" class="text-center" style="padding: 2rem;">Loading student
+                                            database records...</td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {% for s in academic.low_attendance_students %}
-                                        <tr>
-                                            <td>#{{ s.student_id }}</td>
-                                            <td><code>{{ s.roll_no }}</code></td>
-                                            <td><strong>{{ s.name }}</strong></td>
-                                            <td>{{ s.department }}</td>
-                                            <td><strong>{{ s.cgpa }}</strong></td>
-                                            <td>
-                                                <span class="status-pill status-danger">
-                                                    <i class="fa-solid fa-arrow-down"></i> {{ s.avg_attendance }}%
-                                                </span>
-                                            </td>
-                                            <td><span class="badge badge-warning">Proctor Notice Issued</span></td>
-                                        </tr>
-                                    {% else %}
-                                        <tr><td colspan="7" class="text-center" style="padding: 1.5rem;">All enrolled students currently meet the minimum 75% attendance criteria.</td></tr>
-                                    {% endfor %}
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </section>
 
-                <!-- ================= TAB 4: MARKS & PERFORMANCE ================= -->
-                <section class="tab-view" id="view-marks">
+                <!-- ================= TAB 3: COMPANIES DIRECTORY ================= -->
+                <section class="tab-view" id="view-companies">
                     <div class="view-header-strip">
                         <div>
-                            <h2>Academic Marks &amp; CGPA Performance Analytics</h2>
-                            <p>Evaluates academic grade distribution, internal/external assessments, and top achievers.</p>
+                            <h2>Corporate Recruiting Partners &amp; Company Directory</h2>
+                            <p>Manage verified corporate hiring partners, recruitment tiers, and package benchmarks.</p>
                         </div>
-                    </div>
-
-                    <!-- Marks Summary Grid -->
-                    <div class="charts-grid-2col">
-                        <div class="white-card">
-                            <div class="white-card-header">
-                                <h3><i class="fa-solid fa-medal"></i> Grade Distribution (Semester 7)</h3>
-                                <span class="card-subtitle">Breakdown of student letter grades</span>
-                            </div>
-                            <div class="white-card-body">
-                                <div style="display: flex; justify-content: space-around; text-align: center; padding: 1rem 0;">
-                                    <div>
-                                        <span style="font-size: 2rem; font-weight: 800; color: var(--emerald-600);">{{ academic.grade_distribution.get('O', 0) }}</span>
-                                        <p style="font-size: 0.82rem; font-weight: 700; color: var(--slate-600);">Grade O (&gt;90)</p>
-                                    </div>
-                                    <div>
-                                        <span style="font-size: 2rem; font-weight: 800; color: var(--royal-600);">{{ academic.grade_distribution.get('A+', 0) }}</span>
-                                        <p style="font-size: 0.82rem; font-weight: 700; color: var(--slate-600);">Grade A+ (80-89)</p>
-                                    </div>
-                                    <div>
-                                        <span style="font-size: 2rem; font-weight: 800; color: var(--royal-500);">{{ academic.grade_distribution.get('A', 0) }}</span>
-                                        <p style="font-size: 0.82rem; font-weight: 700; color: var(--slate-600);">Grade A (70-79)</p>
-                                    </div>
-                                    <div>
-                                        <span style="font-size: 2rem; font-weight: 800; color: var(--amber-600);">{{ academic.grade_distribution.get('B+', 0) }}</span>
-                                        <p style="font-size: 0.82rem; font-weight: 700; color: var(--slate-600);">Grade B+ (60-69)</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="white-card">
-                            <div class="white-card-header">
-                                <h3><i class="fa-solid fa-graduation-cap"></i> Academic Excellence Standards</h3>
-                                <span class="card-subtitle">Criteria for Placement Eligibility</span>
-                            </div>
-                            <div class="white-card-body" style="font-size: 0.88rem; line-height: 1.6; color: var(--slate-700);">
-                                <p><i class="fa-solid fa-check text-emerald" style="color: var(--emerald-600); margin-right: 6px;"></i> <strong>CGPA &ge; 8.0:</strong> Eligible for Super Dream (&gt;15 LPA) recruitment drives.</p>
-                                <p><i class="fa-solid fa-check text-emerald" style="color: var(--emerald-600); margin-right: 6px;"></i> <strong>CGPA 6.0 - 7.99:</strong> Eligible for Dream and Core industrial placement tracks.</p>
-                                <p><i class="fa-solid fa-circle-exclamation text-amber" style="color: var(--amber-600); margin-right: 6px;"></i> <strong>CGPA &lt; 6.0 or Backlogs:</strong> Placed in academic remediation with special tutoring sessions.</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- ================= TAB 5: ASSIGNMENTS & STUDY MATERIALS ================= -->
-                <section class="tab-view" id="view-assignments">
-                    <div class="view-header-strip">
-                        <div>
-                            <h2>Course Assignments &amp; Digital Study Materials</h2>
-                            <p>Repository of active course assignments, lab problem statements, and lecture handouts.</p>
-                        </div>
-                    </div>
-
-                    <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--navy-900); margin-bottom: 1rem;">
-                        <i class="fa-solid fa-list-check" style="color: var(--royal-600);"></i> Active Course Assignments
-                    </h3>
-                    <div class="grid-cards-3col" style="margin-bottom: 2rem;">
-                        {% for a in academic.assignments %}
-                            <div class="academic-card">
-                                <div class="academic-card-top">
-                                    <span class="subject-badge">{{ a.department }} &bull; {{ a.subject }}</span>
-                                    <h4 style="margin-top: 0.5rem;">{{ a.title }}</h4>
-                                </div>
-                                <div class="academic-card-bottom">
-                                    <span><i class="fa-regular fa-clock"></i> Due: {{ a.due_date }}</span>
-                                    <span class="status-pill status-eligible">{{ a.status }}</span>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-
-                    <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--navy-900); margin-bottom: 1rem;">
-                        <i class="fa-solid fa-file-pdf" style="color: var(--royal-600);"></i> Recommended Study Materials &amp; Guides
-                    </h3>
-                    <div class="grid-cards-3col">
-                        {% for m in academic.materials %}
-                            <div class="academic-card">
-                                <div class="academic-card-top">
-                                    <span class="subject-badge">{{ m.department }} &bull; {{ m.subject }}</span>
-                                    <h4 style="margin-top: 0.5rem;">{{ m.title }}</h4>
-                                </div>
-                                <div class="academic-card-bottom">
-                                    <span>{{ m.material_type }} ({{ m.file_size }})</span>
-                                    <a href="#" class="btn btn-secondary btn-sm" onclick="alert('Downloading {{ m.title }}'); return false;">
-                                        <i class="fa-solid fa-download"></i> Download
-                                    </a>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </section>
-
-                <!-- ================= TAB 6: ANNOUNCEMENTS ================= -->
-                <section class="tab-view" id="view-announcements">
-                    <div class="view-header-strip">
-                        <div>
-                            <h2>University Announcements &amp; Recruitment Notices</h2>
-                            <p>Official notices broadcast to faculty, proctors, and eligible student cohorts.</p>
-                        </div>
-                        <button type="button" class="btn btn-primary" onclick="document.getElementById('announceModal').classList.add('open')">
+                        <button type="button" class="btn btn-primary" onclick="document.getElementById('companyModal').classList.add('open')">
                             <i class="fa-solid fa-plus"></i>
-                            <span>Create New Announcement</span>
+                            <span>Register New Company</span>
                         </button>
                     </div>
 
-                    <div class="announcements-list">
-                        {% for n in academic.announcements %}
-                            <div class="announcement-item">
-                                <div class="announcement-meta-top">
-                                    <span class="subject-badge">{{ n.category }}</span>
-                                    <span class="announcement-priority priority-{{ n.priority|lower }}">{{ n.priority }} Priority</span>
-                                </div>
-                                <h4>{{ n.title }}</h4>
-                                <p>{{ n.content }}</p>
-                                <div class="announcement-footer">
-                                    <span><i class="fa-solid fa-user-pen"></i> Posted by: <strong>{{ n.author }}</strong></span>
-                                    <span><i class="fa-regular fa-calendar"></i> {{ n.date_posted }}</span>
-                                </div>
+                    <!-- Companies Top Stats -->
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-card-header">
+                                <span class="kpi-title">Active Recruiting Partners</span>
+                                <div class="kpi-icon-pill pill-royal"><i class="fa-solid fa-building"></i></div>
                             </div>
-                        {% endfor %}
+                            <div class="kpi-value-row">
+                                <span class="kpi-number" id="kpiTotalCompanies">10</span>
+                                <span class="kpi-badge badge-primary">Corporate Network</span>
+                            </div>
+                            <p class="kpi-subtext">Verified on-campus &amp; off-campus recruiters</p>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-card-header">
+                                <span class="kpi-title">Tier 1 Super Dream Partners</span>
+                                <div class="kpi-icon-pill pill-emerald"><i class="fa-solid fa-gem"></i></div>
+                            </div>
+                            <div class="kpi-value-row">
+                                <span class="kpi-number">4</span>
+                                <span class="kpi-badge badge-success">&ge; 14.0 LPA</span>
+                            </div>
+                            <p class="kpi-subtext">Google, Microsoft, Amazon, Cisco</p>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-card-header">
+                                <span class="kpi-title">Average Recruiter Package</span>
+                                <div class="kpi-icon-pill pill-amber"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                            </div>
+                            <div class="kpi-value-row">
+                                <span class="kpi-number">10.8 LPA</span>
+                                <span class="kpi-badge badge-warning">Cohort Average</span>
+                            </div>
+                            <p class="kpi-subtext">Calculated across all registered companies</p>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-card-header">
+                                <span class="kpi-title">Drive Participation</span>
+                                <div class="kpi-icon-pill pill-indigo"><i class="fa-solid fa-handshake"></i></div>
+                            </div>
+                            <div class="kpi-value-row">
+                                <span class="kpi-number">100%</span>
+                                <span class="kpi-badge badge-primary">Active Season</span>
+                            </div>
+                            <p class="kpi-subtext">Recruiting cohort 2025</p>
+                        </div>
+                    </div>
+
+                    <!-- Companies Table -->
+                    <div class="white-card">
+                        <div class="white-card-header">
+                            <h3><i class="fa-solid fa-building"></i> Corporate Recruitment Partners</h3>
+                            <span class="card-subtitle">Official directory of partnering organizations</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="companiesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Company</th>
+                                        <th>Industry Domain</th>
+                                        <th>Hiring Tier</th>
+                                        <th>Location / Hub</th>
+                                        <th>Total Offers</th>
+                                        <th>Avg CTC (LPA)</th>
+                                        <th>Contact Email</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="companiesTableBody">
+                                    <tr>
+                                        <td><strong>Google</strong></td>
+                                        <td>Cloud &amp; AI Systems</td>
+                                        <td><span class="kpi-badge badge-success">Tier 1 (Super Dream)</span></td>
+                                        <td>Bangalore / Hyderabad</td>
+                                        <td><strong>12</strong></td>
+                                        <td><strong style="color: var(--royal-600);">18.5 LPA</strong></td>
+                                        <td><code>campus-in@google.com</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Microsoft</strong></td>
+                                        <td>Enterprise Software &amp; Cloud</td>
+                                        <td><span class="kpi-badge badge-success">Tier 1 (Super Dream)</span></td>
+                                        <td>Hyderabad / Noida</td>
+                                        <td><strong>14</strong></td>
+                                        <td><strong style="color: var(--royal-600);">16.0 LPA</strong></td>
+                                        <td><code>india-recruiting@microsoft.com</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Amazon</strong></td>
+                                        <td>E-Commerce &amp; AWS Cloud</td>
+                                        <td><span class="kpi-badge badge-success">Tier 1 (Super Dream)</span></td>
+                                        <td>Bangalore / Chennai</td>
+                                        <td><strong>18</strong></td>
+                                        <td><strong style="color: var(--royal-600);">14.0 LPA</strong></td>
+                                        <td><code>aws-campus@amazon.com</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Cisco Systems</strong></td>
+                                        <td>Networking &amp; Cyber Security</td>
+                                        <td><span class="kpi-badge badge-success">Tier 1 (Super Dream)</span></td>
+                                        <td>Bangalore</td>
+                                        <td><strong>8</strong></td>
+                                        <td><strong style="color: var(--royal-600);">13.5 LPA</strong></td>
+                                        <td><code>cisco-hire@cisco.com</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Oracle</strong></td>
+                                        <td>Database &amp; Enterprise Cloud</td>
+                                        <td><span class="kpi-badge badge-primary">Tier 2 (Dream)</span></td>
+                                        <td>Bangalore / Pune</td>
+                                        <td><strong>15</strong></td>
+                                        <td><strong style="color: var(--royal-600);">11.5 LPA</strong></td>
+                                        <td><code>campus-relations@oracle.com</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Infosys</strong></td>
+                                        <td>Consulting &amp; IT Services</td>
+                                        <td><span class="kpi-badge badge-primary">Tier 2 (Dream)</span></td>
+                                        <td>Bangalore / Mysore / Pune</td>
+                                        <td><strong>42</strong></td>
+                                        <td><strong style="color: var(--royal-600);">9.5 LPA</strong></td>
+                                        <td><code>campusconnect@infosys.com</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Tata Consultancy Services</strong></td>
+                                        <td>Global IT Infrastructure</td>
+                                        <td><span class="kpi-badge badge-primary">Tier 2 (Dream)</span></td>
+                                        <td>Mumbai / Chennai</td>
+                                        <td><strong>55</strong></td>
+                                        <td><strong style="color: var(--royal-600);">7.5 LPA</strong></td>
+                                        <td><code>campus-in@tcs.com</code></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </section>
 
-                <!-- ================= TAB 7: PLACEMENT RECORDS ================= -->
-                <section class="tab-view" id="view-placements">
+                <!-- ================= TAB 4: PLACEMENT DRIVES ================= -->
+                <section class="tab-view" id="view-drives">
                     <div class="view-header-strip">
                         <div>
-                            <h2>Verified Placement Offers &amp; Corporate Partners</h2>
-                            <p>Explore official hiring partners, verified placement records, and live corporate recruitment offers.</p>
+                            <h2>On-Campus &amp; Virtual Placement Drives</h2>
+                            <p>Schedule recruitment rounds, establish eligibility filters, and track registered cohorts.</p>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="document.getElementById('driveModal').classList.add('open')">
+                            <i class="fa-solid fa-calendar-plus"></i>
+                            <span>Schedule New Placement Drive</span>
+                        </button>
+                    </div>
+
+                    <!-- Drives Table -->
+                    <div class="white-card">
+                        <div class="white-card-header">
+                            <h3><i class="fa-solid fa-briefcase"></i> Active &amp; Upcoming Drives Calendar</h3>
+                            <span class="card-subtitle">Real-time drive scheduling &amp; status</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="drivesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Company</th>
+                                        <th>Designation / Role</th>
+                                        <th>Package (LPA)</th>
+                                        <th>Drive Date</th>
+                                        <th>Eligible Branches</th>
+                                        <th>Min CGPA Cutoff</th>
+                                        <th>Status</th>
+                                        <th>Registered</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="drivesTableBody">
+                                    <tr>
+                                        <td><strong>Google</strong></td>
+                                        <td>Software Development Engineer</td>
+                                        <td><strong style="color: var(--royal-600);">18.5 LPA</strong></td>
+                                        <td>2025-03-15</td>
+                                        <td>CSE, IT, ECE</td>
+                                        <td><strong>&ge; 7.5 CGPA</strong></td>
+                                        <td><span class="status-pill status-eligible">Active Drive</span></td>
+                                        <td><strong>48 Candidates</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Microsoft</strong></td>
+                                        <td>Cloud Solutions Engineer</td>
+                                        <td><strong style="color: var(--royal-600);">16.0 LPA</strong></td>
+                                        <td>2025-03-22</td>
+                                        <td>CSE, IT, ECE</td>
+                                        <td><strong>&ge; 7.0 CGPA</strong></td>
+                                        <td><span class="status-pill status-eligible">Active Drive</span></td>
+                                        <td><strong>52 Candidates</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Amazon</strong></td>
+                                        <td>SDE - Operations Tech</td>
+                                        <td><strong style="color: var(--royal-600);">14.0 LPA</strong></td>
+                                        <td>2025-03-29</td>
+                                        <td>All Departments</td>
+                                        <td><strong>&ge; 7.0 CGPA</strong></td>
+                                        <td><span class="badge badge-warning" style="background: var(--amber-50); color: var(--amber-600);">Upcoming</span></td>
+                                        <td><strong>65 Candidates</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Oracle</strong></td>
+                                        <td>Systems Applications Engineer</td>
+                                        <td><strong style="color: var(--royal-600);">11.5 LPA</strong></td>
+                                        <td>2025-04-05</td>
+                                        <td>CSE, IT</td>
+                                        <td><strong>&ge; 6.5 CGPA</strong></td>
+                                        <td><span class="badge badge-warning" style="background: var(--amber-50); color: var(--amber-600);">Upcoming</span></td>
+                                        <td><strong>42 Candidates</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Accenture</strong></td>
+                                        <td>Advanced App Engineering</td>
+                                        <td><strong style="color: var(--royal-600);">6.5 LPA</strong></td>
+                                        <td>2025-02-18</td>
+                                        <td>All Departments</td>
+                                        <td><strong>&ge; 6.0 CGPA</strong></td>
+                                        <td><span class="status-pill status-placed">Completed</span></td>
+                                        <td><strong>110 Candidates</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================= TAB 5: APPLICATIONS & INTERVIEWS ================= -->
+                <section class="tab-view" id="view-applications">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Candidate Applications &amp; Interview Pipeline</h2>
+                            <p>Track student candidacy across Online Aptitude, Technical Rounds, and Final HR evaluations.</p>
+                        </div>
+                    </div>
+
+                    <!-- Applications Summary Grid -->
+                    <div class="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-card-header">
+                                <span class="kpi-title">Total Applications Logged</span>
+                                <div class="kpi-icon-pill pill-royal"><i class="fa-regular fa-file-lines"></i></div>
+                            </div>
+                            <div class="kpi-value-row">
+                                <span class="kpi-number">340+</span>
+                                <span class="kpi-badge badge-primary">Active Cohort</span>
+                            </div>
+                            <p class="kpi-subtext">Submitted by eligible candidates</p>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-card-header">
+                                <span class="kpi-title">In Technical Rounds</span>
+                                <div class="kpi-icon-pill pill-amber"><i class="fa-solid fa-code"></i></div>
+                            </div>
+                            <div class="kpi-value-row">
+                                <span class="kpi-number">48</span>
+                                <span class="kpi-badge badge-warning">In Progress</span>
+                            </div>
+                            <p class="kpi-subtext">Round 1 &amp; Round 2 Interviews</p>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-card-header">
+                                <span class="kpi-title">HR &amp; Final Selection</span>
+                                <div class="kpi-icon-pill pill-indigo"><i class="fa-solid fa-user-tie"></i></div>
+                            </div>
+                            <div class="kpi-value-row">
+                                <span class="kpi-number">24</span>
+                                <span class="kpi-badge badge-primary">Final Stage</span>
+                            </div>
+                            <p class="kpi-subtext">Awaiting final corporate clearance</p>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-card-header">
+                                <span class="kpi-title">Offers Converted</span>
+                                <div class="kpi-icon-pill pill-emerald"><i class="fa-solid fa-award"></i></div>
+                            </div>
+                            <div class="kpi-value-row">
+                                <span class="kpi-number">85+</span>
+                                <span class="kpi-badge badge-success">Accepted / Placed</span>
+                            </div>
+                            <p class="kpi-subtext">Corporate verification complete</p>
+                        </div>
+                    </div>
+
+                    <!-- Applications Table -->
+                    <div class="white-card">
+                        <div class="white-card-header">
+                            <h3><i class="fa-regular fa-file-lines"></i> Live Candidate Pipeline Tracker</h3>
+                            <span class="card-subtitle">Real-time status across multi-stage corporate interviews</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="applicationsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Roll Number</th>
+                                        <th>Student Name</th>
+                                        <th>Department</th>
+                                        <th>Applied Company</th>
+                                        <th>Role</th>
+                                        <th>Current Stage / Round</th>
+                                        <th>Status</th>
+                                        <th>Package (LPA)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="applicationsTableBody">
+                                    <tr>
+                                        <td><code>COM2025001</code></td>
+                                        <td><strong>Aarav Sharma</strong></td>
+                                        <td>Computer Science</td>
+                                        <td>Google</td>
+                                        <td>Software Development Engineer</td>
+                                        <td><span class="badge badge-warning">Technical Round 2</span></td>
+                                        <td><span class="status-pill status-eligible">In Progress</span></td>
+                                        <td><strong>18.5 LPA</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>COM2025003</code></td>
+                                        <td><strong>Rohan Gupta</strong></td>
+                                        <td>Computer Science</td>
+                                        <td>Microsoft</td>
+                                        <td>Cloud Solutions Engineer</td>
+                                        <td><span class="badge badge-warning">Technical Round 1</span></td>
+                                        <td><span class="status-pill status-eligible">In Progress</span></td>
+                                        <td><strong>16.0 LPA</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>INF2025004</code></td>
+                                        <td><strong>Priya Patel</strong></td>
+                                        <td>Information Technology</td>
+                                        <td>Amazon</td>
+                                        <td>SDE - Operations Tech</td>
+                                        <td><span class="badge badge-primary">Aptitude Test</span></td>
+                                        <td><span class="status-pill status-eligible">Shortlisted</span></td>
+                                        <td><strong>14.0 LPA</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>ECE2025010</code></td>
+                                        <td><strong>Kavita Iyer</strong></td>
+                                        <td>Electronics &amp; Comm</td>
+                                        <td>Cisco Systems</td>
+                                        <td>Network Software Engineer</td>
+                                        <td><span class="badge badge-success">HR Interview</span></td>
+                                        <td><span class="status-pill status-placed">Selected</span></td>
+                                        <td><strong>13.5 LPA</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>MEC2025015</code></td>
+                                        <td><strong>Vikram Singh</strong></td>
+                                        <td>Mechanical Engg</td>
+                                        <td>Tata Consultancy Services</td>
+                                        <td>Digital Innovator</td>
+                                        <td><span class="badge badge-success">Offer Extended</span></td>
+                                        <td><span class="status-pill status-placed">Placed</span></td>
+                                        <td><strong>7.5 LPA</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================= TAB 6: ELIGIBILITY RULES & CUTOFFS ================= -->
+                <section class="tab-view" id="view-eligibility">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Placement Policy &amp; Eligibility Cutoffs Engine</h2>
+                            <p>Configure institutional eligibility benchmarks, backlog restrictions, and dream offer policies.</p>
+                        </div>
+                    </div>
+
+                    <div class="charts-grid-2col">
+                        <!-- Left: Policy Control Form -->
+                        <div class="white-card">
+                            <div class="white-card-header">
+                                <h3><i class="fa-solid fa-sliders"></i> Eligibility Policy Criteria</h3>
+                                <span class="card-subtitle">Adjust parameters to recalculate cohort qualification</span>
+                            </div>
+                            <div class="white-card-body">
+                                <form id="eligibilityRulesForm" onsubmit="handleSaveEligibility(event)">
+                                    <div class="form-group-clean">
+                                        <label for="ruleMinCgpa"><strong>Minimum CGPA Cutoff Threshold:</strong></label>
+                                        <div style="display: flex; align-items: center; gap: 1rem; margin-top: 0.35rem;">
+                                            <input type="number" step="0.1" min="4.0" max="10.0" id="ruleMinCgpa" class="form-control" value="6.0" style="max-width: 140px; font-weight: 800; font-size: 1.1rem;" required>
+                                            <span style="font-size: 0.84rem; color: var(--slate-500);">(Candidates below this are marked Ineligible)</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group-clean" style="margin-top: 1.25rem;">
+                                        <label for="ruleMaxBacklogs"><strong>Maximum Allowed Active Backlogs:</strong></label>
+                                        <select id="ruleMaxBacklogs" class="form-control" style="max-width: 220px; font-weight: 700; margin-top: 0.35rem;">
+                                            <option value="0" selected>0 (Strictly No Backlogs)</option>
+                                            <option value="1">At most 1 Active Backlog</option>
+                                            <option value="2">At most 2 Active Backlogs</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group-clean" style="margin-top: 1.25rem;">
+                                        <label><strong>Dream Offer Lock Policy:</strong></label>
+                                        <div style="display: flex; align-items: center; gap: 0.65rem; margin-top: 0.35rem;">
+                                            <input type="checkbox" id="ruleOneDreamOffer" checked style="width: 18px; height: 18px;">
+                                            <label for="ruleOneDreamOffer" style="margin: 0; font-size: 0.88rem; color: var(--slate-700); cursor: pointer;">
+                                                <strong>One Dream Offer Policy:</strong> Students holding an offer &ge; 10.0 LPA are locked from regular tier recruitment.
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div style="margin-top: 2rem;">
+                                        <button type="submit" class="btn btn-primary btn-block" style="padding: 0.85rem;" id="btnApplyEligibility">
+                                            <i class="fa-solid fa-arrows-rotate"></i>
+                                            <span>Save &amp; Re-Calculate Cohort Eligibility</span>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Right: Live Cohort Status Breakdown -->
+                        <div class="white-card">
+                            <div class="white-card-header">
+                                <h3><i class="fa-solid fa-chart-pie"></i> Cohort Eligibility Breakdown</h3>
+                                <span class="card-subtitle">Real-time distribution under current criteria</span>
+                            </div>
+                            <div class="white-card-body">
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                                    <div style="background: var(--emerald-50); border: 1px solid var(--emerald-100); padding: 1.25rem; border-radius: var(--radius-md); text-align: center;">
+                                        <span style="font-size: 0.76rem; font-weight: 800; text-transform: uppercase; color: var(--emerald-600); display: block; margin-bottom: 0.25rem;">Eligible Students</span>
+                                        <strong style="font-size: 2rem; color: var(--emerald-600); font-family: var(--font-mono);" id="elCountEligible">165</strong>
+                                        <p style="font-size: 0.78rem; color: var(--slate-600); margin-top: 0.25rem;">Denominator for Placement Rate</p>
+                                    </div>
+                                    <div style="background: var(--rose-50); border: 1px solid var(--rose-100); padding: 1.25rem; border-radius: var(--radius-md); text-align: center;">
+                                        <span style="font-size: 0.76rem; font-weight: 800; text-transform: uppercase; color: var(--rose-600); display: block; margin-bottom: 0.25rem;">Ineligible Students</span>
+                                        <strong style="font-size: 2rem; color: var(--rose-600); font-family: var(--font-mono);" id="elCountIneligible">35</strong>
+                                        <p style="font-size: 0.78rem; color: var(--slate-600); margin-top: 0.25rem;">Excluded from placement rate</p>
+                                    </div>
+                                </div>
+
+                                <div style="font-size: 0.88rem; line-height: 1.6; color: var(--slate-700); background: var(--slate-50); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--slate-200);">
+                                    <p><strong><i class="fa-solid fa-circle-info" style="color: var(--royal-600); margin-right: 4px;"></i> Acceptance Standard:</strong></p>
+                                    <p style="font-size: 0.82rem; color: var(--slate-600); margin-top: 0.25rem;">
+                                        Placement Rate (%) = (Unique Placed Eligible Students / Total Eligible Cohort Denominator) &times; 100
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================= TAB 7: OFFERS & SALARIES ================= -->
+                <section class="tab-view" id="view-offers">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Verified Placement Offers &amp; Salary Ledger</h2>
+                            <p>Explore official verified placement records, corporate packages, and offer logs.</p>
                         </div>
                         <button type="button" class="btn btn-primary" id="btnOpenPlacementModal">
-                            <i class="fa-solid fa-file-signature"></i>
+                            <i class="fa-solid fa-award"></i>
                             <span>Record Placement Offer</span>
                         </button>
                     </div>
@@ -665,11 +923,13 @@
                     <div class="white-card">
                         <div class="white-card-header">
                             <h3><i class="fa-solid fa-handshake"></i> Official Corporate Recruitment Partners</h3>
-                            <span class="card-subtitle">Tier 1 Product, Semiconductor, Consulting &amp; Core Engineering</span>
+                            <span class="card-subtitle">Tier 1 Product, Semiconductor, Consulting &amp; Core
+                                Engineering</span>
                         </div>
                         <div class="white-card-body" style="padding: 1.5rem;">
                             <div class="partners-showcase-grid" id="companyPartnersGrid">
-                                <div class="text-center" style="grid-column: 1/-1; padding: 2rem; color: var(--slate-500);">
+                                <div class="text-center"
+                                    style="grid-column: 1/-1; padding: 2rem; color: var(--slate-500);">
                                     <i class="fa-solid fa-spinner fa-spin"></i> Loading hiring partner profiles...
                                 </div>
                             </div>
@@ -695,7 +955,10 @@
                                     </tr>
                                 </thead>
                                 <tbody id="companiesTableBody">
-                                    <tr><td colspan="6" class="text-center" style="padding: 2rem;">Loading corporate recruitment metrics...</td></tr>
+                                    <tr>
+                                        <td colspan="6" class="text-center" style="padding: 2rem;">Loading corporate
+                                            recruitment metrics...</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -722,19 +985,22 @@
                                     </tr>
                                 </thead>
                                 <tbody id="recentPlacementsTableBody">
-                                    <tr><td colspan="8" class="text-center" style="padding: 2rem;">Loading verified offers stream...</td></tr>
+                                    <tr>
+                                        <td colspan="8" class="text-center" style="padding: 2rem;">Loading verified
+                                            offers stream...</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </section>
 
-                <!-- ================= TAB 8: DEPARTMENT ANALYTICS ================= -->
-                <section class="tab-view" id="view-departments">
+                <!-- ================= TAB 8: PLACEMENT ANALYTICS ================= -->
+                <section class="tab-view" id="view-analytics">
                     <div class="view-header-strip">
                         <div>
-                            <h2>Department-Wise Placement Analytics</h2>
-                            <p>Comparative evaluation across all engineering branches. Denominators consider eligible students only.</p>
+                            <h2>Multi-Department Placement Analytics &amp; Benchmarks</h2>
+                            <p>Comparative evaluation across all engineering branches, package curves, and skill demand matrices.</p>
                         </div>
                     </div>
 
@@ -764,28 +1030,27 @@
                                     </tr>
                                 </thead>
                                 <tbody id="departmentTableBody">
-                                    <tr><td colspan="9" class="text-center" style="padding: 2rem;">Loading department data...</td></tr>
+                                    <tr>
+                                        <td colspan="9" class="text-center" style="padding: 2rem;">Loading department
+                                            data...</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                </section>
-
-                <!-- ================= TAB 9: SALARY & COMPENSATION ================= -->
-                <section class="tab-view" id="view-packages">
-                    <div class="view-header-strip">
-                        <div>
-                            <h2>Compensation &amp; Salary Distribution</h2>
-                            <p>NumPy statistical computations including Mean, Median, Standard Deviation, and Quartiles.</p>
-                        </div>
+                    <!-- Salary & Compensation Statistics Grid -->
+                    <div style="margin-top: 2rem; margin-bottom: 1.5rem;">
+                        <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--navy-900); margin-bottom: 0.5rem;">
+                            <i class="fa-solid fa-money-bill-trend-up" style="color: var(--royal-600);"></i> Compensation &amp; Salary Distribution
+                        </h3>
+                        <p style="font-size: 0.85rem; color: var(--slate-600); margin-bottom: 1rem;">NumPy statistical computations including Mean, Median, Standard Deviation, and Quartiles.</p>
                     </div>
 
-                    <!-- Salary Statistical Metrics Grid -->
                     <div class="salary-stat-grid" id="salaryStatBoxes" style="margin-bottom: 1.75rem;">
                         <!-- Populated dynamically by app.js -->
                     </div>
 
-                    <div class="charts-grid-2col">
+                    <div class="charts-grid-2col" style="margin-bottom: 2rem;">
                         <div class="white-card">
                             <div class="white-card-header">
                                 <h3><i class="fa-solid fa-chart-area"></i> Package Density Distribution Curve</h3>
@@ -810,22 +1075,15 @@
                             </div>
                         </div>
                     </div>
-                </section>
 
-                <!-- ================= TAB 10: SKILL DEMAND ================= -->
-                <section class="tab-view" id="view-skills">
-                    <div class="view-header-strip">
-                        <div>
-                            <h2>Technical Skill Market Demand Matrix</h2>
-                            <p>Evaluates which technical competencies correlate with higher placement rates and top compensation.</p>
-                        </div>
-                        <div class="table-search-box" style="margin-bottom: 0;">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                            <input type="text" id="skillSearchInput" placeholder="Filter competencies (e.g. Python, AWS, Docker)...">
-                        </div>
+                    <!-- In-Demand Competency Cloud & Skills Ranking -->
+                    <div style="margin-top: 2rem; margin-bottom: 1.5rem;">
+                        <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--navy-900); margin-bottom: 0.5rem;">
+                            <i class="fa-solid fa-code" style="color: var(--royal-600);"></i> Technical Skill Market Demand Matrix
+                        </h3>
+                        <p style="font-size: 0.85rem; color: var(--slate-600); margin-bottom: 1rem;">Evaluates which technical competencies correlate with higher placement rates and top compensation.</p>
                     </div>
 
-                    <!-- In-Demand Competency Cloud -->
                     <div class="white-card" style="margin-bottom: 1.75rem;">
                         <div class="white-card-header">
                             <h3><i class="fa-solid fa-tags"></i> In-Demand Competency Cloud</h3>
@@ -854,33 +1112,185 @@
                                     </tr>
                                 </thead>
                                 <tbody id="skillsTableBody">
-                                    <tr><td colspan="6" class="text-center" style="padding: 2rem;">Loading skill metrics...</td></tr>
+                                    <tr>
+                                        <td colspan="6" class="text-center" style="padding: 2rem;">Loading skill metrics...</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </section>
 
-                <!-- ================= TAB 11: MATPLOTLIB VISUALS ================= -->
-                <section class="tab-view" id="view-charts">
+                <!-- ================= TAB 9: DATA IMPORT & EXPORT ================= -->
+                <section class="tab-view" id="view-import-export">
                     <div class="view-header-strip">
                         <div>
-                            <h2>Institutional Matplotlib Visuals Gallery</h2>
-                            <p>High-resolution figures generated directly from Python data processing pipeline.</p>
+                            <h2>Data Ingestion, Batch Upload &amp; Data Export Hub</h2>
+                            <p>Bulk upload student cohorts via CSV or Excel (`.xlsx`), download standard schemas, and export database tables.</p>
                         </div>
-                        <button type="button" class="btn btn-secondary" id="btnRefreshMatplotlibCharts">
-                            <i class="fa-solid fa-arrows-rotate"></i>
-                            <span>Regenerate Figures</span>
-                        </button>
                     </div>
 
+                    <div class="charts-grid-2col" style="margin-bottom: 2rem;">
+                        <!-- Bulk Student Upload Card -->
+                        <div class="white-card">
+                            <div class="white-card-header">
+                                <h3><i class="fa-solid fa-file-arrow-up"></i> Bulk Student Batch Upload (Excel / CSV)</h3>
+                                <span class="card-subtitle">Automated validation &amp; ingestion</span>
+                            </div>
+                            <div class="white-card-body">
+                                <form id="bulkUploadForm" enctype="multipart/form-data">
+                                    <div class="upload-dropzone" id="dropzoneContainer" onclick="document.getElementById('bulkUploadFileInput').click()">
+                                        <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                                        <h4>Drop student data file here or browse</h4>
+                                        <p>Supported file types: <strong>.xlsx, .xls, .csv</strong> (Max size: 15MB)</p>
+                                        <input type="file" id="bulkUploadFileInput" name="file" accept=".xlsx,.xls,.csv" style="display: none;">
+                                    </div>
+                                    <div id="uploadFileInfo" style="display: none; margin-top: 1rem; padding: 0.75rem; background: var(--royal-50); border: 1px solid var(--royal-100); border-radius: var(--radius-sm); font-size: 0.88rem;">
+                                        <i class="fa-solid fa-file-excel" style="color: var(--royal-600);"></i>
+                                        <span id="uploadFileName">No file selected</span>
+                                    </div>
+                                    <div style="margin-top: 1.25rem;">
+                                        <button type="submit" class="btn btn-primary btn-block" id="btnSubmitBulkUpload" style="padding: 0.85rem;">
+                                            <i class="fa-solid fa-upload"></i> Process &amp; Import Student Cohort
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Download Sample Templates & Schema Specs -->
+                        <div class="white-card">
+                            <div class="white-card-header">
+                                <h3><i class="fa-solid fa-table"></i> Official Ingestion Schema Templates</h3>
+                                <span class="card-subtitle">Download standardized templates</span>
+                            </div>
+                            <div class="white-card-body">
+                                <p style="font-size: 0.88rem; color: var(--slate-600); line-height: 1.55; margin-bottom: 1.25rem;">
+                                    Ensure batch uploads match the official institutional schema. Download ready-to-fill sample files with pre-configured headers:
+                                </p>
+                                <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 1.5rem;">
+                                    <a href="/api/students/sample-template?format=xlsx" class="btn btn-secondary" style="justify-content: flex-start;">
+                                        <i class="fa-solid fa-file-excel" style="color: var(--emerald-600);"></i>
+                                        <span>Download Excel Template (.xlsx)</span>
+                                    </a>
+                                    <a href="/api/students/sample-template?format=csv" class="btn btn-secondary" style="justify-content: flex-start;">
+                                        <i class="fa-solid fa-file-csv" style="color: var(--royal-600);"></i>
+                                        <span>Download CSV Template (.csv)</span>
+                                    </a>
+                                </div>
+                                <div style="font-size: 0.78rem; background: var(--slate-50); border: 1px solid var(--slate-200); padding: 0.85rem; border-radius: var(--radius-sm); color: var(--slate-600);">
+                                    <strong>Required Columns:</strong> <code>roll_no</code>, <code>name</code>, <code>department</code>, <code>cgpa</code>, <code>graduation_year</code>, <code>backlogs</code>, <code>email</code>, <code>mobile</code>.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Direct Database Tables Export Section -->
+                    <div class="white-card">
+                        <div class="white-card-header">
+                            <h3><i class="fa-solid fa-download"></i> Direct CSV / Excel Data Exports</h3>
+                            <span class="card-subtitle">Export live placement database tables</span>
+                        </div>
+                        <div class="white-card-body">
+                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
+                                <a href="/api/export/students" class="btn btn-secondary" style="padding: 1rem; display: flex; flex-direction: column; gap: 0.4rem; text-align: center;">
+                                    <i class="fa-solid fa-users" style="font-size: 1.5rem; color: var(--royal-600);"></i>
+                                    <strong>Student Roster</strong>
+                                    <span style="font-size: 0.75rem; color: var(--slate-500);">Complete Cohort CSV</span>
+                                </a>
+                                <a href="/api/export/placements" class="btn btn-secondary" style="padding: 1rem; display: flex; flex-direction: column; gap: 0.4rem; text-align: center;">
+                                    <i class="fa-solid fa-award" style="font-size: 1.5rem; color: var(--emerald-600);"></i>
+                                    <strong>Placement Offers</strong>
+                                    <span style="font-size: 0.75rem; color: var(--slate-500);">All Offers in LPA</span>
+                                </a>
+                                <a href="/api/export/companies" class="btn btn-secondary" style="padding: 1rem; display: flex; flex-direction: column; gap: 0.4rem; text-align: center;">
+                                    <i class="fa-solid fa-building" style="font-size: 1.5rem; color: var(--amber-600);"></i>
+                                    <strong>Recruiting Partners</strong>
+                                    <span style="font-size: 0.75rem; color: var(--slate-500);">Partner Tiers &amp; CTC</span>
+                                </a>
+                                <a href="/api/export/drives" class="btn btn-secondary" style="padding: 1rem; display: flex; flex-direction: column; gap: 0.4rem; text-align: center;">
+                                    <i class="fa-solid fa-briefcase" style="font-size: 1.5rem; color: var(--indigo-600);"></i>
+                                    <strong>Placement Drives</strong>
+                                    <span style="font-size: 0.75rem; color: var(--slate-500);">Schedule &amp; Cutoffs</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================= TAB 10: REPORTS & EXPORTED DOSSIERS ================= -->
+                <section class="tab-view" id="view-reports">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Official Placement Reports &amp; Institutional Documentation</h2>
+                            <p>Download official aggregated reports, cohort dossiers, and publication-ready Matplotlib figures.</p>
+                        </div>
+                        <div style="display: flex; gap: 0.75rem;">
+                            <a href="/reports/download" class="btn btn-primary" id="btnDownloadSummaryReport">
+                                <i class="fa-solid fa-file-arrow-down"></i>
+                                <span>Download Text Summary Report</span>
+                            </a>
+                            <button type="button" class="btn btn-secondary" id="btnRefreshMatplotlibCharts">
+                                <i class="fa-solid fa-arrows-rotate"></i>
+                                <span>Regenerate Figures</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Official Reports Download Cards -->
+                    <div class="grid-cards-3col" style="margin-bottom: 2rem;">
+                        <div class="white-card" style="padding: 1.5rem;">
+                            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.85rem;">
+                                <div class="kpi-icon-pill pill-royal"><i class="fa-solid fa-file-lines"></i></div>
+                                <div>
+                                    <h4 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: var(--navy-900);">Cohort Placement Dossier</h4>
+                                    <span style="font-size: 0.75rem; color: var(--slate-500);">Complete Graduating Year 2025</span>
+                                </div>
+                            </div>
+                            <p style="font-size: 0.84rem; color: var(--slate-600); margin-bottom: 1.25rem;">Comprehensive audited summary containing eligibility denominators, duplicate offer disambiguation, and official placement percentages.</p>
+                            <a href="/reports/download" class="btn btn-secondary btn-block">
+                                <i class="fa-solid fa-download"></i> Download Report (.txt)
+                            </a>
+                        </div>
+
+                        <div class="white-card" style="padding: 1.5rem;">
+                            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.85rem;">
+                                <div class="kpi-icon-pill pill-emerald"><i class="fa-solid fa-file-excel"></i></div>
+                                <div>
+                                    <h4 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: var(--navy-900);">Placement Offers Ledger</h4>
+                                    <span style="font-size: 0.75rem; color: var(--slate-500);">All Verified Corporate Records</span>
+                                </div>
+                            </div>
+                            <p style="font-size: 0.84rem; color: var(--slate-600); margin-bottom: 1.25rem;">Spreadsheet-compatible data format of all offers received across CSE, IT, ECE, Mechanical, and Civil Engineering.</p>
+                            <a href="/api/export/placements" class="btn btn-secondary btn-block">
+                                <i class="fa-solid fa-download"></i> Export CSV Spreadsheet
+                            </a>
+                        </div>
+
+                        <div class="white-card" style="padding: 1.5rem;">
+                            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.85rem;">
+                                <div class="kpi-icon-pill pill-indigo"><i class="fa-solid fa-building-user"></i></div>
+                                <div>
+                                    <h4 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: var(--navy-900);">Recruiter Profiles &amp; CTC</h4>
+                                    <span style="font-size: 0.75rem; color: var(--slate-500);">Corporate Partners Roster</span>
+                                </div>
+                            </div>
+                            <p style="font-size: 0.84rem; color: var(--slate-600); margin-bottom: 1.25rem;">Directory of active company hiring partners, job designations, hiring tier categorizations, and package statistics.</p>
+                            <a href="/api/export/companies" class="btn btn-secondary btn-block">
+                                <i class="fa-solid fa-download"></i> Export Company Directory
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Matplotlib Visuals Gallery -->
                     <div class="gallery-grid">
                         <div class="gallery-card">
                             <div class="gallery-card-header">
                                 <h4>Department-Wise Placement Rate</h4>
                                 <span class="kpi-badge badge-primary">Bar Chart</span>
                             </div>
-                            <div class="gallery-img-wrap" onclick="openImageModal('/charts/department_placement_rate.png', 'Department Placement Rate')">
+                            <div class="gallery-img-wrap"
+                                onclick="openImageModal('/charts/department_placement_rate.png', 'Department Placement Rate')">
                                 <img src="/charts/department_placement_rate.png" alt="Department Placement Rate" id="imgDeptChart">
                                 <div class="img-overlay"><i class="fa-solid fa-magnifying-glass-plus"></i> View Full Chart</div>
                             </div>
@@ -891,7 +1301,8 @@
                                 <h4>Package Distribution &amp; Metrics</h4>
                                 <span class="kpi-badge badge-primary">Boxplot &amp; Hist</span>
                             </div>
-                            <div class="gallery-img-wrap" onclick="openImageModal('/charts/package_distribution.png', 'Package Distribution')">
+                            <div class="gallery-img-wrap"
+                                onclick="openImageModal('/charts/package_distribution.png', 'Package Distribution')">
                                 <img src="/charts/package_distribution.png" alt="Package Distribution" id="imgPkgChart">
                                 <div class="img-overlay"><i class="fa-solid fa-magnifying-glass-plus"></i> View Full Chart</div>
                             </div>
@@ -902,7 +1313,8 @@
                                 <h4>Top Skills in Demand</h4>
                                 <span class="kpi-badge badge-primary">Bar Horizontal</span>
                             </div>
-                            <div class="gallery-img-wrap" onclick="openImageModal('/charts/top_skills_demand.png', 'Top Skills in Demand')">
+                            <div class="gallery-img-wrap"
+                                onclick="openImageModal('/charts/top_skills_demand.png', 'Top Skills in Demand')">
                                 <img src="/charts/top_skills_demand.png" alt="Top Skills in Demand" id="imgSkillChart">
                                 <div class="img-overlay"><i class="fa-solid fa-magnifying-glass-plus"></i> View Full Chart</div>
                             </div>
@@ -913,10 +1325,175 @@
                                 <h4>Cohort Placement Status</h4>
                                 <span class="kpi-badge badge-primary">Donut Chart</span>
                             </div>
-                            <div class="gallery-img-wrap" onclick="openImageModal('/charts/placement_status_overview.png', 'Cohort Placement Status')">
+                            <div class="gallery-img-wrap"
+                                onclick="openImageModal('/charts/placement_status_overview.png', 'Cohort Placement Status')">
                                 <img src="/charts/placement_status_overview.png" alt="Cohort Placement Status" id="imgStatusChart">
                                 <div class="img-overlay"><i class="fa-solid fa-magnifying-glass-plus"></i> View Full Chart</div>
                             </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================= TAB 11: USER MANAGEMENT ================= -->
+                <section class="tab-view" id="view-users">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Institutional User Management &amp; Access Control</h2>
+                            <p>Supervise authorized faculty members, training &amp; placement officers, and student login accounts.</p>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="document.getElementById('userModal').classList.add('open')">
+                            <i class="fa-solid fa-user-plus"></i>
+                            <span>Create Authorized User</span>
+                        </button>
+                    </div>
+
+                    <div class="white-card">
+                        <div class="white-card-header">
+                            <h3><i class="fa-solid fa-user-shield"></i> Authorized Institutional Accounts</h3>
+                            <span class="card-subtitle">Faculty members, Placement Deans, and Coordinators</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="usersTable">
+                                <thead>
+                                    <tr>
+                                        <th>Faculty Code</th>
+                                        <th>Full Name</th>
+                                        <th>Username</th>
+                                        <th>Department / Cell</th>
+                                        <th>Email Address</th>
+                                        <th>Role Authority</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usersTableBody">
+                                    <tr>
+                                        <td><code>FAC001</code></td>
+                                        <td><strong>Dr. Rajesh Sharma</strong></td>
+                                        <td><code>faculty</code></td>
+                                        <td>Computer Science</td>
+                                        <td>faculty@eduplace.ac.in</td>
+                                        <td><span class="role-pill role-faculty">Faculty Coordinator</span></td>
+                                        <td><span class="status-pill status-placed">Active</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>FAC002</code></td>
+                                        <td><strong>Prof. Sunita Rao</strong></td>
+                                        <td><code>placement_officer</code></td>
+                                        <td>Training &amp; Placement Cell</td>
+                                        <td>tpo@eduplace.ac.in</td>
+                                        <td><span class="role-pill role-faculty" style="background: var(--indigo-50); color: var(--indigo-600); border-color: var(--indigo-100);">Placement Officer</span></td>
+                                        <td><span class="status-pill status-placed">Active</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================= TAB 12: SYSTEM SETTINGS ================= -->
+                <section class="tab-view" id="view-settings">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>System Settings &amp; University Configuration</h2>
+                            <p>Configure academic years, currency standards, institutional placement parameters, and database engines.</p>
+                        </div>
+                    </div>
+
+                    <div class="charts-grid-2col">
+                        <div class="white-card">
+                            <div class="white-card-header">
+                                <h3><i class="fa-solid fa-gear"></i> University Placement System Preferences</h3>
+                                <span class="card-subtitle">Global platform configuration</span>
+                            </div>
+                            <div class="white-card-body">
+                                <form id="systemSettingsForm" onsubmit="handleSaveSettings(event)">
+                                    <div class="form-group-clean">
+                                        <label for="cfgTargetYear"><strong>Target Graduating Cohort:</strong></label>
+                                        <input type="number" id="cfgTargetYear" class="form-control" value="2025" style="max-width: 160px; font-weight: 700;">
+                                    </div>
+                                    <div class="form-group-clean" style="margin-top: 1rem;">
+                                        <label for="cfgCurrencyUnit"><strong>Compensation Unit / Currency:</strong></label>
+                                        <input type="text" id="cfgCurrencyUnit" class="form-control" value="LPA" style="max-width: 160px; font-weight: 700;" readonly>
+                                        <span style="font-size: 0.78rem; color: var(--slate-500);">Standard: Lakhs Per Annum (INR)</span>
+                                    </div>
+                                    <div class="form-group-clean" style="margin-top: 1rem;">
+                                        <label for="cfgInstName"><strong>Institution Name:</strong></label>
+                                        <input type="text" id="cfgInstName" class="form-control" value="EduPlace University Placement Cell">
+                                    </div>
+                                    <div class="form-group-clean" style="margin-top: 1rem;">
+                                        <label for="cfgTpoEmail"><strong>Placement Cell Official Email:</strong></label>
+                                        <input type="email" id="cfgTpoEmail" class="form-control" value="tpo@eduplace.ac.in">
+                                    </div>
+                                    <div style="margin-top: 1.75rem;">
+                                        <button type="submit" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">
+                                            <i class="fa-solid fa-check"></i> Save System Settings
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="white-card">
+                            <div class="white-card-header">
+                                <h3><i class="fa-solid fa-server"></i> Database Engine &amp; Maintenance</h3>
+                                <span class="card-subtitle">Dual-engine connectivity &amp; resets</span>
+                            </div>
+                            <div class="white-card-body" style="font-size: 0.88rem; line-height: 1.6;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-md); margin-bottom: 1.25rem;">
+                                    <div>
+                                        <strong>Active Database Engine:</strong>
+                                        <p style="font-size: 0.8rem; color: var(--slate-600); margin: 0.15rem 0 0;">Dual Architecture: SQLite Local + MySQL 8.0</p>
+                                    </div>
+                                    <span class="status-pill status-placed"><i class="fa-solid fa-circle-check"></i> Connected</span>
+                                </div>
+
+                                <div style="padding: 1.25rem; background: var(--rose-50); border: 1px solid var(--rose-100); border-radius: var(--radius-md);">
+                                    <h4 style="color: var(--rose-700); margin-bottom: 0.35rem;"><i class="fa-solid fa-arrows-rotate"></i> Reset &amp; Re-Seed Database</h4>
+                                    <p style="font-size: 0.82rem; color: var(--slate-600); margin-bottom: 1rem;">
+                                        Generates a fresh dataset with 200 students across 5 engineering departments, verified corporate offers, and regenerates all Matplotlib charts.
+                                    </p>
+                                    <button type="button" class="btn btn-secondary btn-sm btn-reseed" id="btnReSeedDatabase">
+                                        <i class="fa-solid fa-arrows-rotate"></i> One-Click Re-Seed Data
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================= TAB 13: AUDIT LOGS ================= -->
+                <section class="tab-view" id="view-audit-logs">
+                    <div class="view-header-strip">
+                        <div>
+                            <h2>Institutional Audit Logs &amp; Placement History Archive</h2>
+                            <p>Real-time audit log preserving record mutations, placement offer additions, cutoff revisions, and student history.</p>
+                        </div>
+                    </div>
+
+                    <div class="white-card">
+                        <div class="white-card-header">
+                            <h3><i class="fa-solid fa-clock-rotate-left"></i> Real-Time Placement Mutation Audit Trail</h3>
+                            <span class="card-subtitle">Permanent audit log entries</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table" id="auditLogsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Timestamp</th>
+                                        <th>Action Type</th>
+                                        <th>Target Student</th>
+                                        <th>Operator / User</th>
+                                        <th>Preserved Audit Details Snapshot</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="auditLogsTableBody">
+                                    <tr>
+                                        <td colspan="5" class="text-center" style="padding: 2rem;">
+                                            <i class="fa-solid fa-spinner fa-spin"></i> Loading real-time audit entries...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </section>
@@ -928,18 +1505,25 @@
     <div class="modal-backdrop" id="studentModal" aria-hidden="true">
         <div class="modal-card modal-large modal-scrollable">
             <div class="modal-header">
-                <h3 id="studentModalTitle"><i class="fa-solid fa-user-plus"></i> Register Student to Placement Database</h3>
+                <h3 id="studentModalTitle"><i class="fa-solid fa-user-plus"></i> Register Student to Placement Database
+                </h3>
                 <button type="button" class="btn-close" id="btnCloseStudentModal">&times;</button>
             </div>
             <form id="addStudentForm">
                 <!-- Admission Type Selector Tabs -->
-                <div style="background: var(--slate-100); padding: 0.5rem; border-radius: var(--radius-md); display: flex; gap: 0.5rem; margin-bottom: 1.25rem;">
-                    <label style="flex: 1; text-align: center; margin: 0; cursor: pointer; padding: 0.6rem; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.88rem; transition: var(--transition);" id="tabLabelRegular" class="active-admission-tab">
-                        <input type="radio" name="admission_type_select" id="radioTypeRegular" value="Regular" checked style="display: none;">
+                <div class="admission-tab-wrapper">
+                    <label
+                        style="flex: 1; text-align: center; margin: 0; cursor: pointer; padding: 0.6rem; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.88rem; transition: var(--transition);"
+                        id="tabLabelRegular" class="active-admission-tab">
+                        <input type="radio" name="admission_type_select" id="radioTypeRegular" value="Regular" checked
+                            style="display: none;">
                         <i class="fa-solid fa-graduation-cap"></i> Regular Admission (4-Year Degree)
                     </label>
-                    <label style="flex: 1; text-align: center; margin: 0; cursor: pointer; padding: 0.6rem; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.88rem; transition: var(--transition);" id="tabLabelLateral">
-                        <input type="radio" name="admission_type_select" id="radioTypeLateral" value="Lateral Entry" style="display: none;">
+                    <label
+                        style="flex: 1; text-align: center; margin: 0; cursor: pointer; padding: 0.6rem; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.88rem; transition: var(--transition);"
+                        id="tabLabelLateral">
+                        <input type="radio" name="admission_type_select" id="radioTypeLateral" value="Lateral Entry"
+                            style="display: none;">
                         <i class="fa-solid fa-user-graduate"></i> Lateral Entry (Direct 2nd Year)
                     </label>
                 </div>
@@ -950,11 +1534,13 @@
                 <div class="form-row">
                     <div class="col-6">
                         <label for="inputStudentRollNo">Student Roll Number *</label>
-                        <input type="text" id="inputStudentRollNo" class="form-control" placeholder="e.g. CSE2025101" required>
+                        <input type="text" id="inputStudentRollNo" class="form-control" placeholder="e.g. CSE2025101"
+                            required>
                     </div>
                     <div class="col-6">
                         <label for="inputStudentName">Student Full Name *</label>
-                        <input type="text" id="inputStudentName" class="form-control" placeholder="e.g. Aditi Sharma" required>
+                        <input type="text" id="inputStudentName" class="form-control" placeholder="e.g. Aditi Sharma"
+                            required>
                     </div>
                 </div>
 
@@ -988,7 +1574,8 @@
                     </div>
                     <div class="col-6">
                         <label for="inputAcademicYear">Academic Year</label>
-                        <input type="text" id="inputAcademicYear" class="form-control" value="2024-2025" placeholder="e.g. 2024-2025">
+                        <input type="text" id="inputAcademicYear" class="form-control" value="2024-2025"
+                            placeholder="e.g. 2024-2025">
                     </div>
                 </div>
 
@@ -996,7 +1583,8 @@
                 <div class="form-row" style="margin-top: 1rem;">
                     <div class="col-6">
                         <label for="inputStudentEmail">Email Address</label>
-                        <input type="email" id="inputStudentEmail" class="form-control" placeholder="e.g. aditi.sharma@eduplace.ac.in">
+                        <input type="email" id="inputStudentEmail" class="form-control"
+                            placeholder="e.g. aditi.sharma@eduplace.ac.in">
                     </div>
                     <div class="col-6">
                         <label for="inputStudentMobile">Mobile Number</label>
@@ -1023,7 +1611,8 @@
                 <div class="form-row" style="margin-top: 1rem;">
                     <div class="col-6">
                         <label for="inputStudentCGPA">CGPA (0.00 - 10.00) *</label>
-                        <input type="number" id="inputStudentCGPA" class="form-control" step="0.01" min="0" max="10" placeholder="e.g. 8.45" required>
+                        <input type="number" id="inputStudentCGPA" class="form-control" step="0.01" min="0" max="10"
+                            placeholder="e.g. 8.45" required>
                     </div>
                     <div class="col-6">
                         <label for="inputBacklogs">Active Backlogs</label>
@@ -1053,27 +1642,32 @@
                 <!-- LATERAL ENTRY SPECIFIC SECTION (Toggled via JS) -->
                 <div class="lateral-entry-box" id="lateralEntryFieldsBox" style="display: none;">
                     <div class="lateral-entry-header">
-                        <h4><i class="fa-solid fa-user-graduate"></i> Lateral Entry Details (Direct 2nd Year Admission)</h4>
+                        <h4><i class="fa-solid fa-user-graduate"></i> Lateral Entry Details (Direct 2nd Year Admission)
+                        </h4>
                         <span class="badge-lateral"><i class="fa-solid fa-check"></i> Diploma Entry</span>
                     </div>
                     <div class="form-row">
                         <div class="col-6">
                             <label for="inputDiplomaQual">Diploma Qualification / Branch *</label>
-                            <input type="text" id="inputDiplomaQual" class="form-control" placeholder="e.g. Diploma in Computer Engineering">
+                            <input type="text" id="inputDiplomaQual" class="form-control"
+                                placeholder="e.g. Diploma in Computer Engineering">
                         </div>
                         <div class="col-6">
                             <label for="inputDiplomaPct">Diploma Percentage / CGPA *</label>
-                            <input type="number" id="inputDiplomaPct" class="form-control" step="0.01" min="0" max="100" placeholder="e.g. 86.50">
+                            <input type="number" id="inputDiplomaPct" class="form-control" step="0.01" min="0" max="100"
+                                placeholder="e.g. 86.50">
                         </div>
                     </div>
                     <div class="form-row" style="margin-top: 1rem;">
                         <div class="col-6">
                             <label for="inputDiplomaCollege">Polytechnic / Diploma College Name</label>
-                            <input type="text" id="inputDiplomaCollege" class="form-control" placeholder="e.g. Govt Polytechnic Institute">
+                            <input type="text" id="inputDiplomaCollege" class="form-control"
+                                placeholder="e.g. Govt Polytechnic Institute">
                         </div>
                         <div class="col-6">
                             <label for="inputLateralAdmissionYear">Engineering Admission Year</label>
-                            <input type="number" id="inputLateralAdmissionYear" class="form-control" value="2022" placeholder="e.g. 2022">
+                            <input type="number" id="inputLateralAdmissionYear" class="form-control" value="2022"
+                                placeholder="e.g. 2022">
                         </div>
                     </div>
                 </div>
@@ -1083,8 +1677,10 @@
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <label>Assign Student Skills</label>
                         <div style="display: flex; gap: 0.4rem;">
-                            <input type="text" id="inputCustomSkill" placeholder="Add custom skill..." class="form-control" style="font-size: 0.78rem; padding: 0.25rem 0.5rem; width: 140px;">
-                            <button type="button" class="btn btn-secondary" id="btnAddCustomSkill" style="font-size: 0.76rem; padding: 0.25rem 0.6rem;">+ Add</button>
+                            <input type="text" id="inputCustomSkill" placeholder="Add custom skill..."
+                                class="form-control" style="font-size: 0.78rem; padding: 0.25rem 0.5rem; width: 140px;">
+                            <button type="button" class="btn btn-secondary" id="btnAddCustomSkill"
+                                style="font-size: 0.76rem; padding: 0.25rem 0.6rem;">+ Add</button>
                         </div>
                     </div>
                     <div class="skills-select-grid" id="modalSkillsCheckboxGrid">
@@ -1222,7 +1818,8 @@
                     <div class="form-row">
                         <div class="col-6">
                             <label for="editDiplomaQual">Diploma Qualification</label>
-                            <input type="text" id="editDiplomaQual" class="form-control" placeholder="e.g. Diploma in Computer Engg">
+                            <input type="text" id="editDiplomaQual" class="form-control"
+                                placeholder="e.g. Diploma in Computer Engg">
                         </div>
                         <div class="col-6">
                             <label for="editDiplomaPct">Diploma Percentage / CGPA</label>
@@ -1254,9 +1851,10 @@
         <div class="modal-card modal-large modal-scrollable" style="max-width: 820px;">
             <div class="modal-header" style="background: var(--navy-900); color: #fff; border-bottom: none;">
                 <h3 style="color: #fff;"><i class="fa-solid fa-id-card"></i> Student Comprehensive Dossier</h3>
-                <button type="button" class="btn-close" id="btnCloseViewProfileModal" style="color: #fff;">&times;</button>
+                <button type="button" class="btn-close" id="btnCloseViewProfileModal"
+                    style="color: #fff;">&times;</button>
             </div>
-            
+
             <div class="profile-dossier-hero">
                 <div class="dossier-avatar">
                     <i class="fa-solid fa-user-graduate"></i>
@@ -1268,9 +1866,11 @@
                         <span id="profilePlacementBadge" class="status-pill status-placed">Placed</span>
                     </div>
                     <h2 id="profileStudentName">Student Name</h2>
-                    <p style="opacity: 0.85; font-size: 0.9rem;" id="profileRollAndDept">COM2025001 &bull; Computer Science</p>
+                    <p style="opacity: 0.85; font-size: 0.9rem;" id="profileRollAndDept">COM2025001 &bull; Computer
+                        Science</p>
                     <div class="dossier-meta-row">
-                        <span><i class="fa-solid fa-envelope"></i> <span id="profileEmail">email@college.edu</span></span>
+                        <span><i class="fa-solid fa-envelope"></i> <span
+                                id="profileEmail">email@college.edu</span></span>
                         <span><i class="fa-solid fa-phone"></i> <span id="profileMobile">--</span></span>
                         <span><i class="fa-solid fa-cake-candles"></i> <span id="profileDOB">--</span></span>
                         <span><i class="fa-solid fa-venus-mars"></i> <span id="profileGender">--</span></span>
@@ -1283,30 +1883,43 @@
                 <div class="dossier-card">
                     <h4><i class="fa-solid fa-graduation-cap"></i> Academic Performance</h4>
                     <ul class="dossier-detail-list">
-                        <li><span class="label">Current CGPA:</span> <span class="value" id="profileCGPA" style="color: var(--royal-600); font-size: 1rem;">--</span></li>
-                        <li><span class="label">Active Backlogs:</span> <span class="value" id="profileBacklogs">0</span></li>
-                        <li><span class="label">Year of Study:</span> <span class="value" id="profileYear">4th Year</span></li>
-                        <li><span class="label">Section / Cohort:</span> <span class="value" id="profileSection">A</span></li>
-                        <li><span class="label">Academic Year:</span> <span class="value" id="profileAcademicYear">2024-2025</span></li>
-                        <li><span class="label">Graduation Year:</span> <span class="value" id="profileGradYear">2025</span></li>
+                        <li><span class="label">Current CGPA:</span> <span class="value" id="profileCGPA"
+                                style="color: var(--royal-600); font-size: 1rem;">--</span></li>
+                        <li><span class="label">Active Backlogs:</span> <span class="value"
+                                id="profileBacklogs">0</span></li>
+                        <li><span class="label">Year of Study:</span> <span class="value" id="profileYear">4th
+                                Year</span></li>
+                        <li><span class="label">Section / Cohort:</span> <span class="value"
+                                id="profileSection">A</span></li>
+                        <li><span class="label">Academic Year:</span> <span class="value"
+                                id="profileAcademicYear">2024-2025</span></li>
+                        <li><span class="label">Graduation Year:</span> <span class="value"
+                                id="profileGradYear">2025</span></li>
                     </ul>
                 </div>
 
                 <!-- Lateral Entry Details Card -->
-                <div class="dossier-card" id="profileLateralCard" style="background: #faf5ff; border-color: #e9d5ff;">
-                    <h4 style="color: #6b21a8;"><i class="fa-solid fa-user-graduate"></i> Lateral Entry Qualification</h4>
+                <div class="dossier-card" id="profileLateralCard">
+                    <h4 style="color: #6b21a8;"><i class="fa-solid fa-user-graduate"></i> Lateral Entry Qualification
+                    </h4>
                     <ul class="dossier-detail-list" id="profileLateralList">
-                        <li><span class="label">Admission Route:</span> <span class="value" style="color: #6b21a8;">Direct 2nd Year (Lateral Entry)</span></li>
-                        <li><span class="label">Diploma Specialization:</span> <span class="value" id="profileDiplomaQual">--</span></li>
-                        <li><span class="label">Diploma Percentage:</span> <span class="value" id="profileDiplomaPct" style="color: var(--emerald-600); font-weight: 700;">--%</span></li>
-                        <li><span class="label">Polytechnic College:</span> <span class="value" id="profileDiplomaCollege">--</span></li>
-                        <li><span class="label">Admission Year:</span> <span class="value" id="profileAdmYear">2022</span></li>
+                        <li><span class="label">Admission Route:</span> <span class="value"
+                                style="color: #6b21a8;">Direct 2nd Year (Lateral Entry)</span></li>
+                        <li><span class="label">Diploma Specialization:</span> <span class="value"
+                                id="profileDiplomaQual">--</span></li>
+                        <li><span class="label">Diploma Percentage:</span> <span class="value" id="profileDiplomaPct"
+                                style="color: var(--emerald-600); font-weight: 700;">--%</span></li>
+                        <li><span class="label">Polytechnic College:</span> <span class="value"
+                                id="profileDiplomaCollege">--</span></li>
+                        <li><span class="label">Admission Year:</span> <span class="value"
+                                id="profileAdmYear">2022</span></li>
                     </ul>
                 </div>
 
                 <!-- Placement Overview Card -->
                 <div class="dossier-card" style="grid-column: 1 / -1;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
                         <h4><i class="fa-solid fa-briefcase"></i> Placement Offers &amp; Packages</h4>
                         <span id="profileOffersCountBadge" class="kpi-badge badge-primary">0 Offers</span>
                     </div>
@@ -1322,7 +1935,10 @@
                                 </tr>
                             </thead>
                             <tbody id="profileOffersTableBody">
-                                <tr><td colspan="5" class="text-center" style="padding: 1rem; color: var(--slate-500);">No placement offers recorded yet.</td></tr>
+                                <tr>
+                                    <td colspan="5" class="text-center" style="padding: 1rem; color: var(--slate-500);">
+                                        No placement offers recorded yet.</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -1331,7 +1947,8 @@
                 <!-- Assigned Skills -->
                 <div class="dossier-card" style="grid-column: 1 / -1;">
                     <h4><i class="fa-solid fa-bolt"></i> Technical Skills Profile</h4>
-                    <div id="profileSkillsTags" style="display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                    <div id="profileSkillsTags"
+                        style="display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.5rem;">
                         <!-- Tags injected dynamically -->
                     </div>
                 </div>
@@ -1347,21 +1964,27 @@
     <div class="modal-backdrop" id="deleteStudentModal" aria-hidden="true">
         <div class="modal-card" style="max-width: 480px;">
             <div class="modal-header">
-                <h3 style="color: var(--rose-600);"><i class="fa-solid fa-triangle-exclamation"></i> Confirm Student Removal</h3>
+                <h3 style="color: var(--rose-600);"><i class="fa-solid fa-triangle-exclamation"></i> Confirm Student
+                    Removal</h3>
                 <button type="button" class="btn-close" id="btnCloseDeleteStudentModal">&times;</button>
             </div>
             <div class="modal-body" style="padding: 1.5rem 1.75rem;">
                 <p style="font-size: 0.92rem; color: var(--slate-700); line-height: 1.5; margin-bottom: 1rem;">
-                    Are you sure you want to delete student <strong id="deleteStudentRoll">--</strong> (<span id="deleteStudentName">--</span>)?
+                    Are you sure you want to delete student <strong id="deleteStudentRoll">--</strong> (<span
+                        id="deleteStudentName">--</span>)?
                 </p>
-                <div style="background: var(--amber-50); border: 1px solid var(--amber-100); border-radius: var(--radius-md); padding: 0.85rem; font-size: 0.8rem; color: var(--amber-600); margin-bottom: 1rem;">
-                    <i class="fa-solid fa-shield-halved"></i> <strong>Audit Preservation Safeguard:</strong> All student details and their <strong id="deleteStudentOffersCount">0</strong> placement offer(s) will be automatically archived into the university audit log to ensure historical records are preserved.
+                <div
+                    style="background: var(--amber-50); border: 1px solid var(--amber-100); border-radius: var(--radius-md); padding: 0.85rem; font-size: 0.8rem; color: var(--amber-600); margin-bottom: 1rem;">
+                    <i class="fa-solid fa-shield-halved"></i> <strong>Audit Preservation Safeguard:</strong> All student
+                    details and their <strong id="deleteStudentOffersCount">0</strong> placement offer(s) will be
+                    automatically archived into the university audit log to ensure historical records are preserved.
                 </div>
                 <input type="hidden" id="deleteStudentId">
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" id="btnCancelDeleteModal">Cancel</button>
-                <button type="button" class="btn" id="btnConfirmDeleteStudent" style="background: var(--rose-600); color: #fff; border: 1px solid var(--rose-600);">
+                <button type="button" class="btn" id="btnConfirmDeleteStudent"
+                    style="background: var(--rose-600); color: #fff; border: 1px solid var(--rose-600);">
                     <i class="fa-solid fa-trash-can"></i> Yes, Delete &amp; Archive Record
                 </button>
             </div>
@@ -1377,14 +2000,18 @@
             </div>
             <div class="modal-body" style="padding: 1.5rem 1.75rem;">
                 <!-- Instructions Banner -->
-                <div style="display: flex; justify-content: space-between; align-items: center; background: var(--royal-50); border: 1px solid var(--royal-100); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.25rem;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; background: var(--royal-50); border: 1px solid var(--royal-100); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.25rem;">
                     <div>
-                        <strong style="color: var(--royal-700); font-size: 0.9rem;"><i class="fa-solid fa-circle-info"></i> Excel / CSV Import Instructions</strong>
+                        <strong style="color: var(--royal-700); font-size: 0.9rem;"><i
+                                class="fa-solid fa-circle-info"></i> Excel / CSV Import Instructions</strong>
                         <p style="font-size: 0.8rem; color: var(--slate-600); margin-top: 0.2rem;">
-                            Supports both Regular and Lateral Entry students. Roll numbers are verified to prevent duplicates.
+                            Supports both Regular and Lateral Entry students. Roll numbers are verified to prevent
+                            duplicates.
                         </p>
                     </div>
-                    <a href="/api/students/sample-template" class="btn btn-primary" download style="font-size: 0.82rem; padding: 0.45rem 0.85rem; display: inline-flex; align-items: center; gap: 0.4rem; flex-shrink: 0;">
+                    <a href="/api/students/sample-template" class="btn btn-primary" download
+                        style="font-size: 0.82rem; padding: 0.45rem 0.85rem; display: inline-flex; align-items: center; gap: 0.4rem; flex-shrink: 0;">
                         <i class="fa-solid fa-download"></i> Download Sample Template
                     </a>
                 </div>
@@ -1393,15 +2020,21 @@
                 <form id="bulkUploadForm">
                     <div class="upload-dropzone" id="bulkDropzone">
                         <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
-                        <h4 style="font-size: 1.1rem; font-weight: 700; color: var(--navy-900);">Select or Drag &amp; Drop Spreadsheet</h4>
+                        <h4 style="font-size: 1.1rem; font-weight: 700; color: var(--navy-900);">Select or Drag &amp;
+                            Drop Spreadsheet</h4>
                         <p style="font-size: 0.82rem; color: var(--slate-500); margin-top: 0.3rem;">
                             Supported formats: <strong>.csv, .xlsx, .xls</strong> (Max: 500 students per batch)
                         </p>
-                        <input type="file" id="bulkFileInput" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" style="display: none;">
-                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('bulkFileInput').click()" style="margin-top: 1rem;">
+                        <input type="file" id="bulkFileInput"
+                            accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                            style="display: none;">
+                        <button type="button" class="btn btn-secondary"
+                            onclick="document.getElementById('bulkFileInput').click()" style="margin-top: 1rem;">
                             <i class="fa-solid fa-folder-open"></i> Browse File
                         </button>
-                        <div id="selectedFileNotice" style="margin-top: 0.75rem; font-size: 0.85rem; font-weight: 600; color: var(--royal-600); display: none;"></div>
+                        <div id="selectedFileNotice"
+                            style="margin-top: 0.75rem; font-size: 0.85rem; font-weight: 600; color: var(--royal-600); display: none;">
+                        </div>
                     </div>
 
                     <div style="margin-top: 1.25rem; display: flex; justify-content: flex-end; gap: 0.75rem;">
@@ -1413,7 +2046,8 @@
                 </form>
 
                 <!-- Bulk Upload Results Panel (Displayed after upload) -->
-                <div id="bulkUploadResults" style="display: none; margin-top: 1.5rem; border-top: 1px solid var(--slate-200); padding-top: 1.25rem;">
+                <div id="bulkUploadResults"
+                    style="display: none; margin-top: 1.5rem; border-top: 1px solid var(--slate-200); padding-top: 1.25rem;">
                     <h4 style="font-size: 1rem; font-weight: 700; color: var(--navy-900); margin-bottom: 0.85rem;">
                         <i class="fa-solid fa-square-poll-vertical"></i> Upload Outcome Summary
                     </h4>
@@ -1482,18 +2116,21 @@
                 <div class="form-row" style="margin-top: 1rem;">
                     <div class="col-6">
                         <label for="inputCompany">Recruiting Company *</label>
-                        <input type="text" id="inputCompany" class="form-control" placeholder="e.g. Google, Microsoft" required>
+                        <input type="text" id="inputCompany" class="form-control" placeholder="e.g. Google, Microsoft"
+                            required>
                     </div>
                     <div class="col-6">
                         <label for="inputRole">Job Role Title *</label>
-                        <input type="text" id="inputRole" class="form-control" placeholder="e.g. Software Engineer" required>
+                        <input type="text" id="inputRole" class="form-control" placeholder="e.g. Software Engineer"
+                            required>
                     </div>
                 </div>
 
                 <div class="form-row" style="margin-top: 1rem;">
                     <div class="col-6">
                         <label for="inputPackage">Package (in LPA) *</label>
-                        <input type="number" id="inputPackage" class="form-control" step="0.1" min="1" max="150" placeholder="e.g. 14.5" required>
+                        <input type="number" id="inputPackage" class="form-control" step="0.1" min="1" max="150"
+                            placeholder="e.g. 14.5" required>
                     </div>
                     <div class="col-6">
                         <label for="inputPlacementDate">Offer Date</label>
@@ -1518,17 +2155,153 @@
         </div>
     </div>
 
+    <!-- ================= MODAL: REGISTER COMPANY ================= -->
+    <div class="modal-backdrop" id="companyModal" aria-hidden="true">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-building"></i> Register Corporate Partner</h3>
+                <button type="button" class="btn-close" onclick="document.getElementById('companyModal').classList.remove('open')">&times;</button>
+            </div>
+            <form id="addCompanyForm" onsubmit="handleSaveCompany(event)">
+                <div class="form-group-clean">
+                    <label for="compName">Company Name *</label>
+                    <input type="text" id="compName" class="form-control" placeholder="e.g. Adobe Systems" required>
+                </div>
+                <div class="form-row" style="margin-top: 1rem;">
+                    <div class="col-6">
+                        <label for="compIndustry">Industry Sector</label>
+                        <input type="text" id="compIndustry" class="form-control" placeholder="e.g. Cloud & Creative Software">
+                    </div>
+                    <div class="col-6">
+                        <label for="compTier">Hiring Tier</label>
+                        <select id="compTier" class="form-select">
+                            <option value="Tier 1 (Super Dream)">Tier 1 (Super Dream &ge; 12 LPA)</option>
+                            <option value="Tier 2 (Dream)" selected>Tier 2 (Dream 6-12 LPA)</option>
+                            <option value="Tier 3 (Regular)">Tier 3 (Regular &lt; 6 LPA)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row" style="margin-top: 1rem;">
+                    <div class="col-6">
+                        <label for="compEmail">Contact Email</label>
+                        <input type="email" id="compEmail" class="form-control" placeholder="e.g. campus@adobe.com">
+                    </div>
+                    <div class="col-6">
+                        <label for="compLocation">Location Hub</label>
+                        <input type="text" id="compLocation" class="form-control" placeholder="e.g. Noida / Bangalore">
+                    </div>
+                </div>
+                <div class="modal-footer" style="margin-top: 1.5rem;">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('companyModal').classList.remove('open')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Company Partner</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: SCHEDULE DRIVE ================= -->
+    <div class="modal-backdrop" id="driveModal" aria-hidden="true">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-briefcase"></i> Schedule Campus Placement Drive</h3>
+                <button type="button" class="btn-close" onclick="document.getElementById('driveModal').classList.remove('open')">&times;</button>
+            </div>
+            <form id="scheduleDriveForm" onsubmit="handleSaveDrive(event)">
+                <div class="form-row">
+                    <div class="col-6">
+                        <label for="drvCompany">Company *</label>
+                        <input type="text" id="drvCompany" class="form-control" placeholder="e.g. Cisco Systems" required>
+                    </div>
+                    <div class="col-6">
+                        <label for="drvRole">Job Role Title *</label>
+                        <input type="text" id="drvRole" class="form-control" placeholder="e.g. Network Software Engineer" required>
+                    </div>
+                </div>
+                <div class="form-row" style="margin-top: 1rem;">
+                    <div class="col-6">
+                        <label for="drvPackage">Package CTC (LPA) *</label>
+                        <input type="number" id="drvPackage" step="0.1" class="form-control" placeholder="e.g. 13.5" required>
+                    </div>
+                    <div class="col-6">
+                        <label for="drvDate">Drive Date *</label>
+                        <input type="date" id="drvDate" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-row" style="margin-top: 1rem;">
+                    <div class="col-6">
+                        <label for="drvMinCgpa">Min CGPA Cutoff</label>
+                        <input type="number" id="drvMinCgpa" step="0.1" class="form-control" value="6.5">
+                    </div>
+                    <div class="col-6">
+                        <label for="drvDepartments">Eligible Branches</label>
+                        <input type="text" id="drvDepartments" class="form-control" value="All Departments">
+                    </div>
+                </div>
+                <div class="modal-footer" style="margin-top: 1.5rem;">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('driveModal').classList.remove('open')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Schedule Drive</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= MODAL: CREATE USER ================= -->
+    <div class="modal-backdrop" id="userModal" aria-hidden="true">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-plus"></i> Create Institutional User Account</h3>
+                <button type="button" class="btn-close" onclick="document.getElementById('userModal').classList.remove('open')">&times;</button>
+            </div>
+            <form id="addUserForm" onsubmit="handleSaveUser(event)">
+                <div class="form-row">
+                    <div class="col-6">
+                        <label for="usrCode">Faculty / Staff ID *</label>
+                        <input type="text" id="usrCode" class="form-control" placeholder="e.g. TPO003" required>
+                    </div>
+                    <div class="col-6">
+                        <label for="usrUsername">Login Username *</label>
+                        <input type="text" id="usrUsername" class="form-control" placeholder="e.g. placement_admin" required>
+                    </div>
+                </div>
+                <div class="form-group-clean" style="margin-top: 1rem;">
+                    <label for="usrName">Full Name *</label>
+                    <input type="text" id="usrName" class="form-control" placeholder="e.g. Dr. Amit Verma" required>
+                </div>
+                <div class="form-row" style="margin-top: 1rem;">
+                    <div class="col-6">
+                        <label for="usrDept">Department / Cell</label>
+                        <input type="text" id="usrDept" class="form-control" value="Training & Placement Cell">
+                    </div>
+                    <div class="col-6">
+                        <label for="usrEmail">Email Address</label>
+                        <input type="email" id="usrEmail" class="form-control" placeholder="e.g. amit@eduplace.ac.in">
+                    </div>
+                </div>
+                <div class="form-group-clean" style="margin-top: 1rem;">
+                    <label for="usrPass">Initial Password *</label>
+                    <input type="password" id="usrPass" class="form-control" value="Faculty@123" required>
+                </div>
+                <div class="modal-footer" style="margin-top: 1.5rem;">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('userModal').classList.remove('open')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- ================= MODAL: POST ANNOUNCEMENT ================= -->
     <div class="modal-backdrop" id="announceModal" aria-hidden="true">
         <div class="modal-card">
             <div class="modal-header">
                 <h3><i class="fa-solid fa-bullhorn"></i> Post Official University Notice</h3>
-                <button type="button" class="btn-close" onclick="document.getElementById('announceModal').classList.remove('open')">&times;</button>
+                <button type="button" class="btn-close"
+                    onclick="document.getElementById('announceModal').classList.remove('open')">&times;</button>
             </div>
             <form id="postAnnounceForm">
                 <div class="form-group-clean">
                     <label for="inputAnnounceTitle">Notice Title *</label>
-                    <input type="text" id="inputAnnounceTitle" class="form-control" placeholder="e.g. Campus Recruitment Schedule" required>
+                    <input type="text" id="inputAnnounceTitle" class="form-control"
+                        placeholder="e.g. Campus Recruitment Schedule" required>
                 </div>
                 <div class="form-row" style="margin-top: 1rem;">
                     <div class="col-6">
@@ -1551,10 +2324,12 @@
                 </div>
                 <div class="form-group-clean" style="margin-top: 1rem;">
                     <label for="textareaAnnounceContent">Notice Details *</label>
-                    <textarea id="textareaAnnounceContent" class="form-control" rows="4" placeholder="Enter complete notice content..." required></textarea>
+                    <textarea id="textareaAnnounceContent" class="form-control" rows="4"
+                        placeholder="Enter complete notice content..." required></textarea>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('announceModal').classList.remove('open')">Cancel</button>
+                    <button type="button" class="btn btn-secondary"
+                        onclick="document.getElementById('announceModal').classList.remove('open')">Cancel</button>
                     <button type="submit" class="btn btn-primary">Broadcast Notice</button>
                 </div>
             </form>
@@ -1569,7 +2344,8 @@
                 <button type="button" class="btn-close" id="btnCloseImageModal">&times;</button>
             </div>
             <div style="padding: 1rem; text-align: center;">
-                <img src="" alt="Full view preview" id="fullPreviewImage" style="max-width: 100%; border-radius: var(--radius-md);">
+                <img src="" alt="Full view preview" id="fullPreviewImage"
+                    style="max-width: 100%; border-radius: var(--radius-md);">
             </div>
         </div>
     </div>
@@ -1578,7 +2354,7 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- Application Script -->
-    <script src="/static/js/app.js"></script>
+    <script src="/static/js/app.js?v=2.2"></script>
 
     <!-- Faculty Portal Sidebar & UI Switcher Script -->
     <script>
@@ -1662,4 +2438,5 @@
         }
     </script>
 </body>
+
 </html>

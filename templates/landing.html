@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduPlace University Portal | Integrated Campus Placement &amp; Analytics System</title>
+    <meta name="description" content="Centralized University Campus Placement & Career Intelligence Portal. Real-time cohort analytics, automated eligibility rules, corporate drives, and verified LPA ledgers.">
+    <!-- Immediate Theme Application Script (Prevents FOUC) -->
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('eduplace_theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css?v=2.3">
+</head>
+<body class="login-page-body">
+    <!-- Top University Banner Header -->
+    <header class="login-header-banner">
+        <div class="login-brand-group">
+            <div class="login-brand-crest">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <div class="login-brand-title">
+                <h1>EduPlace University Portal</h1>
+                <span>Integrated Campus Placement &amp; Analytics System</span>
+            </div>
+        </div>
+        <nav class="landing-nav-links" aria-label="Portal Navigation">
+            <a href="#pagePurpose" class="landing-nav-link"><i class="fa-solid fa-compass"></i> Purpose of Gateway</a>
+            <a href="#aboutApp" class="landing-nav-link"><i class="fa-solid fa-circle-info"></i> About Platform</a>
+            <a href="#coreModules" class="landing-nav-link"><i class="fa-solid fa-cubes"></i> 13 Modules</a>
+            <a href="#lifecycleWorkflow" class="landing-nav-link"><i class="fa-solid fa-timeline"></i> Workflow</a>
+            <a href="#dashboardShowcase" class="landing-nav-link"><i class="fa-solid fa-chart-pie"></i> Dashboards</a>
+            <a href="#faqSection" class="landing-nav-link"><i class="fa-solid fa-circle-question"></i> FAQ</a>
+            <a href="/login" class="landing-nav-cta" id="navLoginBtn"><i class="fa-solid fa-arrow-right-to-bracket"></i> Login to Dashboard</a>
+        </nav>
+        <div style="display: flex; align-items: center; gap: 0.85rem;">
+            <!-- Dark / Light Mode Switcher -->
+            <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle Dark or Light Theme" title="Toggle Theme">
+                <i class="fa-solid fa-moon"></i>
+                <span class="theme-toggle-text">Dark Mode</span>
+            </button>
+            <div class="login-academic-session">
+                <i class="fa-regular fa-calendar-check" style="color: #60a5fa; margin-right: 4px;"></i>
+                <span>Academic Year 2024-2025 &bull; Active</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="login-main-container">
+
+        <!-- ================= HERO PRESENTATION SECTION ================= -->
+        <div class="landing-hero-showcase">
+            <div class="hero-badge-pill">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <span>EduPlace Campus Placement Intelligence Platform</span>
+            </div>
+            <h1 class="landing-hero-heading">Empowering Campus Placements with Real-Time Analytics</h1>
+            <p class="landing-hero-subtext">
+                Centralized gateway connecting faculty placement coordinators, recruiting corporate partners, and student candidates. Monitor verified offers in LPA, automated eligibility cutoffs, multi-round selection pipelines, and cohort trends in real-time.
+            </p>
+            <div class="landing-hero-actions">
+                <a href="/login" class="btn-hero-primary" id="heroLoginBtn">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                    <span>Login to Dashboard</span>
+                </a>
+                <a href="#coreModules" class="btn-hero-secondary">
+                    <i class="fa-solid fa-cubes"></i>
+                    <span>Explore 13 Platform Modules</span>
+                </a>
+            </div>
+
+            <!-- Features Highlights Strip -->
+            <div class="hero-features-strip">
+                <div class="hero-feature-item">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>Unified Role-Aware Single Sign-On</span>
+                </div>
+                <div class="hero-feature-item">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span>Dynamic Cutoff Eligibility Engine</span>
+                </div>
+                <div class="hero-feature-item">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Real-Time Corporate Analytics &amp; LPA Ledger</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= LANDING PAGE INFORMATIONAL SECTIONS ================= -->
+        <div class="landing-info-wrapper">
+            
+            <!-- 1. Real-Time Platform Key Metrics Bar -->
+            <div class="landing-stats-grid" id="platformStatsBar">
+                <div class="landing-stat-card">
+                    <div class="landing-stat-icon icon-blue">
+                        <i class="fa-solid fa-user-graduate"></i>
+                    </div>
+                    <div class="landing-stat-content">
+                        <h4>200+ Candidates</h4>
+                        <p>Active Graduating Cohort (2025)</p>
+                    </div>
+                </div>
+                <div class="landing-stat-card">
+                    <div class="landing-stat-icon icon-emerald">
+                        <i class="fa-solid fa-building-columns"></i>
+                    </div>
+                    <div class="landing-stat-content">
+                        <h4>5 Departments</h4>
+                        <p>CSE, IT, ECE, Mechanical, Civil</p>
+                    </div>
+                </div>
+                <div class="landing-stat-card">
+                    <div class="landing-stat-icon icon-amber">
+                        <i class="fa-solid fa-indian-rupee-sign"></i>
+                    </div>
+                    <div class="landing-stat-content">
+                        <h4>₹12.50+ LPA</h4>
+                        <p>Standardized Compensation Metric</p>
+                    </div>
+                </div>
+                <div class="landing-stat-card">
+                    <div class="landing-stat-icon icon-indigo">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div class="landing-stat-content">
+                        <h4>100% Audited</h4>
+                        <p>Deduplicated Placement Calculation</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. What is the Purpose of this Gateway Page? -->
+            <section class="landing-info-section" id="pagePurpose">
+                <div class="landing-section-header">
+                    <span class="landing-section-eyebrow">
+                        <i class="fa-solid fa-compass"></i> Gateway Guide &amp; Purpose
+                    </span>
+                    <h2 class="landing-section-title">What is the Purpose of this Landing Gateway?</h2>
+                    <p class="landing-section-subtitle">
+                        This gateway is the single, centralized, role-based entry point connecting university leadership, Training &amp; Placement Officers (TPOs), faculty branch coordinators, and graduating student candidates to their dedicated operational workspaces.
+                    </p>
+                </div>
+
+                <div class="landing-gateway-grid">
+                    <div class="gateway-info-card">
+                        <div class="gateway-icon-badge gateway-badge-blue">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                        <h3>1. Role-Based Access Isolation</h3>
+                        <p>
+                            Institutional placement operations require strict security segregation. Administrative controls (scheduling campus drives, editing cutoffs, viewing the full multi-department roster, and downloading NIRF accreditation dossiers) are restricted exclusively to verified Faculty &amp; TPO accounts.
+                        </p>
+                        <ul class="gateway-quick-steps">
+                            <li><i class="fa-solid fa-check"></i> <strong>Faculty Role:</strong> Administrative governance &amp; analytics</li>
+                            <li><i class="fa-solid fa-check"></i> <strong>Student Role:</strong> Personal career &amp; eligibility tracker</li>
+                        </ul>
+                    </div>
+
+                    <div class="gateway-info-card">
+                        <div class="gateway-icon-badge gateway-badge-emerald">
+                            <i class="fa-solid fa-user-check"></i>
+                        </div>
+                        <h3>2. Zero-Friction Student Access</h3>
+                        <p>
+                            Enrolled students do not need manual account registration. Student candidate records are pre-linked to official university Roll Numbers. Candidates log in instantly to verify real-time placement eligibility, monitor corporate interview rounds, and review verified salary packages.
+                        </p>
+                        <ul class="gateway-quick-steps">
+                            <li><i class="fa-solid fa-check"></i> Pre-synchronized with university enrollment rosters</li>
+                            <li><i class="fa-solid fa-check"></i> Instant authentication via unified login gateway</li>
+                        </ul>
+                    </div>
+
+                    <div class="gateway-info-card">
+                        <div class="gateway-icon-badge gateway-badge-amber">
+                            <i class="fa-solid fa-bolt"></i>
+                        </div>
+                        <h3>3. Quick Evaluation &amp; Inspection</h3>
+                        <p>
+                            For institutional auditors, recruiters, and platform evaluators, unified login allows seamless inspection of all 13 placement management features without manual database configuration.
+                        </p>
+                        <ul class="gateway-quick-steps">
+                            <li><i class="fa-solid fa-check"></i> Unified auto-routing login for both roles</li>
+                            <li><i class="fa-solid fa-check"></i> Live SQLite &amp; MySQL dual-engine connectivity</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. About The Web Application & Platform Mission -->
+            <section class="landing-info-section" id="aboutApp">
+                <div class="landing-section-header">
+                    <span class="landing-section-eyebrow">
+                        <i class="fa-solid fa-briefcase"></i> Platform Mission &amp; Capabilities
+                    </span>
+                    <h2 class="landing-section-title">About the EduPlace Placement &amp; Analytics System</h2>
+                    <p class="landing-section-subtitle">
+                        Built from the ground up to replace error-prone spreadsheets with an automated, auditable, and mathematically rigorous data platform designed specifically for collegiate placement cells and corporate campus drives.
+                    </p>
+                </div>
+
+                <div class="landing-features-grid">
+                    <div class="landing-feature-box">
+                        <div>
+                            <div class="landing-feature-icon">
+                                <i class="fa-solid fa-calculator"></i>
+                            </div>
+                            <h3>Truthful Placement Calculation</h3>
+                            <p>
+                                Traditional reports often inflate statistics by counting duplicate offers. EduPlace strictly calculates:
+                                <br><strong style="color: var(--royal-600); font-family: var(--font-mono); font-size: 0.8rem; display: block; margin-top: 0.35rem;">Placement Rate (%) = (Unique Placed / Eligible Denominator) &times; 100</strong>
+                                Multiple offers received by high-achieving candidates are preserved in a separate disambiguated offer ledger.
+                            </p>
+                        </div>
+                        <div class="landing-feature-tags">
+                            <span class="landing-feature-pill">Strict Denominator</span>
+                            <span class="landing-feature-pill">Deduplication</span>
+                            <span class="landing-feature-pill">LPA Standards</span>
+                        </div>
+                    </div>
+
+                    <div class="landing-feature-box">
+                        <div>
+                            <div class="landing-feature-icon">
+                                <i class="fa-solid fa-sliders"></i>
+                            </div>
+                            <h3>Dynamic Policy &amp; Cutoff Recalculation</h3>
+                            <p>
+                                Institutional academic cutoffs are never static. TPOs can adjust the minimum CGPA threshold (e.g. 6.0 to 7.0) or active backlog constraints, and the system instantly recalculates the qualification status of all 200+ students in real-time.
+                            </p>
+                        </div>
+                        <div class="landing-feature-tags">
+                            <span class="landing-feature-pill">CGPA Sliders</span>
+                            <span class="landing-feature-pill">Backlog Filters</span>
+                            <span class="landing-feature-pill">Dream Policy</span>
+                        </div>
+                    </div>
+
+                    <div class="landing-feature-box">
+                        <div>
+                            <div class="landing-feature-icon">
+                                <i class="fa-solid fa-handshake"></i>
+                            </div>
+                            <h3>Recruiter Pipeline &amp; Offer Verification</h3>
+                            <p>
+                                Track recruiting partners through multi-tier compensation categorizations (Super Dream &gt; 15 LPA, Dream &gt; 10 LPA, Core &gt; 6 LPA, IT &amp; Consulting). Every offer is verified against student eligibility rules before logging.
+                            </p>
+                        </div>
+                        <div class="landing-feature-tags">
+                            <span class="landing-feature-pill">Tier Classification</span>
+                            <span class="landing-feature-pill">Offer Verification</span>
+                            <span class="landing-feature-pill">CTC Ledger</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. The 13 Core Modules Showcase -->
+            <section class="landing-info-section" id="coreModules">
+                <div class="landing-section-header">
+                    <span class="landing-section-eyebrow">
+                        <i class="fa-solid fa-cubes"></i> Comprehensive Capability Suite
+                    </span>
+                    <h2 class="landing-section-title">13 Specialized Placement Modules</h2>
+                    <p class="landing-section-subtitle">
+                        Every module in the sidebar is purpose-built to automate a critical stage in the campus recruitment lifecycle.
+                    </p>
+                </div>
+
+                <div class="landing-modules-grid">
+                    <!-- Module 01 -->
+                    <div class="landing-module-card">
+                        <div class="module-card-top">
+                            <div class="module-icon-pill">
+                                <i class="fa-solid fa-chart-pie"></i>
+                            </div>
+                            <span class="module-number-chip">01</span>
+                        </div>
+                        <h4>Executive Dashboard Overview</h4>
+                        <p>High-level KPI statistics, live placement percentage, department breakdown charts, salary tier distribution, and top technical skills in demand.</p>
+                    </div>
+
+                    <!-- Module 02 -->
+                    <div class="landing-module-card">
+                        <div class="module-card-top">
+                            <div class="module-icon-pill">
+                                <i class="fa-solid fa-user-graduate"></i>
+                            </div>
+                            <span class="module-number-chip">02</span>
+                        </div>
+                        <h4>Students Directory</h4>
+                        <p>Roster of 200+ candidates across Computer Science, IT, ECE, Mechanical, and Civil Engineering with comprehensive dossiers, CGPA, and backlog tracking.</p>
+                    </div>
+
+                    <!-- Module 03 -->
+                    <div class="landing-module-card">
+                        <div class="module-card-top">
+                            <div class="module-icon-pill">
+                                <i class="fa-solid fa-building"></i>
+                            </div>
+                            <span class="module-number-chip">03</span>
+                        </div>
+                        <h4>Recruiting Companies</h4>
+                        <p>Directory of corporate recruitment partners categorized into Super Dream (&gt;15 LPA), Dream (&gt;10 LPA), Core Engineering, and IT Services.</p>
+                    </div>
+
+                    <!-- Module 04 -->
+                    <div class="landing-module-card">
+                        <div class="module-card-top">
+                            <div class="module-icon-pill">
+                                <i class="fa-solid fa-briefcase"></i>
+                            </div>
+                            <span class="module-number-chip">04</span>
+                        </div>
+                        <h4>Placement Drives</h4>
+                        <p>Drive management calendar tracking corporate visits, department eligibility criteria, minimum CGPA requirements, and candidate registration counts.</p>
+                    </div>
+
+                    <!-- Module 05 -->
+                    <div class="landing-module-card">
+                        <div class="module-card-top">
+                            <div class="module-icon-pill">
+                                <i class="fa-solid fa-file-lines"></i>
+                            </div>
+                            <span class="module-number-chip">05</span>
+                        </div>
+                        <h4>Applications &amp; Interviews</h4>
+                        <p>Selection pipeline tracker monitoring student progress across 5 recruitment rounds: Aptitude, Coding Round, Technical Interview 1 &amp; 2, and HR Round.</p>
+                    </div>
+
+                    <!-- Module 06 -->
+                    <div class="landing-module-card">
+                        <div class="module-card-top">
+                            <div class="module-icon-pill">
+                                <i class="fa-solid fa-sliders"></i>
+                            </div>
+                            <span class="module-number-chip">06</span>
+                        </div>
+                        <h4>Eligibility Rules &amp; Cutoffs</h4>
+                        <p>Interactive cutoff engine allowing TPOs to adjust minimum CGPA requirements, backlog restrictions, and dream offer policies with instant database recalculation.</p>
+                    </div>
+
+                    <!-- Module 07 -->
+                    <div class="landing-module-card">
+                        <div class="module-card-top">
+                            <div class="module-icon-pill">
+                                <i class="fa-solid fa-award"></i>
+                            </div>
+                            <span class="module-number-chip">07</span>
+                        </div>
+                        <h4>Offers &amp; Salaries</h4>
+                        <p>Verified ledger of all corporate job offers with exact LPA packages, offer letters, student deduplication, and compensation distribution analytics.</p>
+                    </div>
+
+                    <!-- Module 08 -->
+                    <div class="landing-module-card">
+                        <div class="module-card-top">
+                            <div class="module-icon-pill">
+                                <i class="fa-solid fa-chart-column"></i>
+                            </div>
+                            <span class="module-number-chip">08</span>
+                        </div>
+                        <h4>Placement Analytics</h4>
+                        <p>Statistical analysis suite providing Mean, Median, IQR, and Standard Deviation package metrics, and Matplotlib density curves.</p>
+                    </div>
+
+                    <!-- Module 09 -->
+                    <div class="landing-module-card">
+                        <div class="module-card-top">
+                            <div class="module-icon-pill">
+                                <i class="fa-solid fa-file-csv"></i>
+                            </div>
+                            <span class="module-number-chip">09</span>
+                        </div>
+                        <h4>Data Import &amp; Export</h4>
+                        <p>Robust bulk operations supporting CSV and Excel spreadsheets with validation, error logging, and export of student dossiers and offer reports.</p>
+                    </div>
+
+                    <!-- Module 10 -->
+                    <div class="landing-module-card">
+                        <div class="module-card-top">
+                            <div class="module-icon-pill">
+                                <i class="fa-solid fa-file-shield"></i>
+                            </div>
+                            <span class="module-number-chip">10</span>
+                        </div>
+                        <h4>Compliance Reports</h4>
+                        <p>Automated report generation for NIRF, NAAC, NBA, and institutional accreditation bodies with downloadable text summaries and charts.</p>
+                    </div>
+
+                    <!-- Module 11 -->
+                    <div class="landing-module-card">
+                        <div class="module-card-top">
+                            <div class="module-icon-pill">
+                                <i class="fa-solid fa-user-gear"></i>
+                            </div>
+                            <span class="module-number-chip">11</span>
+                        </div>
+                        <h4>User Management</h4>
+                        <p>Administrative security directory managing accounts for Placement Officers, Faculty Coordinators, and candidates with password resets.</p>
+                    </div>
+
+                    <!-- Module 12 -->
+                    <div class="landing-module-card">
+                        <div class="module-card-top">
+                            <div class="module-icon-pill">
+                                <i class="fa-solid fa-gears"></i>
+                            </div>
+                            <span class="module-number-chip">12</span>
+                        </div>
+                        <h4>System Settings</h4>
+                        <p>Institutional parameters configuration: academic year active cohort, currency units (LPA), dream package thresholds, and one-click data re-seeding.</p>
+                    </div>
+
+                    <!-- Module 13 -->
+                    <div class="landing-module-card">
+                        <div class="module-card-top">
+                            <div class="module-icon-pill">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                            </div>
+                            <span class="module-number-chip">13</span>
+                        </div>
+                        <h4>Immutable Audit Logs</h4>
+                        <p>Security audit trail recording every student creation, eligibility modification, offer addition, and cutoff adjustment with operator timestamps.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. Recruitment Lifecycle Workflow -->
+            <section class="landing-info-section" id="lifecycleWorkflow">
+                <div class="landing-section-header">
+                    <span class="landing-section-eyebrow">
+                        <i class="fa-solid fa-timeline"></i> Process Governance
+                    </span>
+                    <h2 class="landing-section-title">The End-to-End Campus Recruitment Lifecycle</h2>
+                    <p class="landing-section-subtitle">
+                        How EduPlace manages data from initial student ingestion to final NIRF accreditation reporting.
+                    </p>
+                </div>
+
+                <div class="landing-workflow-grid">
+                    <div class="landing-workflow-card">
+                        <span class="workflow-step-num">Step 01</span>
+                        <h4>Data Ingestion</h4>
+                        <p>Rosters ingested via Excel/CSV or single student entry with CGPA, department, and lateral-entry diploma qualifications.</p>
+                    </div>
+                    <div class="landing-workflow-card">
+                        <span class="workflow-step-num">Step 02</span>
+                        <h4>Dynamic Cutoffs</h4>
+                        <p>Cutoff policy is established (e.g. CGPA &ge; 6.5, 0 backlogs). The system computes the truthful eligible candidate denominator.</p>
+                    </div>
+                    <div class="landing-workflow-card">
+                        <span class="workflow-step-num">Step 03</span>
+                        <h4>Drive Scheduling</h4>
+                        <p>Recruiting companies post campus drives with job descriptions, CTC packages, dates, and eligible branch criteria.</p>
+                    </div>
+                    <div class="landing-workflow-card">
+                        <span class="workflow-step-num">Step 04</span>
+                        <h4>Interview Pipeline</h4>
+                        <p>Candidates progress through 5 interview rounds: Aptitude &rarr; Coding &rarr; Tech 1 &rarr; Tech 2 &rarr; HR Round.</p>
+                    </div>
+                    <div class="landing-workflow-card">
+                        <span class="workflow-step-num">Step 05</span>
+                        <h4>Offer Verification</h4>
+                        <p>Verified corporate offers are recorded with LPA packages, accepted statuses, and automatic unique student deduplication.</p>
+                    </div>
+                    <div class="landing-workflow-card">
+                        <span class="workflow-step-num">Step 06</span>
+                        <h4>Accreditation Reporting</h4>
+                        <p>Executive charts and audit-ready data dossiers are generated for NIRF, NAAC, NBA, and institutional stakeholders.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. Role Dashboards Showcase -->
+            <section class="landing-info-section" id="dashboardShowcase">
+                <div class="landing-section-header">
+                    <span class="landing-section-eyebrow">
+                        <i class="fa-solid fa-chalkboard-user"></i> Workspace Architecture
+                    </span>
+                    <h2 class="landing-section-title">Tailored Portals for Every Institutional Stakeholder</h2>
+                    <p class="landing-section-subtitle">
+                        Distinct, purpose-crafted interfaces give each user role exactly the tools and data views they require.
+                    </p>
+                </div>
+
+                <div class="dashboard-showcase-grid">
+                    <!-- Faculty Portal Card -->
+                    <div class="dashboard-showcase-card">
+                        <div class="showcase-header">
+                            <div class="showcase-icon icon-blue">
+                                <i class="fa-solid fa-user-shield"></i>
+                            </div>
+                            <div>
+                                <h3>Faculty &amp; TPO Command Center</h3>
+                                <p>Comprehensive operational control for university administrators</p>
+                            </div>
+                        </div>
+                        <ul class="showcase-feature-list">
+                            <li><i class="fa-solid fa-circle-check"></i> <span>Full access to all 13 specialized placement management modules</span></li>
+                            <li><i class="fa-solid fa-circle-check"></i> <span>Real-time KPI calculations with verified student deduplication</span></li>
+                            <li><i class="fa-solid fa-circle-check"></i> <span>Batch CSV / Excel roster upload with validation error logs</span></li>
+                            <li><i class="fa-solid fa-circle-check"></i> <span>Dynamic cutoff rules engine with instant SQL recalculation</span></li>
+                            <li><i class="fa-solid fa-circle-check"></i> <span>Comprehensive audit logs tracking every modification</span></li>
+                        </ul>
+                        <div style="margin-top: 1.5rem;">
+                            <a href="/login" class="btn btn-primary" style="padding: 0.65rem 1.25rem;">
+                                <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                                <span>Sign In to Faculty Portal</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Student Portal Card -->
+                    <div class="dashboard-showcase-card">
+                        <div class="showcase-header">
+                            <div class="showcase-icon icon-emerald">
+                                <i class="fa-solid fa-graduation-cap"></i>
+                            </div>
+                            <div>
+                                <h3>Student Candidate Portal</h3>
+                                <p>Focused personal career dashboard for enrolled students</p>
+                            </div>
+                        </div>
+                        <ul class="showcase-feature-list">
+                            <li><i class="fa-solid fa-circle-check"></i> <span>Real-time placement qualification &amp; CGPA status view</span></li>
+                            <li><i class="fa-solid fa-circle-check"></i> <span>Upcoming company drives calendar and registration status</span></li>
+                            <li><i class="fa-solid fa-circle-check"></i> <span>Multi-stage interview progress tracker (Rounds 1 through 5)</span></li>
+                            <li><i class="fa-solid fa-circle-check"></i> <span>Verified corporate offers ledger and package breakdown in LPA</span></li>
+                            <li><i class="fa-solid fa-circle-check"></i> <span>Registered competency badges and branch compensation benchmarks</span></li>
+                        </ul>
+                        <div style="margin-top: 1.5rem;">
+                            <a href="/login" class="btn btn-success" style="padding: 0.65rem 1.25rem; background-color: var(--royal-600);">
+                                <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                                <span>Sign In to Student Portal</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7. Technical Specifications -->
+            <section class="landing-info-section" id="technicalSpecs">
+                <div class="landing-section-header">
+                    <span class="landing-section-eyebrow">
+                        <i class="fa-solid fa-microchip"></i> System Architecture
+                    </span>
+                    <h2 class="landing-section-title">Built with High-Performance Technologies</h2>
+                    <p class="landing-section-subtitle">
+                        EduPlace combines Python 3.14, modern Flask, vectorized Pandas calculations, and dual-database support.
+                    </p>
+                </div>
+
+                <div class="landing-tech-grid">
+                    <div class="landing-tech-card">
+                        <div class="tech-card-icon"><i class="fa-brands fa-python"></i></div>
+                        <h4>Python 3.14 &amp; Flask 3.1</h4>
+                        <p>Microframework architecture with session security, RESTful JSON endpoints, and Jinja2 rendering.</p>
+                    </div>
+                    <div class="landing-tech-card">
+                        <div class="tech-card-icon"><i class="fa-solid fa-table"></i></div>
+                        <h4>Pandas Data Analytics</h4>
+                        <p>Vectorized statistical processing, IQR, Standard Deviation, and real-time student cohort deduplication.</p>
+                    </div>
+                    <div class="landing-tech-card">
+                        <div class="tech-card-icon"><i class="fa-solid fa-database"></i></div>
+                        <h4>Dual SQLite &amp; MySQL</h4>
+                        <p>Zero-configuration SQLite local database with automatic schema migrations to production MySQL 8.0.</p>
+                    </div>
+                    <div class="landing-tech-card">
+                        <div class="tech-card-icon"><i class="fa-solid fa-chart-line"></i></div>
+                        <h4>Chart.js 4.4 &amp; Matplotlib</h4>
+                        <p>Interactive animated browser charts with Matplotlib static publication visualizations.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 8. Frequently Asked Questions (FAQ) -->
+            <section class="landing-info-section" id="faqSection">
+                <div class="landing-section-header">
+                    <span class="landing-section-eyebrow">
+                        <i class="fa-solid fa-circle-question"></i> Knowledge Base &amp; FAQ
+                    </span>
+                    <h2 class="landing-section-title">Frequently Asked Questions</h2>
+                    <p class="landing-section-subtitle">
+                        Essential answers regarding platform calculations, data ingestion, student privacy, and institutional compliance.
+                    </p>
+                </div>
+
+                <div class="landing-faq-container">
+                    <div class="landing-faq-item open">
+                        <button type="button" class="faq-question-btn">
+                            <span>1. How does the unified login gateway work?</span>
+                            <i class="fa-solid fa-chevron-down faq-chevron"></i>
+                        </button>
+                        <div class="faq-answer-pane">
+                            <p>
+                                When you enter your credentials on the login page, the system automatically detects whether you are a Faculty member or an enrolled Student candidate. Faculty members are routed directly to the administrative Command Center, and students are routed to their personal placement dashboard.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="landing-faq-item">
+                        <button type="button" class="faq-question-btn">
+                            <span>2. How is the university placement rate officially computed?</span>
+                            <i class="fa-solid fa-chevron-down faq-chevron"></i>
+                        </button>
+                        <div class="faq-answer-pane">
+                            <p>
+                                Unlike legacy spreadsheets that divide by arbitrary counts, EduPlace uses the audited formula: <code>Placement Rate (%) = (Unique Placed Eligible Students / Total Eligible Cohort Denominator) &times; 100</code>. Ineligible students (e.g. active backlogs or CGPA below cutoff) are partitioned out of the denominator to maintain rigorous mathematical integrity.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="landing-faq-item">
+                        <button type="button" class="faq-question-btn">
+                            <span>3. How does the system handle students who receive multiple job offers?</span>
+                            <i class="fa-solid fa-chevron-down faq-chevron"></i>
+                        </button>
+                        <div class="faq-answer-pane">
+                            <p>
+                                Multiple offers are recorded in full in the Verified Placement Ledger, but the system deduplicates the student count when calculating placement rates. A candidate holding offers from Google, Microsoft, and Amazon counts as exactly ONE placed student in the numerator, avoiding artificial metric inflation.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="landing-faq-item">
+                        <button type="button" class="faq-question-btn">
+                            <span>4. How does dynamic eligibility cutoff recalculation operate?</span>
+                            <i class="fa-solid fa-chevron-down faq-chevron"></i>
+                        </button>
+                        <div class="faq-answer-pane">
+                            <p>
+                                When a Placement Officer adjusts the CGPA cutoff (e.g. from 6.0 to 6.5) or updates backlog rules, the platform executes an instant batch SQL query that updates the <code>is_eligible</code> flag across the entire database, immediately refreshing KPI denominators and student radar cards.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="landing-faq-item">
+                        <button type="button" class="faq-question-btn">
+                            <span>5. How does EduPlace ensure compliance with NAAC, NBA, and NIRF audits?</span>
+                            <i class="fa-solid fa-chevron-down faq-chevron"></i>
+                        </button>
+                        <div class="faq-answer-pane">
+                            <p>
+                                All student record modifications, offer additions, and cutoff adjustments are permanently recorded in the immutable Audit Logs table with timestamps and operator identity. Complete aggregated text dossiers and publication-ready charts can be exported with a single click.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 9. Ready to Access Call to Action Banner -->
+            <section class="landing-cta-banner">
+                <div class="landing-cta-content">
+                    <h2>Ready to Access Your University Dashboard?</h2>
+                    <p>
+                        Sign in with your institutional credentials to review real-time placement analytics, manage student records, or monitor your individual academic progress.
+                    </p>
+                    <a href="/login" class="btn-hero-primary" id="btnBottomLogin" style="margin-top: 1rem; display: inline-flex;">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        <span>Login to Dashboard</span>
+                    </a>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- University Footer -->
+    <footer class="login-page-footer">
+        <p><strong>EduPlace University Portal</strong> &bull; University Academic Management &amp; Career Development Cell</p>
+    </footer>
+
+    <!-- Interactive Scripts for Landing Page -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initThemeToggle();
+            initFaqAccordion();
+        });
+
+        function initThemeToggle() {
+            const toggleBtn = document.getElementById('themeToggleBtn');
+            if (!toggleBtn) return;
+
+            function updateThemeUI(theme) {
+                const icon = toggleBtn.querySelector('i');
+                const label = toggleBtn.querySelector('.theme-toggle-text');
+                if (theme === 'dark') {
+                    if (icon) icon.className = 'fa-solid fa-sun';
+                    if (label) label.textContent = 'Light Mode';
+                    toggleBtn.setAttribute('title', 'Switch to Light Mode');
+                } else {
+                    if (icon) icon.className = 'fa-solid fa-moon';
+                    if (label) label.textContent = 'Dark Mode';
+                    toggleBtn.setAttribute('title', 'Switch to Dark Mode');
+                }
+            }
+
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            updateThemeUI(currentTheme);
+
+            toggleBtn.addEventListener('click', () => {
+                const active = document.documentElement.getAttribute('data-theme') || 'light';
+                const nextTheme = active === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', nextTheme);
+                localStorage.setItem('eduplace_theme', nextTheme);
+                updateThemeUI(nextTheme);
+            });
+        }
+
+        function initFaqAccordion() {
+            const faqItems = document.querySelectorAll('.landing-faq-item');
+            faqItems.forEach(item => {
+                const btn = item.querySelector('.faq-question-btn');
+                if (!btn) return;
+                btn.addEventListener('click', () => {
+                    const isOpen = item.classList.contains('open');
+                    faqItems.forEach(i => i.classList.remove('open'));
+                    if (!isOpen) {
+                        item.classList.add('open');
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>
